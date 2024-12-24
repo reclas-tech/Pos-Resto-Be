@@ -20,7 +20,7 @@ return new class extends Migration {
             $table->softDeletes();
 
             // FOREIGN KEY
-            $table->foreignId('invoice_id')->constrained('invoices');
+            $table->foreignUuid('invoice_id')->constrained('invoices');
         });
     }
 

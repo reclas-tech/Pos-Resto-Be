@@ -21,7 +21,7 @@ return new class extends Migration {
             $table->softDeletes();
 
             // FOREIGN KEY
-            $table->foreignId('admin_id')->constrained('admins');
+            $table->foreignUuid('admin_id')->constrained('admins');
         });
     }
 

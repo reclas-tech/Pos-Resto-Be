@@ -20,7 +20,7 @@ return new class extends Migration {
             $table->softDeletes();
 
             // FOREIGN KEY
-            $table->foreignId('cashier_id')->constrained('employees');
+            $table->foreignUuid('cashier_id')->constrained('employees');
         });
     }
 
