@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Authentication;
 
-use App\Http\Services\Admin\Authentication\LoginService;
 use App\Http\Requests\Authentication\LoginAdminRequest;
+use App\Http\Services\Authentication\LoginAdminService;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Collection;
 use Illuminate\Http\JsonResponse;
@@ -11,7 +11,7 @@ use App\Helpers\Response;
 
 class LoginAdminController extends Controller
 {
-    public function __construct(public LoginService $loginService)
+    public function __construct(public LoginAdminService $loginService)
     {
     }
 

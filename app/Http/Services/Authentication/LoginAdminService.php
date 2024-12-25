@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Services\Admin\Authentication;
+namespace App\Http\Services\Authentication;
 
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -10,7 +10,7 @@ use App\Helpers\Token;
 use App\Models\Admin;
 use Exception;
 
-class LoginService extends Service
+class LoginAdminService extends Service
 {
 	/**
 	 * @param string $email
