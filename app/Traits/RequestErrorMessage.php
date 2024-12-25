@@ -16,6 +16,7 @@ trait RequestErrorMessage
         return [
             'max' => ':attribute tidak boleh melebihi :max karakter',
             'exists' => ':attribute tidak dapat ditemukan',
+            'email' => ':attribute harus berformat email',
             'numeric' => ':attribute harus berupa angka',
             'string' => ':attribute harus berupa teks',
             'required' => ':attribute wajib diisi',
