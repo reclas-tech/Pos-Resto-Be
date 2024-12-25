@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Foundation\Auth\User;
+use Illuminate\Support\Carbon;
 
 class Admin extends User implements JWTSubject
 {
@@ -44,6 +46,11 @@ class Admin extends User implements JWTSubject
     |--------------------------------------------------------------------------
     */
 
+    public function refreshToken(): HasMany
+    {
+        return $this->hasMany(AdminRefreshToken::class);
+    }
+
 
     /*
     |--------------------------------------------------------------------------
@@ -56,6 +63,14 @@ class Admin extends User implements JWTSubject
         return [
             'password' => 'hashed',
         ];
+    }
+
+    public function setRefreshToken(string $token, Carbon|string $exp): AdminRefreshToken
+    {
+        return $this->refreshToken()->create([
+            'expired_at' => $exp,
+            'token' => $token,
+        ]);
     }
 
     public function getJWTCustomClaims(): array
