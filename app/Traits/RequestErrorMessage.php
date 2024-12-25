@@ -14,6 +14,7 @@ trait RequestErrorMessage
     public function messages(): array
     {
         return [
+            'min' => ':attribute tidak boleh kurang dari :min karakter',
             'max' => ':attribute tidak boleh melebihi :max karakter',
             'exists' => ':attribute tidak dapat ditemukan',
             'email' => ':attribute harus berformat email',
