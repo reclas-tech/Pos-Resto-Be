@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->uuid('id')->primary();
 
             // REQUIRED
-            $table->string('token', 255);
+            $table->text('token');
             $table->dateTime('expired_at');
 
             $table->timestamps();
