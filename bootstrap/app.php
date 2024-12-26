@@ -2,6 +2,7 @@
 
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use App\Http\Middleware\EmployeeAuthenticate;
 use App\Http\Middleware\AdminAuthenticate;
 use App\Http\Middleware\APIAuthenticate;
 use Illuminate\Foundation\Application;
@@ -22,6 +23,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->group('api-admin', [
             APIAuthenticate::class,
             AdminAuthenticate::class,
+        ]);
+        $middleware->group('api-employee', [
+            APIAuthenticate::class,
+            EmployeeAuthenticate::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
