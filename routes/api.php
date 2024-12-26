@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Authentication\LogoutEmployeeController;
 use App\Http\Controllers\Authentication\LoginEmployeeController;
 use App\Http\Controllers\Authentication\LogoutAdminController;
 use App\Http\Controllers\Authentication\LoginAdminController;
@@ -28,6 +29,7 @@ Route::prefix('v1')->group(function (): void {
 		// EMPLOYEE
 		Route::prefix('employee')->group(function (): void {
 			Route::post('login', [LoginEmployeeController::class, 'action']);
+			Route::get('logout', [LogoutEmployeeController::class, 'action'])->middleware('api-employee');
 		});
 	});
 });
