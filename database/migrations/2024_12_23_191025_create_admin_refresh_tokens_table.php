@@ -14,14 +14,14 @@ return new class extends Migration {
             $table->uuid('id')->primary();
 
             // REQUIRED
-            $table->string('token', 255);
+            $table->text('token');
             $table->dateTime('expired_at');
 
             $table->timestamps();
             $table->softDeletes();
 
             // FOREIGN KEY
-            $table->foreignId('admin_id')->constrained('admins');
+            $table->foreignUuid('admin_id')->constrained('admins');
         });
     }
 
