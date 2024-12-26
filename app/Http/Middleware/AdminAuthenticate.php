@@ -22,7 +22,7 @@ class AdminAuthenticate
             $payload = $request->attributes->get('jwt_payload', []);
 
             if (isset($payload['sub'])) {
-                $admin = Admin::whereHas('refreshToken', function (Builder $query) use ($payload) {
+                $admin = Admin::whereHas('refreshToken', function (Builder $query) use ($payload): void {
                     $query->whereKey($payload['sub']);
                 })->first();
 
