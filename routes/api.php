@@ -27,6 +27,7 @@ Route::prefix('v1')->group(function (): void {
 			Route::post('login', [LoginAdminController::class, 'action']);
 			Route::get('logout', [LogoutAdminController::class, 'action'])->middleware('api-admin');
 			Route::post('forget-password', [PasswordAdminController::class, 'forgetPassword']);
+			Route::post('otp-verification', [PasswordAdminController::class, 'otpVerification'])->middleware('jwt');
 		});
 		// EMPLOYEE
 		Route::prefix('employee')->group(function (): void {

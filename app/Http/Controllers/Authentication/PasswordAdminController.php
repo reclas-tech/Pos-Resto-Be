@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Authentication;
 
+use App\Http\Requests\Authentication\OTPVerificationAdminRequest;
 use App\Http\Requests\Authentication\ForgetPasswordAdminRequest;
 use App\Http\Services\Authentication\PasswordAdminService;
 use App\Http\Controllers\Controller;
@@ -29,6 +30,31 @@ class PasswordAdminController extends Controller
             $response->set(Response::INTERNAL_SERVER_ERROR, 'Lupa kata sandi gagal');
         } else if (!$data instanceof Collection) {
             $response->set(Response::BAD_REQUEST, 'Validasi gagal');
+        }
+
+        return $response->get();
+    }
+
+    public function otpVerification(OTPVerificationAdminRequest $request): JsonResponse
+    {
+        [
+            'otp' => $otp,
+        ] = $request;
+
+        $payload = $request->attributes->get('jwt_payload', []);
+
+        $response = new Response(message: 'Kode OTP berhasil diverifikasi');
+
+        if (isset($payload['sub'])) {
+            $data = $this->passwordService->otpVerification($payload['sub'], $otp);
+
+            if (!$data instanceof Collection) {
+                $response->set(Response::BAD_REQUEST, 'Validasi gagal');
+            }
+
+            $response->set(data: $data);
+        } else {
+            $response->set(Response::UNAUTHORIZED, 'Anda tidak memiliki akses');
         }
 
         return $response->get();

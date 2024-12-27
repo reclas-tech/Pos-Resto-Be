@@ -53,4 +53,28 @@ class PasswordAdminService extends Service
 			],
 		];
 	}
+
+	/**
+	 * @param string $email
+	 * @param string $otp
+	 * 
+	 * @return array|\Illuminate\Support\Collection
+	 */
+	public function otpVerification(string $email, string $otp): array|Collection
+	{
+		$admin = Admin::where('email', $email)->where('otp', $otp)->first();
+
+		if ($admin !== null) {
+			$tokenData = Token::generate(['sub' => $admin->email, 'otp' => 'valid'], $this->exp);
+
+			return $tokenData;
+		}
+
+		return [
+			[
+				'message' => 'Kode OTP tidak valid',
+				'property' => 'otp',
+			],
+		];
+	}
 }
