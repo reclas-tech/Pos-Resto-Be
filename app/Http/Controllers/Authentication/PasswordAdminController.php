@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Authentication;
 
 use App\Http\Requests\Authentication\OTPVerificationAdminRequest;
+use App\Http\Requests\Authentication\ChangePasswordAdminRequest;
 use App\Http\Requests\Authentication\ForgetPasswordAdminRequest;
 use App\Http\Services\Authentication\PasswordAdminService;
 use App\Http\Controllers\Controller;
@@ -37,15 +38,15 @@ class PasswordAdminController extends Controller
 
     public function otpVerification(OTPVerificationAdminRequest $request): JsonResponse
     {
-        [
-            'otp' => $otp,
-        ] = $request;
-
         $payload = $request->attributes->get('jwt_payload', []);
 
         $response = new Response(message: 'Kode OTP berhasil diverifikasi');
 
         if (isset($payload['sub'])) {
+            [
+                'otp' => $otp,
+            ] = $request;
+
             $data = $this->passwordService->otpVerification($payload['sub'], $otp);
 
             if (!$data instanceof Collection) {
@@ -53,6 +54,30 @@ class PasswordAdminController extends Controller
             }
 
             $response->set(data: $data);
+        } else {
+            $response->set(Response::UNAUTHORIZED, 'Anda tidak memiliki akses');
+        }
+
+        return $response->get();
+    }
+
+    public function changePassword(ChangePasswordAdminRequest $request): JsonResponse
+    {
+
+        $payload = $request->attributes->get('jwt_payload', []);
+
+        $response = new Response(message: 'Kata sandi berhasil diperbarui');
+
+        if (isset($payload['sub'], $payload['otp']) && $payload['otp'] ?? '' === 'valid') {
+            [
+                'new_password' => $newPassword,
+            ] = $request;
+
+            $data = $this->passwordService->changePassword($payload['sub'], $newPassword);
+
+            if (!$data) {
+                $response->set(Response::INTERNAL_SERVER_ERROR, 'Kata sandi gagal diperbarui');
+            }
         } else {
             $response->set(Response::UNAUTHORIZED, 'Anda tidak memiliki akses');
         }

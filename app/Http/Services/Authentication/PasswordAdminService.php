@@ -77,4 +77,23 @@ class PasswordAdminService extends Service
 			],
 		];
 	}
+
+	/**
+	 * @param string $email
+	 * @param string $password
+	 * 
+	 * @return bool
+	 */
+	public function changePassword(string $email, string $password): bool
+	{
+		$admin = Admin::where('email', $email)->first();
+
+		if ($admin !== null) {
+			$admin->update(['password' => $password, 'otp' => null]);
+
+			return true;
+		}
+
+		return false;
+	}
 }
