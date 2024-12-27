@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Authentication\RefreshAccessTokenAdminController;
 use App\Http\Controllers\Authentication\ProfileEmployeeController;
 use App\Http\Controllers\Authentication\LogoutEmployeeController;
 use App\Http\Controllers\Authentication\LoginEmployeeController;
@@ -32,6 +33,7 @@ Route::prefix('v1')->group(function (): void {
 			Route::post('otp-verification', [PasswordAdminController::class, 'otpVerification'])->middleware('jwt');
 			Route::post('new-password', [PasswordAdminController::class, 'changePassword'])->middleware('jwt');
 			Route::get('profile', [ProfileAdminController::class, 'action'])->middleware('api-admin');
+			Route::get('refresh-access-token', [RefreshAccessTokenAdminController::class, 'action'])->middleware('jwt');
 		});
 		// EMPLOYEE
 		Route::prefix('employee')->group(function (): void {
