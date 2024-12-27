@@ -2,12 +2,12 @@
 
 namespace App\Http\Services\Authentication;
 
-use App\Models\AdminRefreshToken;
+use App\Models\EmployeeRefreshToken;
 use Illuminate\Support\Carbon;
 use App\Http\Services\Service;
 use App\Helpers\Token;
 
-class RefreshAccessTokenAdminService extends Service
+class RefreshAccessTokenEmployeeService extends Service
 {
 	/**
 	 * @param string $token
@@ -16,7 +16,7 @@ class RefreshAccessTokenAdminService extends Service
 	 */
 	public function action(string $token): array|null
 	{
-		$currentRefreshToken = AdminRefreshToken::where('token', $token)->first();
+		$currentRefreshToken = EmployeeRefreshToken::where('token', $token)->first();
 
 		if ($currentRefreshToken) {
 			$refreshTokenExp = $currentRefreshToken->expired_at;
