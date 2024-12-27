@@ -3,6 +3,7 @@
 use App\Http\Controllers\Authentication\LogoutEmployeeController;
 use App\Http\Controllers\Authentication\LoginEmployeeController;
 use App\Http\Controllers\Authentication\PasswordAdminController;
+use App\Http\Controllers\Authentication\ProfileAdminController;
 use App\Http\Controllers\Authentication\LogoutAdminController;
 use App\Http\Controllers\Authentication\LoginAdminController;
 use App\Http\Controllers\Example\ExampleCreateController;
@@ -29,6 +30,7 @@ Route::prefix('v1')->group(function (): void {
 			Route::post('forget-password', [PasswordAdminController::class, 'forgetPassword']);
 			Route::post('otp-verification', [PasswordAdminController::class, 'otpVerification'])->middleware('jwt');
 			Route::post('new-password', [PasswordAdminController::class, 'changePassword'])->middleware('jwt');
+			Route::get('profile', [ProfileAdminController::class, 'action'])->middleware('api-admin');
 		});
 		// EMPLOYEE
 		Route::prefix('employee')->group(function (): void {
