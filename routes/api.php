@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Authentication\LogoutEmployeeController;
 use App\Http\Controllers\Authentication\LoginEmployeeController;
+use App\Http\Controllers\Authentication\PasswordAdminController;
 use App\Http\Controllers\Authentication\LogoutAdminController;
 use App\Http\Controllers\Authentication\LoginAdminController;
 use App\Http\Controllers\Example\ExampleCreateController;
@@ -25,6 +26,7 @@ Route::prefix('v1')->group(function (): void {
 		Route::prefix('admin')->group(function (): void {
 			Route::post('login', [LoginAdminController::class, 'action']);
 			Route::get('logout', [LogoutAdminController::class, 'action'])->middleware('api-admin');
+			Route::post('forget-password', [PasswordAdminController::class, 'forgetPassword']);
 		});
 		// EMPLOYEE
 		Route::prefix('employee')->group(function (): void {
