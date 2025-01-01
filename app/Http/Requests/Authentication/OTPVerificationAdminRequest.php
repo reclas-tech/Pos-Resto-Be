@@ -25,7 +25,7 @@ class OTPVerificationAdminRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'otp' => 'bail|required|string|min:6|max:6',
+            'otp' => 'bail|required|numeric|integer|digits:6',
         ];
     }
 
