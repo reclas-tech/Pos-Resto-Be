@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
 use App\Mail\ForgetPasswordMail;
 use App\Http\Services\Service;
-use Illuminate\Support\Str;
 use App\Helpers\Token;
 use App\Models\Admin;
 use Exception;
@@ -29,10 +28,10 @@ class PasswordAdminService extends Service
 			DB::beginTransaction();
 
 			try {
-				$otp = Str::random(6);
+				$otp = fake()->randomNumber(6, true);
 
 				$tokenData = Token::generate(['sub' => $admin->email], $this->exp);
-				$admin->update(['otp' => $otp]);
+				$admin->update(['otp' => (string) $otp]);
 
 				Mail::to($admin->email)->send(new ForgetPasswordMail($admin->toArray()));
 
@@ -88,7 +87,7 @@ class PasswordAdminService extends Service
 	{
 		$admin = Admin::where('email', $email)->first();
 
-		if ($admin !== null) {
+		if ($admin !== null && $admin?->otp !== null) {
 			$admin->update(['password' => $password, 'otp' => null]);
 
 			return true;
