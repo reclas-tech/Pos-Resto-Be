@@ -10,17 +10,24 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('invoice_notes', function (Blueprint $table) {
+        Schema::create('invoice_packets', function (Blueprint $table): void {
             $table->uuid('id')->primary();
 
             // REQUIRED
-            $table->text('note');
+            $table->unsignedInteger('quantity');
+            $table->unsignedBigInteger('price_sum');
+            $table->unsignedBigInteger('profit');
+
+            // OPTIONAL
+            $table->string('note', 255)->nullable();
 
             $table->timestamps();
             $table->softDeletes();
 
             // FOREIGN KEY
             $table->foreignUuid('invoice_id')->constrained('invoices');
+            $table->foreignUuid('packet_id')->constrained('packets');
+            $table->foreignUuid('updated_by')->nullable()->constrained('employees');
         });
     }
 
@@ -29,6 +36,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('invoice_notes');
+        Schema::dropIfExists('invoice_packets');
     }
 };

@@ -4,12 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
-class InvoiceTable extends Model
+class Charity extends Model
 {
-    use HasUuids, SoftDeletes;
+    use HasUuids;
 
 
     /*
@@ -18,12 +16,13 @@ class InvoiceTable extends Model
     |--------------------------------------------------------------------------
     */
 
-    protected $table = 'invoice_tables';
+    protected $table = 'charities';
 
     protected $fillable = [
-        // FOREIGN KEY
-        'invoice_id',
-        'table_id'
+        // REQUIRED
+        'value',
+        'month',
+        'year',
     ];
 
     protected $hidden = [];
@@ -34,16 +33,6 @@ class InvoiceTable extends Model
     | Relations
     |--------------------------------------------------------------------------
     */
-
-    public function invoice(): BelongsTo
-    {
-        return $this->belongsTo(Invoice::class);
-    }
-
-    public function table(): BelongsTo
-    {
-        return $this->belongsTo(Table::class);
-    }
 
 
     /*
