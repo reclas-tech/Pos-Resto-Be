@@ -10,7 +10,7 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('employee_refresh_tokens', function (Blueprint $table) {
+        Schema::create('employee_refresh_tokens', function (Blueprint $table): void {
             $table->uuid('id')->primary();
 
             // REQUIRED

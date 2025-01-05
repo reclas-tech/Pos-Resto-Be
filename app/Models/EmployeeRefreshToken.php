@@ -52,5 +52,4 @@ class EmployeeRefreshToken extends Model
     | Functions
     |--------------------------------------------------------------------------
     */
-
 }

@@ -24,7 +24,7 @@ class RefreshAccessTokenEmployeeService extends Service
 			$id = $currentRefreshToken->id;
 
 			if (Carbon::now()->diffInHours($refreshTokenExp, true) < 1) {
-				$refreshToken = Token::generate(refreshToken: true);
+				$refreshToken = Token::Generate(refreshToken: true);
 
 				$id = $currentRefreshToken->admin->setRefreshToken($refreshToken->get('token'), $refreshToken->get('exp'))->id;
 
@@ -32,7 +32,7 @@ class RefreshAccessTokenEmployeeService extends Service
 
 			}
 
-			$accessToken = Token::generate(['sub' => $id], accessToken: true);
+			$accessToken = Token::Generate(['sub' => $id], accessToken: true);
 
 			return [
 				'refresh_token' => $refreshToken['token'],

@@ -35,6 +35,13 @@ class Employee extends User implements JWTSubject
 
     protected $hidden = [];
 
+    public static const ROLE = [
+        Employee::CASHIER,
+        Employee::WAITER,
+    ];
+    public static const CASHIER = 'cashier';
+    public static const WAITER = 'waiter';
+
 
     /*
     |--------------------------------------------------------------------------
@@ -45,6 +52,16 @@ class Employee extends User implements JWTSubject
     public function refreshToken(): HasMany
     {
         return $this->hasMany(EmployeeRefreshToken::class);
+    }
+
+    public function cashOnHands(): HasMany
+    {
+        return $this->hasMany(CashOnHand::class, 'cashier_id');
+    }
+
+    public function times(): HasMany
+    {
+        return $this->hasMany(CashierTime::class, 'cashier_id');
     }
 
 
