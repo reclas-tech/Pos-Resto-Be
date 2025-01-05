@@ -26,9 +26,9 @@ class LoginAdminService extends Service
 			DB::beginTransaction();
 
 			try {
-				$tokenData = Token::generate(refreshToken: true);
+				$tokenData = Token::Generate(refreshToken: true);
 				$refreshTokenInstance = $admin->setRefreshToken($tokenData->get('token'), $tokenData->get('exp'));
-				$accessToken = Token::generate(['sub' => $refreshTokenInstance->id], accessToken: true);
+				$accessToken = Token::Generate(['sub' => $refreshTokenInstance->id], accessToken: true);
 
 				DB::commit();
 

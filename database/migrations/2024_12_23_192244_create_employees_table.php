@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Models\Employee;
 
 return new class extends Migration {
     /**
@@ -10,7 +11,7 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('employees', function (Blueprint $table) {
+        Schema::create('employees', function (Blueprint $table): void {
             $table->uuid('id')->primary();
 
             // UNIQUE
@@ -20,7 +21,7 @@ return new class extends Migration {
             $table->string('name', 255);
             $table->string('phone', 15);
             $table->text('address');
-            $table->enum('role', ['cashier', 'waiter']);
+            $table->enum('role', Employee::ROLE);
 
             $table->timestamps();
             $table->softDeletes();

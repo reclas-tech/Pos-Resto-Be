@@ -10,21 +10,20 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('admins', function (Blueprint $table): void {
+        Schema::create('cashier_times', function (Blueprint $table): void {
             $table->uuid('id')->primary();
 
-            // UNIQUE
-            $table->string('email', 255)->unique();
-
             // REQUIRED
-            $table->string('name', 255);
-            $table->string('password', 255);
+            $table->dateTime('started_at');
 
             // OPTIONAL
-            $table->char('otp', 6)->nullable();
+            $table->dateTime('ended_at')->nullable();
 
             $table->timestamps();
             $table->softDeletes();
+
+            // FOREIGN KEY
+            $table->foreignUuid('cashier_id')->constrained('employees');
         });
     }
 
@@ -33,6 +32,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('admins');
+        Schema::dropIfExists('cashier_times');
     }
 };

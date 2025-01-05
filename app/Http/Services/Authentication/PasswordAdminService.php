@@ -30,7 +30,7 @@ class PasswordAdminService extends Service
 			try {
 				$otp = fake()->randomNumber(6, true);
 
-				$tokenData = Token::generate(['sub' => $admin->email], $this->exp);
+				$tokenData = Token::Generate(['sub' => $admin->email], $this->exp);
 				$admin->update(['otp' => (string) $otp]);
 
 				Mail::to($admin->email)->send(new ForgetPasswordMail($admin->toArray()));
@@ -64,7 +64,7 @@ class PasswordAdminService extends Service
 		$admin = Admin::where('email', $email)->where('otp', $otp)->first();
 
 		if ($admin !== null) {
-			$tokenData = Token::generate(['sub' => $admin->email, 'otp' => 'valid'], $this->exp);
+			$tokenData = Token::Generate(['sub' => $admin->email, 'otp' => 'valid'], $this->exp);
 
 			return $tokenData;
 		}

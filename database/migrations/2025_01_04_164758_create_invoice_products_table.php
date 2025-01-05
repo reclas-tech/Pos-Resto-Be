@@ -10,12 +10,16 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('invoice_lists', function (Blueprint $table) {
+        Schema::create('invoice_products', function (Blueprint $table): void {
             $table->uuid('id')->primary();
 
             // REQUIRED
-            $table->unsignedBigInteger('price_sum');
             $table->unsignedInteger('quantity');
+            $table->unsignedBigInteger('price_sum');
+            $table->unsignedBigInteger('profit');
+
+            // OPTIONAL
+            $table->string('note', 255)->nullable();
 
             $table->timestamps();
             $table->softDeletes();
@@ -23,6 +27,7 @@ return new class extends Migration {
             // FOREIGN KEY
             $table->foreignUuid('invoice_id')->constrained('invoices');
             $table->foreignUuid('product_id')->constrained('products');
+            $table->foreignUuid('updated_by')->nullable()->constrained('employees');
         });
     }
 
@@ -31,6 +36,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('invoice_lists');
+        Schema::dropIfExists('invoice_products');
     }
 };

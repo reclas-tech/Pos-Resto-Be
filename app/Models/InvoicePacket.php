@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Model;
 
-class InvoiceTable extends Model
+class InvoicePacket extends Model
 {
     use HasUuids, SoftDeletes;
 
@@ -18,12 +18,21 @@ class InvoiceTable extends Model
     |--------------------------------------------------------------------------
     */
 
-    protected $table = 'invoice_tables';
+    protected $table = 'invoice_packets';
 
     protected $fillable = [
+        // REQUIRED
+        'price_sum',
+        'quantity',
+        'profit',
+
+        // OPTIONAL
+        'note',
+
         // FOREIGN KEY
         'invoice_id',
-        'table_id'
+        'packet_id',
+        'updated_by' // NULLABLE
     ];
 
     protected $hidden = [];
@@ -40,9 +49,14 @@ class InvoiceTable extends Model
         return $this->belongsTo(Invoice::class);
     }
 
-    public function table(): BelongsTo
+    public function packet(): BelongsTo
     {
-        return $this->belongsTo(Table::class);
+        return $this->belongsTo(Packet::class);
+    }
+
+    public function updatedBy(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class, 'updated_by');
     }
 
 

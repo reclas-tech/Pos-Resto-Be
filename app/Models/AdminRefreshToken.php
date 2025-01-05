@@ -52,5 +52,4 @@ class AdminRefreshToken extends Model
     | Functions
     |--------------------------------------------------------------------------
     */
-
 }

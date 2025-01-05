@@ -17,7 +17,7 @@ class Token
 	 * 
 	 * @return \Illuminate\Support\Collection
 	 */
-	public static function generate(array $data = [], float $ttl = 1, bool $accessToken = false, bool $refreshToken = false): Collection
+	public static function Generate(array $data = [], float $ttl = 1, bool $accessToken = false, bool $refreshToken = false): Collection
 	{
 		if ($accessToken) {
 			$ttl = config('jwt.ttl');

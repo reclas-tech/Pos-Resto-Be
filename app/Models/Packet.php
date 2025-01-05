@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 
-class InvoiceList extends Model
+class Packet extends Model
 {
     use HasUuids, SoftDeletes;
 
@@ -18,16 +18,17 @@ class InvoiceList extends Model
     |--------------------------------------------------------------------------
     */
 
-    protected $table = 'invoice_lists';
+    protected $table = 'packets';
 
     protected $fillable = [
-        // REQUIRED
-        'price_sum',
-        'quantity',
+        // UNIQUE
+        'name',
 
-        // FOREIGN KEY
-        'invoice_id',
-        'product_id'
+        // REQUIRED
+        'image',
+        'price',
+        'stock',
+        'cogp',
     ];
 
     protected $hidden = [];
@@ -39,14 +40,9 @@ class InvoiceList extends Model
     |--------------------------------------------------------------------------
     */
 
-    public function invoice(): BelongsTo
+    public function products(): HasMany
     {
-        return $this->belongsTo(Invoice::class);
-    }
-
-    public function product(): BelongsTo
-    {
-        return $this->belongsTo(Product::class);
+        return $this->hasMany(PacketProduct::class);
     }
 
 

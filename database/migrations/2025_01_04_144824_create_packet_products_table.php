@@ -10,21 +10,18 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('admins', function (Blueprint $table): void {
+        Schema::create('packet_products', function (Blueprint $table): void {
             $table->uuid('id')->primary();
 
-            // UNIQUE
-            $table->string('email', 255)->unique();
-
             // REQUIRED
-            $table->string('name', 255);
-            $table->string('password', 255);
-
-            // OPTIONAL
-            $table->char('otp', 6)->nullable();
+            $table->unsignedInteger('quantity');
 
             $table->timestamps();
             $table->softDeletes();
+
+            // FOREIGN KEY
+            $table->foreignUuid('product_id')->constrained('products');
+            $table->foreignUuid('packet_id')->constrained('packets');
         });
     }
 
@@ -33,6 +30,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('admins');
+        Schema::dropIfExists('packet_products');
     }
 };

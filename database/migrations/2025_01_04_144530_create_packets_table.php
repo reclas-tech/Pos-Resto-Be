@@ -10,18 +10,17 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('admins', function (Blueprint $table): void {
+        Schema::create('packets', function (Blueprint $table): void {
             $table->uuid('id')->primary();
 
             // UNIQUE
-            $table->string('email', 255)->unique();
+            $table->string('name', 255)->unique();
 
             // REQUIRED
-            $table->string('name', 255);
-            $table->string('password', 255);
-
-            // OPTIONAL
-            $table->char('otp', 6)->nullable();
+            $table->unsignedBigInteger('cogp');
+            $table->unsignedBigInteger('price');
+            $table->unsignedInteger('stock');
+            $table->text('image');
 
             $table->timestamps();
             $table->softDeletes();
@@ -33,6 +32,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('admins');
+        Schema::dropIfExists('packets');
     }
 };

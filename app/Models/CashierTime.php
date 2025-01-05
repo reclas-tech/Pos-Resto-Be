@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 
-class InvoiceNote extends Model
+class CashierTime extends Model
 {
     use HasUuids, SoftDeletes;
 
@@ -18,14 +18,17 @@ class InvoiceNote extends Model
     |--------------------------------------------------------------------------
     */
 
-    protected $table = 'invoice_notes';
+    protected $table = 'cashier_times';
 
     protected $fillable = [
         // REQUIRED
-        'note',
+        'started_at',
+
+        // OPTIONAL
+        'ended_at',
 
         // FOREIGN KEY
-        'invoice_id',
+        'cashier_id'
     ];
 
     protected $hidden = [];
@@ -37,9 +40,9 @@ class InvoiceNote extends Model
     |--------------------------------------------------------------------------
     */
 
-    public function invoice(): BelongsTo
+    public function cashier(): BelongsTo
     {
-        return $this->belongsTo(Invoice::class);
+        return $this->belongsTo(Employee::class);
     }
 
 
