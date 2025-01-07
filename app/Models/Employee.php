@@ -35,12 +35,12 @@ class Employee extends User implements JWTSubject
 
     protected $hidden = [];
 
-    public static const ROLE = [
-        Employee::CASHIER,
-        Employee::WAITER,
+    public const ROLE = [
+        self::CASHIER,
+        self::WAITER,
     ];
-    public static const CASHIER = 'cashier';
-    public static const WAITER = 'waiter';
+    public const CASHIER = 'cashier';
+    public const WAITER = 'waiter';
 
 
     /*

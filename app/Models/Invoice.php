@@ -44,30 +44,30 @@ class Invoice extends Model
 
     protected $hidden = [];
 
-    public static const TYPE = [
-        Invoice::TAKE_AWAY,
-        Invoice::DINE_IN,
+    public const TYPE = [
+        self::TAKE_AWAY,
+        self::DINE_IN,
     ];
-    public static const TAKE_AWAY = 'take away';
-    public static const DINE_IN = 'dine in';
+    public const TAKE_AWAY = 'take away';
+    public const DINE_IN = 'dine in';
 
-    public static const STATUS = [
-        Invoice::PENDING,
-        Invoice::SUCCESS,
-        Invoice::CANCEL,
+    public const STATUS = [
+        self::PENDING,
+        self::SUCCESS,
+        self::CANCEL,
     ];
-    public static const PENDING = 'debit';
-    public static const SUCCESS = 'qris';
-    public static const CANCEL = 'cash';
+    public const PENDING = 'debit';
+    public const SUCCESS = 'qris';
+    public const CANCEL = 'cash';
 
-    public static const PAYMENT = [
-        Invoice::DEBIT,
-        Invoice::CASH,
-        Invoice::QRIS,
+    public const PAYMENT = [
+        self::DEBIT,
+        self::CASH,
+        self::QRIS,
     ];
-    public static const DEBIT = 'debit';
-    public static const CASH = 'cash';
-    public static const QRIS = 'qris';
+    public const DEBIT = 'debit';
+    public const CASH = 'cash';
+    public const QRIS = 'qris';
 
 
     /*
