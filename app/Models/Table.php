@@ -31,12 +31,12 @@ class Table extends Model
 
     protected $hidden = [];
 
-    public static const LOCATION = [
-        Table::OUTDOOR,
-        Table::INDOOR,
+    public const LOCATION = [
+        self::OUTDOOR,
+        self::INDOOR,
     ];
-    public static const OUTDOOR = 'outdoor';
-    public static const INDOOR = 'indoor';
+    public const OUTDOOR = 'outdoor';
+    public const INDOOR = 'indoor';
 
 
     /*
