@@ -26,6 +26,7 @@ use App\Http\Controllers\Kitchen\KitchenGetOneController;
 use App\Http\Controllers\Kitchen\KitchenListController;
 use App\Http\Controllers\Kitchen\KitchenUpdateController;
 use App\Http\Controllers\Product\ProductCreateController;
+use App\Http\Controllers\Product\ProductListController;
 use App\Http\Controllers\Table\TableCreateController;
 use App\Http\Controllers\Table\TableDeleteController;
 use App\Http\Controllers\Table\TableGetOneController;
@@ -67,6 +68,7 @@ Route::prefix('v1')->group(function (): void {
 		// ADMIN
 		Route::prefix('admin')->group(function (): void {
 			Route::post('create', [ProductCreateController::class, 'action']);
+			Route::get('list', [ProductListController::class, 'action']);
 		});
 	});
 
