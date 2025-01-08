@@ -11,7 +11,6 @@ use App\Http\Controllers\Authentication\LogoutAdminController;
 use App\Http\Controllers\Authentication\LoginAdminController;
 use App\Http\Controllers\Category\CategoryCreateController;
 use App\Http\Controllers\Category\CategoryDeleteController;
-use App\Http\Controllers\Category\CategoryGetAllController;
 use App\Http\Controllers\Category\CategoryGetOneController;
 use App\Http\Controllers\Category\CategoryListController;
 use App\Http\Controllers\Category\CategoryUpdateController;
