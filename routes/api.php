@@ -26,6 +26,11 @@ use App\Http\Controllers\Kitchen\KitchenGetOneController;
 use App\Http\Controllers\Kitchen\KitchenListController;
 use App\Http\Controllers\Kitchen\KitchenUpdateController;
 use App\Http\Controllers\Product\ProductCreateController;
+use App\Http\Controllers\Table\TableCreateController;
+use App\Http\Controllers\Table\TableDeleteController;
+use App\Http\Controllers\Table\TableGetOneController;
+use App\Http\Controllers\Table\TableListController;
+use App\Http\Controllers\Table\TableUpdateController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('example')->group(function (): void {
@@ -87,6 +92,18 @@ Route::prefix('v1')->group(function (): void {
 			Route::get('detail/{id}', [CategoryGetOneController::class, 'action']);
 			Route::put('edit/{id}', [CategoryUpdateController::class, 'action']);
 			Route::delete('delete/{id}', [CategoryDeleteController::class, 'action']);
+		});
+	});
+
+	// Table
+	Route::prefix('table')->group(function (): void {
+		// ADMIN
+		Route::prefix('admin')->group(function (): void {
+			Route::post('create', [TableCreateController::class, 'action']);
+			Route::get('list', [TableListController::class, 'action']);
+			Route::get('detail/{id}', [TableGetOneController::class, 'action']);
+			Route::put('edit/{id}', [TableUpdateController::class, 'action']);
+			Route::delete('delete/{id}', [TableDeleteController::class, 'action']);
 		});
 	});
 });
