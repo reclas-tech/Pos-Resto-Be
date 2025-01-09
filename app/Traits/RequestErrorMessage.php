@@ -22,7 +22,9 @@ trait RequestErrorMessage
             'numeric' => ':attribute harus berupa angka',
             'digits' => ':attribute harus :digits digit',
             'string' => ':attribute harus berupa teks',
+            'unique' => ':attribute telah digunakan',
             'required' => ':attribute wajib diisi',
+            'in' => ':attribute tidak valid',
         ];
     }
 
