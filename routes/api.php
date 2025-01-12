@@ -14,6 +14,11 @@ use App\Http\Controllers\Category\CategoryDeleteController;
 use App\Http\Controllers\Category\CategoryGetOneController;
 use App\Http\Controllers\Category\CategoryListController;
 use App\Http\Controllers\Category\CategoryUpdateController;
+use App\Http\Controllers\Employee\EmployeeCreateController;
+use App\Http\Controllers\Employee\EmployeeDeleteController;
+use App\Http\Controllers\Employee\EmployeeGetOneController;
+use App\Http\Controllers\Employee\EmployeeUpdateController;
+use App\Http\Controllers\Employee\EmployeeListController;
 use App\Http\Controllers\Example\ExampleCreateController;
 use App\Http\Controllers\Example\ExampleDeleteController;
 use App\Http\Controllers\Example\ExampleGetAllController;
@@ -122,6 +127,16 @@ Route::prefix('v1')->group(function (): void {
 			Route::get('detail/{id}', [TableGetOneController::class, 'action']);
 			Route::put('edit/{id}', [TableUpdateController::class, 'action']);
 			Route::delete('delete/{id}', [TableDeleteController::class, 'action']);
+		});
+	});
+	Route::prefix('employee')->group(function (): void {
+		// ADMIN
+		Route::prefix('admin')->middleware('api-admin')->group(function (): void {
+			Route::post('create', [EmployeeCreateController::class, 'action']);
+			Route::get('list', [EmployeeListController::class, 'action']);
+			Route::get('detail/{id}', [EmployeeGetOneController::class, 'action']);
+			Route::put('edit/{id}', [EmployeeUpdateController::class, 'action']);
+			Route::delete('delete/{id}', [EmployeeDeleteController::class, 'action']);
 		});
 	});
 });
