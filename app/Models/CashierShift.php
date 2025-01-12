@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 
-class CashierTime extends Model
+class CashierShift extends Model
 {
     use HasUuids, SoftDeletes;
 
@@ -18,13 +18,15 @@ class CashierTime extends Model
     |--------------------------------------------------------------------------
     */
 
-    protected $table = 'cashier_times';
+    protected $table = 'cashier_shifts';
 
     protected $fillable = [
         // REQUIRED
+        'cash_on_hand_start',
         'started_at',
 
         // OPTIONAL
+        'cash_on_hand_end',
         'ended_at',
 
         // FOREIGN KEY

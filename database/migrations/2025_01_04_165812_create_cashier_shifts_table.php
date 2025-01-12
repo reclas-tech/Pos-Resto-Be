@@ -10,11 +10,16 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('cash_on_hands', function (Blueprint $table): void {
+        Schema::create('cashier_shifts', function (Blueprint $table): void {
             $table->uuid('id')->primary();
 
             // REQUIRED
-            $table->unsignedBigInteger('cash');
+            $table->unsignedBigInteger('cash_on_hand_start');
+            $table->dateTime('started_at');
+
+            // OPTIONAL
+            $table->unsignedBigInteger('cash_on_hand_end')->nullable();
+            $table->dateTime('ended_at')->nullable();
 
             $table->timestamps();
             $table->softDeletes();
@@ -29,6 +34,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('cash_on_hands');
+        Schema::dropIfExists('cashier_shifts');
     }
 };
