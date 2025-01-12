@@ -25,6 +25,9 @@ use App\Http\Controllers\Kitchen\KitchenGetAllController;
 use App\Http\Controllers\Kitchen\KitchenGetOneController;
 use App\Http\Controllers\Kitchen\KitchenListController;
 use App\Http\Controllers\Kitchen\KitchenUpdateController;
+use App\Http\Controllers\Packet\PacketCreateController;
+use App\Http\Controllers\Packet\PacketGetOneController;
+use App\Http\Controllers\Packet\PacketListController;
 use App\Http\Controllers\Product\ProductCreateController;
 use App\Http\Controllers\Product\ProductDeleteController;
 use App\Http\Controllers\Product\ProductGetOneController;
@@ -75,6 +78,13 @@ Route::prefix('v1')->group(function (): void {
 			Route::get('detail/{id}', [ProductGetOneController::class, 'action']);
 			Route::put('edit/{id}', [ProductUpdateController::class, 'action']);
 			Route::delete('delete/{id}', [ProductDeleteController::class, 'action']);
+
+			// Packet Product
+			Route::prefix('packet')->group(function (): void {
+				Route::post('create', [PacketCreateController::class, 'action']);
+				Route::get('list', [PacketListController::class, 'action']);
+				Route::get('detail/{id}', [PacketGetOneController::class, 'action']);
+			});
 		});
 	});
 
