@@ -77,7 +77,7 @@ Route::prefix('v1')->group(function (): void {
 	// Product
 	Route::prefix('product')->group(function (): void {
 		// ADMIN
-		Route::prefix('admin')->group(function (): void {
+		Route::prefix('admin')->middleware('api-admin')->group(function (): void {
 			Route::post('create', [ProductCreateController::class, 'action']);
 			Route::get('list', [ProductListController::class, 'action']);
 			Route::get('detail/{id}', [ProductGetOneController::class, 'action']);
@@ -96,7 +96,7 @@ Route::prefix('v1')->group(function (): void {
 	// Kitchen
 	Route::prefix('kitchen')->group(function (): void {
 		// ADMIN
-		Route::prefix('admin')->group(function (): void {
+		Route::prefix('admin')->middleware('api-admin')->group(function (): void {
 			Route::post('create', [KitchenCreateController::class, 'action']);
 			Route::get('list', [KitchenListController::class, 'action']);
 			Route::get('get', [KitchenGetAllController::class, 'action']);
@@ -109,7 +109,7 @@ Route::prefix('v1')->group(function (): void {
 	// Category
 	Route::prefix('category')->group(function (): void {
 		// ADMIN
-		Route::prefix('admin')->group(function (): void {
+		Route::prefix('admin')->middleware('api-admin')->group(function (): void {
 			Route::post('create', [CategoryCreateController::class, 'action']);
 			Route::get('list', [CategoryListController::class, 'action']);
 			Route::get('detail/{id}', [CategoryGetOneController::class, 'action']);
@@ -121,7 +121,7 @@ Route::prefix('v1')->group(function (): void {
 	// Table
 	Route::prefix('table')->group(function (): void {
 		// ADMIN
-		Route::prefix('admin')->group(function (): void {
+		Route::prefix('admin')->middleware('api-admin')->group(function (): void {
 			Route::post('create', [TableCreateController::class, 'action']);
 			Route::get('list', [TableListController::class, 'action']);
 			Route::get('detail/{id}', [TableGetOneController::class, 'action']);
@@ -129,6 +129,8 @@ Route::prefix('v1')->group(function (): void {
 			Route::delete('delete/{id}', [TableDeleteController::class, 'action']);
 		});
 	});
+
+	//Employee
 	Route::prefix('employee')->group(function (): void {
 		// ADMIN
 		Route::prefix('admin')->middleware('api-admin')->group(function (): void {
