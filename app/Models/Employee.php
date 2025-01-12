@@ -54,14 +54,9 @@ class Employee extends User implements JWTSubject
         return $this->hasMany(EmployeeRefreshToken::class);
     }
 
-    public function cashOnHands(): HasMany
+    public function shifts(): HasMany
     {
-        return $this->hasMany(CashOnHand::class, 'cashier_id');
-    }
-
-    public function times(): HasMany
-    {
-        return $this->hasMany(CashierTime::class, 'cashier_id');
+        return $this->hasMany(CashierShift::class, 'cashier_id');
     }
 
 
