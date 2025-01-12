@@ -2,8 +2,6 @@
 
 namespace App\Http\Services\Product;
 
-use App\Models\Category;
-use App\Models\Kitchen;
 use App\Models\Product;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
