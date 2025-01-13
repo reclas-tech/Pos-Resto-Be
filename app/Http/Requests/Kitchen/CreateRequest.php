@@ -4,6 +4,7 @@ namespace App\Http\Requests\Kitchen;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Traits\RequestErrorMessage;
+use Illuminate\Validation\Rule;
 
 class CreateRequest extends FormRequest
 {
@@ -25,7 +26,7 @@ class CreateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'bail|required|string|unique:kitchens|max:255',
+            'name' => ['bail', 'required', 'string', 'max:255', Rule::unique('kitchens', 'name')->withoutTrashed()],
         ];
     }
 

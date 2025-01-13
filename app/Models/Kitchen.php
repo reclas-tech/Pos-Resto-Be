@@ -21,7 +21,6 @@ class Kitchen extends Model
     protected $table = 'kitchens';
 
     protected $fillable = [
-        // UNIQUE
         'name',
     ];
 

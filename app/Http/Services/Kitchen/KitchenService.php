@@ -102,6 +102,9 @@ class KitchenService extends Service
 	 */
 	public function delete(Kitchen $kitchen): bool|null
 	{
-		return $kitchen->forceDelete() ?? $kitchen->delete();
+		if($kitchen->products()->exists()) {
+			return $kitchen->delete();
+		}
+		return $kitchen->forceDelete();
 	}
 }
