@@ -32,7 +32,7 @@ class UpdateRequest extends FormRequest
             'category_id' => ['bail', 'required', 'string', Rule::exists('categories', 'id')->withoutTrashed()],
             'kitchen_id' => ['bail', 'required', 'string', Rule::exists('kitchens', 'id')->withoutTrashed()],
             'cogp' => 'bail|required|numeric|integer',
-            'image' => 'bail|required|image|mimes:jpeg,png,jpg,svg|max:10240',
+            'image' => 'bail|image|mimes:jpeg,png,jpg,svg|max:10240',
         ];
     }
 
@@ -58,6 +58,8 @@ class UpdateRequest extends FormRequest
     {
         return [
             'image' => ':attribute harus berupa gambar.',
+            'exists' => ':attribute tidak ditemukan.',
+            'integer' => ':attribute harus berupa integer.',
             'mimes' => ':attribute harus berupa file jpeg, png, jpg, svg.',
             'image.max' => ':attribute tidak boleh lebih dari :max kilobytes.',
             'required' => ':attribute wajib diisi.',
