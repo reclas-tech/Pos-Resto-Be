@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'jwt' => APIAuthenticate::class,
+            'employee' => EmployeeAuthenticate::class,
         ]);
         $middleware->group('api-admin', [
             APIAuthenticate::class,
