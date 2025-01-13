@@ -27,11 +27,11 @@ class Token
 
 		$data = count($data) ? $data : ['sub' => config('app.name')];
 		$payload = JWTFactory::setTTL($ttl)->customClaims($data)->make();
-		$exp = Carbon::createFromTimestamp($payload->get('exp'));
+		$exp = Carbon::createFromTimestamp($payload->get('exp'), config('app.timezone'));
 
 		return collect([
-			'exp' => $exp->setHour((int) $exp->format('h') + 7),
 			'token' => JWTAuth::encode($payload)->get(),
+			'exp' => $exp,
 		]);
 	}
 }

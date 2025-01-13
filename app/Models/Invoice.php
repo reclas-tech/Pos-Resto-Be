@@ -26,6 +26,7 @@ class Invoice extends Model
         'code',
 
         // REQUIRED
+        'price_item',
         'price_sum',
         'customer',
         'profit',
