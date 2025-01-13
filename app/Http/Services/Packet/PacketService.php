@@ -170,6 +170,10 @@ class PacketService extends Service
 	 */
 	public function delete(Packet $packet): bool|null
 	{
-		return $packet->delete();
+		if($packet->invoice()->exists()) {
+			return $packet->delete();
+		}	
+		$packet->products()->forceDelete();
+		return $packet->forceDelete();
 	}
 }

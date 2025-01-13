@@ -4,6 +4,7 @@ namespace App\Http\Requests\Packet;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Traits\RequestErrorMessage;
+use Illuminate\Validation\Rule;
 
 class CreateRequest extends FormRequest
 {
@@ -25,12 +26,14 @@ class CreateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'bail|required|string|unique:packets|max:255',
-            'price' => 'bail|required|numeric',
-            'stock' => 'bail|required|numeric',
-            'cogp' => 'bail|required|numeric',
+            'name' => ['bail', 'required', 'string', 'max:255', Rule::unique('packets', 'name')->withoutTrashed()],
+            'price' => 'bail|required|numeric|integer',
+            'stock' => 'bail|required|numeric|integer',
+            'cogp' => 'bail|required|numeric|integer',
             'image' => 'bail|required|image|mimes:jpeg,png,jpg,svg|max:10240',
             'products' => 'bail|required|array',
+            'products.*.id' => ['bail', 'required', 'string', Rule::exists('products', 'id')->withoutTrashed()],
+            'products.*.quantity' => 'bail|required|numeric|integer',
         ];
     }
 
@@ -48,6 +51,8 @@ class CreateRequest extends FormRequest
             'cogp' => 'HPP',
             'image' => 'Gambar',
             'products' => 'Produk',
+            'products.*.id' => 'Produk',
+            'products.*.quantity' => 'Jumlah Produk',
         ];
     }
 
@@ -55,6 +60,8 @@ class CreateRequest extends FormRequest
     {
         return [
             'unique' => ':attribute sudah digunakan.',
+            'exists' => ':attribute tidak ditemukan.',
+            'integer' => ':attribute harus berupa integer.',
             'image' => ':attribute harus berupa gambar.',
             'mimes' => ':attribute harus berupa file jpeg, png, jpg, svg.',
             'image.max' => ':attribute tidak boleh lebih dari :max kilobytes.',
