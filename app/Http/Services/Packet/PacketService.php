@@ -163,4 +163,13 @@ class PacketService extends Service
 
 	}
 
+	/**
+     * @param \App\Models\Packet $packet
+	 * 
+	 * @return bool|null
+	 */
+	public function delete(Packet $packet): bool|null
+	{
+		return $packet->delete();
+	}
 }
