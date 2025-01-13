@@ -29,27 +29,11 @@ class PacketCreateController extends BaseController
             price: $price,
             stock: $stock,
             cogp: $cogp,
-            image: $url
+            image: $url,
+            products: $products
         );
 
         $response = new Response(Response::CREATED, 'Buat Paket Berhasil');
-
-        try {
-
-            foreach ($products as $product) {
-                $this->productPacketService->create(
-                    quantity: $product['quantity'],
-                    product: $product['id'],
-                    packet: $packet->id
-                );
-            }
-
-        } catch (\Exception $e) {
-
-            $response->set(data: $e->getMessage());
-            return $response->get();
-
-        }
 
         if (!$packet instanceof \Exception) {
             $response->set(data: $packet->toArray());
