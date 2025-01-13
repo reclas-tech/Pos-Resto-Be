@@ -48,19 +48,21 @@ class ProductUpdateController extends BaseController
                     category: $category_id,
                     kitchen: $kitchen_id
                 );
+
+            } else {
+
+                $this->productService->update(
+                    product : $product,
+                    name: $name,
+                    price: $price,
+                    stock: $stock,
+                    cogp: $cogp,
+                    image: $product->image,
+                    category: $category_id,
+                    kitchen: $kitchen_id
+                );
+                
             }
-
-            $this->productService->update(
-                product : $product,
-                name: $name,
-                price: $price,
-                stock: $stock,
-                cogp: $cogp,
-                image: $product->image,
-                category: $category_id,
-                kitchen: $kitchen_id
-            );
-
             
         } else {
             $response->set(Response::NOT_FOUND, 'Data produk tidak dapat ditemukan');
