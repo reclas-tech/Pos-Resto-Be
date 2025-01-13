@@ -30,6 +30,7 @@ use App\Http\Controllers\Kitchen\KitchenGetAllController;
 use App\Http\Controllers\Kitchen\KitchenGetOneController;
 use App\Http\Controllers\Kitchen\KitchenListController;
 use App\Http\Controllers\Kitchen\KitchenUpdateController;
+use App\Http\Controllers\Order\OrderCreateController;
 use App\Http\Controllers\Packet\PacketCreateController;
 use App\Http\Controllers\Packet\PacketGetOneController;
 use App\Http\Controllers\Packet\PacketListController;
@@ -54,6 +55,7 @@ Route::prefix('example')->group(function (): void {
 });
 
 Route::prefix('v1')->group(function (): void {
+	// Authentication
 	Route::prefix('auth')->group(function (): void {
 		// ADMIN
 		Route::prefix('admin')->group(function (): void {
@@ -130,7 +132,7 @@ Route::prefix('v1')->group(function (): void {
 		});
 	});
 
-	//Employee
+	// Employee
 	Route::prefix('employee')->group(function (): void {
 		// ADMIN
 		Route::prefix('admin')->middleware('api-admin')->group(function (): void {
@@ -139,6 +141,14 @@ Route::prefix('v1')->group(function (): void {
 			Route::get('detail/{id}', [EmployeeGetOneController::class, 'action']);
 			Route::put('edit/{id}', [EmployeeUpdateController::class, 'action']);
 			Route::delete('delete/{id}', [EmployeeDeleteController::class, 'action']);
+		});
+	});
+
+	// Order
+	Route::prefix('order')->group(function (): void {
+		// WAITER
+		Route::prefix('waiter')->middleware(['jwt', 'employee:waiter'])->group(function (): void {
+			Route::post('create', [OrderCreateController::class, 'action']);
 		});
 	});
 });
