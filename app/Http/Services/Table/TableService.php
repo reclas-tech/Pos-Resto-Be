@@ -111,6 +111,9 @@ class TableService extends Service
 	 */
 	public function delete(Table $table): bool|null
 	{
-		return $table->forceDelete() ?? $table->delete();
+		if($table->invoices()->exists()){
+			return $table->delete();
+		}	
+		return $table->forceDelete();
 	}
 }

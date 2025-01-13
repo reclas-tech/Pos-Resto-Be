@@ -4,6 +4,7 @@ namespace App\Http\Requests\Table;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Traits\RequestErrorMessage;
+use Illuminate\Validation\Rule;
 
 class CreateRequest extends FormRequest
 {
@@ -25,8 +26,8 @@ class CreateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'bail|required|string|unique:tables|max:255',
-            'capacity' => 'bail|required|numeric|min:1',
+            'name' => ['bail', 'required', 'string', 'max:255', Rule::unique('tables', 'name')->withoutTrashed()],
+            'capacity' => 'bail|required|numeric|min:1|integer',
             'location' => 'bail|required|string|in:indoor,outdoor',
         ];
     }
@@ -49,6 +50,7 @@ class CreateRequest extends FormRequest
     {
         return [
             'unique' => ':attribute sudah digunakan.',
+            'integer' => ':attribute harus berupa integer.',
             'required' => ':attribute wajib diisi.',
             'string' => ':attribute harus berupa teks.',
             'max' => ':attribute tidak boleh lebih dari :max karakter.',
