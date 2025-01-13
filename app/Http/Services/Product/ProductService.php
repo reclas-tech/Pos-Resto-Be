@@ -125,7 +125,7 @@ class ProductService extends Service
 	 */
     public function delete(Product $product): bool|null
 	{
-		if($product->invoiceProduct()->exist || $product->packetProduct()->exist) {
+		if($product->invoiceProduct()->exists() || $product->packetProduct()->exists()) {
 			return $product->delete();
 		}
 		return $product->forceDelete();
