@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 
@@ -21,7 +22,6 @@ class Product extends Model
     protected $table = 'products';
 
     protected $fillable = [
-        // UNIQUE
         'name',
 
         // REQUIRED
@@ -54,6 +54,15 @@ class Product extends Model
         return $this->belongsTo(Kitchen::class);
     }
 
+    public function invoiceProduct(): HasMany
+    {
+        return $this->hasMany(InvoiceProduct::class);
+    }
+
+    public function packetProduct(): HasMany
+    {
+        return $this->hasMany(PacketProduct::class);
+    }    
 
     /*
     |--------------------------------------------------------------------------

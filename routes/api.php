@@ -32,8 +32,10 @@ use App\Http\Controllers\Kitchen\KitchenListController;
 use App\Http\Controllers\Kitchen\KitchenUpdateController;
 use App\Http\Controllers\Order\OrderCreateController;
 use App\Http\Controllers\Packet\PacketCreateController;
+use App\Http\Controllers\Packet\PacketDeleteController;
 use App\Http\Controllers\Packet\PacketGetOneController;
 use App\Http\Controllers\Packet\PacketListController;
+use App\Http\Controllers\Packet\PacketUpdateController;
 use App\Http\Controllers\Product\ProductCreateController;
 use App\Http\Controllers\Product\ProductDeleteController;
 use App\Http\Controllers\Product\ProductGetOneController;
@@ -44,6 +46,7 @@ use App\Http\Controllers\Table\TableDeleteController;
 use App\Http\Controllers\Table\TableGetOneController;
 use App\Http\Controllers\Table\TableListController;
 use App\Http\Controllers\Table\TableUpdateController;
+use App\Models\Packet;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('example')->group(function (): void {
@@ -91,6 +94,8 @@ Route::prefix('v1')->group(function (): void {
 				Route::post('create', [PacketCreateController::class, 'action']);
 				Route::get('list', [PacketListController::class, 'action']);
 				Route::get('detail/{id}', [PacketGetOneController::class, 'action']);
+				Route::put('edit/{id}', [PacketUpdateController::class, 'action']);
+				Route::delete('delete/{id}', [PacketDeleteController::class, 'action']);
 			});
 		});
 	});

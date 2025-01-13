@@ -21,7 +21,6 @@ class Table extends Model
     protected $table = 'tables';
 
     protected $fillable = [
-        // UNIQUE
         'name',
 
         // REQUIRED

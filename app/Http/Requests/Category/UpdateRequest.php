@@ -4,6 +4,7 @@ namespace App\Http\Requests\Category;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Traits\RequestErrorMessage;
+use Illuminate\Validation\Rule;
 
 class UpdateRequest extends FormRequest
 {
@@ -25,7 +26,7 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'bail|required|string|unique:categories|max:255',
+            'name' => ['bail', 'required', 'string', 'max:255', Rule::unique('categories', 'name')->ignore($this->route('id'))->withoutTrashed()],
         ];
     }
 

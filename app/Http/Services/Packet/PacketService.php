@@ -3,6 +3,7 @@
 namespace App\Http\Services\Packet;
 
 use App\Models\Packet;
+use App\Models\PacketProduct;
 use App\Models\Product;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -20,14 +21,16 @@ class PacketService extends Service
 	 * @param int $stock
 	 * @param int $cogp
 	 * @param string $image
+	 * @param array $products
 	 * 
 	 * @return \App\Models\Packet|\Exception
 	 */
-	public function create(string $name, int $price, int $stock, int $cogp, string $image): Packet|Exception
+	public function create(string $name, int $price, int $stock, int $cogp, string $image, array $products): Packet|Exception
 	{
 		DB::beginTransaction();
 
 		try {
+
 			$packet = new Packet([
                 'name' => $name,
                 'price' => $price,
@@ -37,6 +40,16 @@ class PacketService extends Service
             ]);
 
 			$packet->save();
+
+			foreach ($products as $product) {
+				$packetProduct = new PacketProduct([
+					'quantity' => $product['quantity'],
+					'product_id' => $product['id'],
+					'packet_id' => $packet->id
+				]);
+
+				$packetProduct->save();
+            }
 
 			DB::commit();
 
@@ -103,4 +116,64 @@ class PacketService extends Service
 		return Packet::find($id);
 	}
 
+	/**
+     * @param \App\Models\Packet $packet
+	 * @param string $name
+	 * @param int $price
+	 * @param int $stock
+	 * @param int $cogp
+	 * @param string $image
+	 * @param array $products
+	 * 
+	 * @return void
+	 */
+	public function update(Packet $packet, string $name, int $price, int $stock, int $cogp, string $image, array $products): void
+	{
+		DB::beginTransaction();
+
+        $packet->name = $name;
+        $packet->price = $price;
+        $packet->stock = $stock;
+        $packet->cogp = $cogp;
+        $packet->image = $image;
+		$packet->save();
+
+		try {
+
+			PacketProduct::where('packet_id', $packet->id)->delete();
+
+			foreach ($products as $product) {
+				$packetProduct = new PacketProduct([
+					'quantity' => $product['quantity'],
+					'product_id' => $product['id'],
+					'packet_id' => $packet->id
+				]);
+
+				$packetProduct->save();
+            }
+
+		} catch (Exception $e) {
+
+			DB::rollBack();
+			throw $e;
+			
+		}
+
+		DB::commit();
+
+	}
+
+	/**
+     * @param \App\Models\Packet $packet
+	 * 
+	 * @return bool|null
+	 */
+	public function delete(Packet $packet): bool|null
+	{
+		if($packet->invoice()->exists()) {
+			return $packet->delete();
+		}	
+		$packet->products()->forceDelete();
+		return $packet->forceDelete();
+	}
 }

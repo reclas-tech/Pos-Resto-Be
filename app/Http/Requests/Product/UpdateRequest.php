@@ -4,6 +4,7 @@ namespace App\Http\Requests\Product;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Traits\RequestErrorMessage;
+use Illuminate\Validation\Rule;
 
 class UpdateRequest extends FormRequest
 {
@@ -25,12 +26,12 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'bail|required|string|max:255',
-            'price' => 'bail|required|numeric',
-            'stock' => 'bail|required|numeric',
-            'category_id' => 'bail|required|string',
-            'kitchen_id' => 'bail|required|string',
-            'cogp' => 'bail|required|numeric',
+            'name' => ['bail', 'required', 'string', 'max:255', Rule::unique('products', 'name')->ignore($this->route('id'))->withoutTrashed()],
+            'price' => 'bail|required|numeric|integer',
+            'stock' => 'bail|required|numeric|integer',
+            'category_id' => ['bail', 'required', 'string', Rule::exists('categories', 'id')->withoutTrashed()],
+            'kitchen_id' => ['bail', 'required', 'string', Rule::exists('kitchens', 'id')->withoutTrashed()],
+            'cogp' => 'bail|required|numeric|integer',
             'image' => 'bail|image|mimes:jpeg,png,jpg,svg|max:10240',
         ];
     }
@@ -57,6 +58,8 @@ class UpdateRequest extends FormRequest
     {
         return [
             'image' => ':attribute harus berupa gambar.',
+            'exists' => ':attribute tidak ditemukan.',
+            'integer' => ':attribute harus berupa integer.',
             'mimes' => ':attribute harus berupa file jpeg, png, jpg, svg.',
             'image.max' => ':attribute tidak boleh lebih dari :max kilobytes.',
             'required' => ':attribute wajib diisi.',

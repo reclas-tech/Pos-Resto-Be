@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Table;
 
-use App\Http\Requests\Kitchen\UpdateRequest;
+use App\Http\Requests\Table\UpdateRequest;
 use Illuminate\Http\JsonResponse;
 use App\Helpers\Response;
 

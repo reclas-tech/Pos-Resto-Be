@@ -102,6 +102,9 @@ class CategoryService extends Service
 	 */
 	public function delete(Category $category): bool|null
 	{
-		return $category->forceDelete() ?? $category->delete();
+		if($category->products()->exists()) {
+			return $category->delete();
+		}
+		return $category->forceDelete();
 	}
 }

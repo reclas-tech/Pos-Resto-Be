@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use App\Traits\RequestErrorMessage;
 use Illuminate\Validation\Rule;
 
-class CreateRequest extends FormRequest
+class UpdateRequest extends FormRequest
 {
     use RequestErrorMessage;
 
@@ -26,11 +26,11 @@ class CreateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['bail', 'required', 'string', 'max:255', Rule::unique('packets', 'name')->withoutTrashed()],
+            'name' => ['bail', 'required', 'string', 'max:255', Rule::unique('packets', 'name')->ignore($this->route('id'))->withoutTrashed()],
             'price' => 'bail|required|numeric|integer',
             'stock' => 'bail|required|numeric|integer',
             'cogp' => 'bail|required|numeric|integer',
-            'image' => 'bail|required|image|mimes:jpeg,png,jpg,svg|max:10240',
+            'image' => 'bail|image|mimes:jpeg,png,jpg,svg|max:10240',
             'products' => 'bail|required|array',
             'products.*.id' => ['bail', 'required', 'string', Rule::exists('products', 'id')->withoutTrashed()],
             'products.*.quantity' => 'bail|required|numeric|integer',
