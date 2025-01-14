@@ -2,16 +2,18 @@
 
 namespace App\Http\Services\Table;
 
-use App\Models\Table;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use App\Http\Services\Service;
+use App\Models\Invoice;
+use App\Models\Table;
 use Exception;
 
 class TableService extends Service
 {
-    protected $limit = 10;
+	protected $limit = 10;
 
 	/**
 	 * @param string $name
@@ -47,32 +49,32 @@ class TableService extends Service
 	/**
 	 * @param string|null $search
 	 * @param int|null $limit
-     * 
+	 * 
 	 * 
 	 * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
 	 */
-	public function list(string|null $search = null, int|null $limit = null): LengthAwarePaginator 
+	public function list(string|null $search = null, int|null $limit = null): LengthAwarePaginator
 	{
 		$table = Table::query();
 
-        if ($search) {
-            $table->where('name', 'like', '%' . $search . '%');
-        }
+		if ($search) {
+			$table->where('name', 'like', '%' . $search . '%');
+		}
 
-        return $table->paginate($limit ?? $this->limit);
-        
+		return $table->paginate($limit ?? $this->limit);
+
 	}
 
 	/**
-     * 
+	 * 
 	 * 
 	 * @return \Illuminate\Database\Eloquent\Collection
 	 */
-    public function getAll(): Collection
+	public function getAll(): Collection
 	{
 		$kitchen = Table::all();
 
-        return $kitchen;
+		return $kitchen;
 	}
 
 	/**
@@ -80,13 +82,13 @@ class TableService extends Service
 	 * 
 	 * @return \App\Models\Table|null
 	 */
-    public function getById(string $id): Table|null
+	public function getById(string $id): Table|null
 	{
-        return Table::find($id);
+		return Table::find($id);
 	}
 
 	/**
-     * @param \App\Models\Table $table
+	 * @param \App\Models\Table $table
 	 * @param string $name
 	 * @param int $capacity
 	 * @param string $location
@@ -96,24 +98,70 @@ class TableService extends Service
 	public function update(Table $table, string $name, int $capacity, string $location): void
 	{
 
-        $table->name = $name;
-        $table->capacity = $capacity;
-        $table->location = $location;
+		$table->name = $name;
+		$table->capacity = $capacity;
+		$table->location = $location;
 
 		$table->save();
 
 	}
 
 	/**
-     * @param \App\Models\Table $table
+	 * @param \App\Models\Table $table
 	 * 
 	 * @return bool|null
 	 */
 	public function delete(Table $table): bool|null
 	{
-		if($table->invoices()->exists()){
+		if ($table->invoices()->exists()) {
 			return $table->delete();
-		}	
+		}
 		return $table->forceDelete();
+	}
+
+	/**
+	 * @param string|null $status
+	 * 
+	 * @return array
+	 */
+	public function listWithCondition(string|null $status = null): array
+	{
+		$tables = Table::oldest()->get();
+
+		$data = collect();
+		$unavailable = 0;
+		$available = 0;
+		foreach ($tables as $table) {
+			$check = $table->invoices()->whereHas('invoice', function (Builder $query): void {
+				$query->where('status', Invoice::PENDING);
+			})->exists();
+
+			if ($check) {
+				$check = 'terisi';
+				$unavailable++;
+			} else {
+				$check = 'tersedia';
+				$available++;
+			}
+
+			if ($status === null || $status === $check) {
+				$data->add([
+					...$table->only([
+						'id',
+						'name',
+						'capacity',
+						'location',
+					]),
+					'invoice' => $table->invoices()->first()['invoice_id'] ?? null,
+					'status' => $check,
+				]);
+			}
+		}
+
+		return [
+			'tables' => $data->toArray(),
+			'unavailable' => $unavailable,
+			'available' => $available,
+		];
 	}
 }

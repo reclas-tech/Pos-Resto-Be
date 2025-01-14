@@ -6,18 +6,19 @@ use App\Http\Controllers\Authentication\ProfileEmployeeController;
 use App\Http\Controllers\Authentication\LogoutEmployeeController;
 use App\Http\Controllers\Authentication\LoginEmployeeController;
 use App\Http\Controllers\Authentication\PasswordAdminController;
+use App\Http\Controllers\Table\TableListWithConditionController;
 use App\Http\Controllers\Authentication\ProfileAdminController;
 use App\Http\Controllers\Authentication\LogoutAdminController;
 use App\Http\Controllers\Authentication\LoginAdminController;
 use App\Http\Controllers\Category\CategoryCreateController;
 use App\Http\Controllers\Category\CategoryDeleteController;
 use App\Http\Controllers\Category\CategoryGetOneController;
-use App\Http\Controllers\Category\CategoryListController;
 use App\Http\Controllers\Category\CategoryUpdateController;
 use App\Http\Controllers\Employee\EmployeeCreateController;
 use App\Http\Controllers\Employee\EmployeeDeleteController;
 use App\Http\Controllers\Employee\EmployeeGetOneController;
 use App\Http\Controllers\Employee\EmployeeUpdateController;
+use App\Http\Controllers\Category\CategoryListController;
 use App\Http\Controllers\Employee\EmployeeListController;
 use App\Http\Controllers\Example\ExampleCreateController;
 use App\Http\Controllers\Example\ExampleDeleteController;
@@ -28,25 +29,24 @@ use App\Http\Controllers\Kitchen\KitchenCreateController;
 use App\Http\Controllers\Kitchen\KitchenDeleteController;
 use App\Http\Controllers\Kitchen\KitchenGetAllController;
 use App\Http\Controllers\Kitchen\KitchenGetOneController;
-use App\Http\Controllers\Kitchen\KitchenListController;
 use App\Http\Controllers\Kitchen\KitchenUpdateController;
-use App\Http\Controllers\Order\OrderCreateController;
-use App\Http\Controllers\Packet\PacketCreateController;
-use App\Http\Controllers\Packet\PacketDeleteController;
-use App\Http\Controllers\Packet\PacketGetOneController;
-use App\Http\Controllers\Packet\PacketListController;
-use App\Http\Controllers\Packet\PacketUpdateController;
 use App\Http\Controllers\Product\ProductCreateController;
 use App\Http\Controllers\Product\ProductDeleteController;
 use App\Http\Controllers\Product\ProductGetOneController;
-use App\Http\Controllers\Product\ProductListController;
 use App\Http\Controllers\Product\ProductUpdateController;
+use App\Http\Controllers\Kitchen\KitchenListController;
+use App\Http\Controllers\Product\ProductListController;
+use App\Http\Controllers\Packet\PacketCreateController;
+use App\Http\Controllers\Packet\PacketDeleteController;
+use App\Http\Controllers\Packet\PacketGetOneController;
+use App\Http\Controllers\Packet\PacketUpdateController;
+use App\Http\Controllers\Packet\PacketListController;
+use App\Http\Controllers\Order\OrderCreateController;
 use App\Http\Controllers\Table\TableCreateController;
 use App\Http\Controllers\Table\TableDeleteController;
 use App\Http\Controllers\Table\TableGetOneController;
-use App\Http\Controllers\Table\TableListController;
 use App\Http\Controllers\Table\TableUpdateController;
-use App\Models\Packet;
+use App\Http\Controllers\Table\TableListController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('example')->group(function (): void {
@@ -134,6 +134,10 @@ Route::prefix('v1')->group(function (): void {
 			Route::get('detail/{id}', [TableGetOneController::class, 'action']);
 			Route::put('edit/{id}', [TableUpdateController::class, 'action']);
 			Route::delete('delete/{id}', [TableDeleteController::class, 'action']);
+		});
+		// EMPLOYEE
+		Route::prefix('employee')->middleware('api-employee')->group(function (): void {
+			Route::get('list', [TableListWithConditionController::class, 'action']);
 		});
 	});
 
