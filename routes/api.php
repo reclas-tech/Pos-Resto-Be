@@ -7,6 +7,7 @@ use App\Http\Controllers\Authentication\LogoutEmployeeController;
 use App\Http\Controllers\Authentication\LoginEmployeeController;
 use App\Http\Controllers\Authentication\PasswordAdminController;
 use App\Http\Controllers\Category\CategoryGetAllController;
+use App\Http\Controllers\Packet\PacketGetAllController;
 use App\Http\Controllers\Product\ProductGetAllController;
 use App\Http\Controllers\Table\TableListWithConditionController;
 use App\Http\Controllers\Authentication\ProfileAdminController;
@@ -104,6 +105,13 @@ Route::prefix('v1')->group(function (): void {
 		// Waiter
 		Route::prefix('waiter')->middleware(['jwt', 'employee:waiter'])->group(function (): void {
 			Route::get('all', [ProductGetAllController::class, 'action']);
+		});
+	});
+
+	//Packet
+	Route::prefix('packet')->middleware(['jwt', 'employee:waiter'])->group(function (): void {
+		Route::prefix('waiter')->group(function (): void {
+			Route::get('all', [PacketGetAllController::class, 'action']);
 		});
 	});
 
