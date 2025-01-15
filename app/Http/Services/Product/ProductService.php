@@ -93,9 +93,9 @@ class ProductService extends Service
 			$query->where('category_id', $category);
 		}
 
-		$kitchen = $query->get();
+		$product = $query->get();
 
-        return $kitchen;
+        return $product;
 	}
 
 	/**
