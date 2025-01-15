@@ -7,6 +7,7 @@ use App\Http\Controllers\Authentication\LogoutEmployeeController;
 use App\Http\Controllers\Authentication\LoginEmployeeController;
 use App\Http\Controllers\Authentication\PasswordAdminController;
 use App\Http\Controllers\Category\CategoryGetAllController;
+use App\Http\Controllers\Product\ProductGetAllController;
 use App\Http\Controllers\Table\TableListWithConditionController;
 use App\Http\Controllers\Authentication\ProfileAdminController;
 use App\Http\Controllers\Authentication\LogoutAdminController;
@@ -99,6 +100,11 @@ Route::prefix('v1')->group(function (): void {
 				Route::delete('delete/{id}', [PacketDeleteController::class, 'action']);
 			});
 		});
+
+		// Waiter
+		Route::prefix('waiter')->middleware(['jwt', 'employee:waiter'])->group(function (): void {
+			Route::get('all', [ProductGetAllController::class, 'action']);
+		});
 	});
 
 	// Kitchen
@@ -124,7 +130,7 @@ Route::prefix('v1')->group(function (): void {
 			Route::put('edit/{id}', [CategoryUpdateController::class, 'action']);
 			Route::delete('delete/{id}', [CategoryDeleteController::class, 'action']);
 		});
-		// ADMIN
+		// Waiter
 		Route::prefix('waiter')->middleware(['jwt', 'employee:waiter'])->group(function (): void {
 			Route::get('all', [CategoryGetAllController::class, 'action']);
 		});
