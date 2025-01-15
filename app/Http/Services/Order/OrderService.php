@@ -133,4 +133,38 @@ class OrderService extends Service
 			return $e;
 		}
 	}
+
+	/**
+	 * @param string|null $status
+	 * 
+	 * @return array
+	 */
+	public function takeAwayList(string|null $status = null): array
+	{
+		$invoices = Invoice::query()
+			->whereDate('created_at', Carbon::now())
+			->where('type', Invoice::TAKE_AWAY);
+
+		if ($status) {
+			if ($status === 'belum bayar') {
+				$invoices->whereNull('payment');
+			} else {
+				$invoices->whereNotNull('payment');
+			}
+		}
+
+		return $invoices->latest()->get()->map(function (Invoice $invoice): array {
+			return [
+				...$invoice->only([
+					'id',
+					'code',
+					'customer',
+					'created_at',
+				]),
+				'item_count' => $invoice->products->sum('quantity') + $invoice->packets->sum('quantity'),
+				'status' => $invoice->payment !== null ? 'sudah bayar' : 'belum bayar',
+				'price' => $invoice->price_sum,
+			];
+		})->toArray();
+	}
 }
