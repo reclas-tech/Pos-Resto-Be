@@ -6,6 +6,7 @@ use App\Http\Controllers\Authentication\ProfileEmployeeController;
 use App\Http\Controllers\Authentication\LogoutEmployeeController;
 use App\Http\Controllers\Authentication\LoginEmployeeController;
 use App\Http\Controllers\Authentication\PasswordAdminController;
+use App\Http\Controllers\Category\CategoryGetAllController;
 use App\Http\Controllers\Table\TableListWithConditionController;
 use App\Http\Controllers\Authentication\ProfileAdminController;
 use App\Http\Controllers\Authentication\LogoutAdminController;
@@ -122,6 +123,10 @@ Route::prefix('v1')->group(function (): void {
 			Route::get('detail/{id}', [CategoryGetOneController::class, 'action']);
 			Route::put('edit/{id}', [CategoryUpdateController::class, 'action']);
 			Route::delete('delete/{id}', [CategoryDeleteController::class, 'action']);
+		});
+		// ADMIN
+		Route::prefix('waiter')->middleware(['jwt', 'employee:waiter'])->group(function (): void {
+			Route::get('all', [CategoryGetAllController::class, 'action']);
 		});
 	});
 
