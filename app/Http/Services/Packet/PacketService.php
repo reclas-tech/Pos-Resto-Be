@@ -4,7 +4,6 @@ namespace App\Http\Services\Packet;
 
 use App\Models\Packet;
 use App\Models\PacketProduct;
-use App\Models\Product;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -13,7 +12,7 @@ use Exception;
 
 class PacketService extends Service
 {
-    protected $limit = 10;
+	protected $limit = 10;
 
 	/**
 	 * @param string $name
@@ -32,12 +31,12 @@ class PacketService extends Service
 		try {
 
 			$packet = new Packet([
-                'name' => $name,
-                'price' => $price,
-                'stock' => $stock,
-                'cogp' => $cogp,
-                'image' => $image,
-            ]);
+				'name' => $name,
+				'price' => $price,
+				'stock' => $stock,
+				'cogp' => $cogp,
+				'image' => $image,
+			]);
 
 			$packet->save();
 
@@ -49,7 +48,7 @@ class PacketService extends Service
 				]);
 
 				$packetProduct->save();
-            }
+			}
 
 			DB::commit();
 
@@ -64,32 +63,49 @@ class PacketService extends Service
 	/**
 	 * @param string|null $search
 	 * @param int|null $limit
-     * 
+	 * 
 	 * 
 	 * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
 	 */
-    public function list(string|null $search = null, int|null $limit = null): LengthAwarePaginator
+	public function list(string|null $search = null, int|null $limit = null): LengthAwarePaginator
 	{
 		$packet = Packet::query();
 
-        if ($search) {
-            $packet->where('name', 'like', '%' . $search . '%');
-        }
+		if ($search) {
+			$packet->where('name', 'like', '%' . $search . '%');
+		}
 
-        return $packet->paginate($limit ?? $this->limit);
+		return $packet->paginate($limit ?? $this->limit);
 
 	}
 
 	/**
-     * 
+	 * @param  string|null $search
 	 * 
 	 * @return \Illuminate\Database\Eloquent\Collection
 	 */
-    public function getAll(): Collection
+	public function getAll(string|null $search = null): Collection
 	{
-		$kitchen = Product::all();
+		if ($search == null) {
+			return Packet::with([
+				'products' => function ($query) {
+					$query->select(['id', 'quantity', 'product_id', 'packet_id'])->with([
+						'product' => function ($query) {
+							$query->select(['id', 'name']); }
+					]);
+				}
+			])->get();
+		}
 
-        return $kitchen;
+		$query = Packet::query()->with('products');
+
+		if ($search) {
+			$query->where('name', 'like', '%' . $search . '%');
+		}
+
+		$packet = $query->get();
+
+		return $packet;
 	}
 
 	/**
@@ -117,7 +133,7 @@ class PacketService extends Service
 	}
 
 	/**
-     * @param \App\Models\Packet $packet
+	 * @param \App\Models\Packet $packet
 	 * @param string $name
 	 * @param int $price
 	 * @param int $stock
@@ -131,11 +147,11 @@ class PacketService extends Service
 	{
 		DB::beginTransaction();
 
-        $packet->name = $name;
-        $packet->price = $price;
-        $packet->stock = $stock;
-        $packet->cogp = $cogp;
-        $packet->image = $image;
+		$packet->name = $name;
+		$packet->price = $price;
+		$packet->stock = $stock;
+		$packet->cogp = $cogp;
+		$packet->image = $image;
 		$packet->save();
 
 		try {
@@ -150,13 +166,13 @@ class PacketService extends Service
 				]);
 
 				$packetProduct->save();
-            }
+			}
 
 		} catch (Exception $e) {
 
 			DB::rollBack();
 			throw $e;
-			
+
 		}
 
 		DB::commit();
@@ -164,15 +180,15 @@ class PacketService extends Service
 	}
 
 	/**
-     * @param \App\Models\Packet $packet
+	 * @param \App\Models\Packet $packet
 	 * 
 	 * @return bool|null
 	 */
 	public function delete(Packet $packet): bool|null
 	{
-		if($packet->invoice()->exists()) {
+		if ($packet->invoice()->exists()) {
 			return $packet->delete();
-		}	
+		}
 		$packet->products()->forceDelete();
 		return $packet->forceDelete();
 	}
