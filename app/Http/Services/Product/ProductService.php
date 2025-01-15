@@ -71,15 +71,31 @@ class ProductService extends Service
 	}
 
 	/**
-     * 
+	 * @param  string|null $search
+	 * @param  string|null $category
 	 * 
 	 * @return \Illuminate\Database\Eloquent\Collection
 	 */
-    public function getAll(): Collection
+	public function getAll(string|null $search = null, string|null $category=null): Collection
 	{
-		$kitchen = Product::all();
+		
+		if($search == null && $category == null) {
+			return Product::all();
+		}
+		
+		$query = Product::query();
+		
+		if ($search) {
+			$query->where('name', 'like', '%' . $search . '%');
+		}
 
-        return $kitchen;
+		if ($category) {
+			$query->where('category_id', $category);
+		}
+
+		$product = $query->get();
+
+        return $product;
 	}
 
 	/**

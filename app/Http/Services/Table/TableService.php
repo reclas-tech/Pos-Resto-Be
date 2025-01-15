@@ -55,13 +55,35 @@ class TableService extends Service
 	 */
 	public function list(string|null $search = null, int|null $limit = null): LengthAwarePaginator
 	{
-		$table = Table::query();
+		$query = Table::query();
 
 		if ($search) {
-			$table->where('name', 'like', '%' . $search . '%');
+			$query->where('name', 'like', '%' . $search . '%');
 		}
 
-		return $table->paginate($limit ?? $this->limit);
+		$table = $query->paginate($limit ?? $this->limit);
+
+		$table->getCollection()->transform(function ($item) {
+			$check = $item->invoices()->whereHas('invoice', function (Builder $query): void {
+				$query->where('status', Invoice::PENDING);
+			})->exists();
+
+			if ($check) {
+				$check = 'terisi';
+			} else {
+				$check = 'tersedia';
+			}
+			$item->status = $check;
+			return $item->only([
+				'id',
+				'name',
+				'capacity',
+				'location',
+				'status'
+			]);
+		});
+
+		return $table;
 
 	}
 
