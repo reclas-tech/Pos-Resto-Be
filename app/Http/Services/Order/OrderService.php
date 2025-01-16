@@ -2,7 +2,9 @@
 
 namespace App\Http\Services\Order;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Carbon;
 use App\Http\Services\Service;
 use App\Models\Invoice;
@@ -13,6 +15,48 @@ use Exception;
 
 class OrderService extends Service
 {
+
+	/**
+	 * @param \Illuminate\Support\Collection $invoices
+	 * @param \Illuminate\Support\Collection $tables
+	 * 
+	 * @return mixed
+	 */
+	private function getRelatedOrder(Collection $invoices, Collection $tables, Carbon $currentDate): array
+	{
+		$invoiceCount = $invoices->count();
+		$tableCount = $tables->count();
+
+		foreach ($invoices as $invoice) {
+			foreach ($invoice->tables ?? [] as $invoiceTable) {
+				$temp = Invoice::whereDate('created_at', $currentDate)
+					->whereNotIn('id', $invoices->pluck('id')->toArray())
+					->where('status', Invoice::PENDING)
+					->where('type', Invoice::DINE_IN)
+					->whereHas('tables', function (Builder $query) use ($invoiceTable): void {
+						$query->where('table_id', $invoiceTable->table->id);
+					})
+					->get();
+
+				if ($temp->count()) {
+					$invoices->add(...$temp);
+				}
+				if ($tables->firstWhere('id', $invoiceTable->table->id) === null) {
+					$tables->add($invoiceTable->table);
+				}
+			}
+		}
+
+		if ($invoices->count() !== $invoiceCount || $tables->count() !== $tableCount) {
+			return $this->getRelatedOrder($invoices, $tables, $currentDate);
+		}
+
+		return [
+			'invoices' => $invoices,
+			'tables' => $tables,
+		];
+	}
+
 	/**
 	 * @param string $customer
 	 * @param string $type
@@ -166,5 +210,76 @@ class OrderService extends Service
 				'price' => $invoice->price_sum,
 			];
 		})->toArray();
+	}
+
+	/**
+	 * @param string $id
+	 * 
+	 * @return array|null
+	 */
+	public function detail(string $id): array|null
+	{
+		$currentDate = Carbon::now();
+		$invoice = Invoice::withTrashed()
+			->whereKey($id)
+			->whereDate('created_at', $currentDate)
+			->whereNull('deleted_at')
+			->first();
+
+
+		if ($invoice) {
+			$invoices = collect();
+			$products = collect();
+			$packets = collect();
+			$tables = collect();
+
+			$invoices->add($invoice);
+
+			if ($invoice->type === Invoice::DINE_IN && $invoice->status === Invoice::PENDING) {
+				$result = $this->getRelatedOrder($invoices, $tables, $currentDate);
+
+				$invoices = $result['invoices'];
+				$tables = $result['tables'];
+			}
+
+			foreach ($invoices as $item) {
+				foreach ($item->products ?? [] as $key => $invoiceProduct) {
+					$products->add([
+						'id' => $invoiceProduct->id,
+						'quantity' => $invoiceProduct->quantity,
+						'price_sum' => $invoiceProduct->price_sum,
+						'name' => $invoiceProduct?->product?->name ?? '',
+						'price' => $invoiceProduct?->product?->price ?? '',
+					]);
+				}
+				foreach ($item->packets ?? [] as $key => $invoicePacket) {
+					$packets->add([
+						'id' => $invoicePacket->id,
+						'quantity' => $invoicePacket->quantity,
+						'price_sum' => $invoicePacket->price_sum,
+						'name' => $invoicePacket?->packet?->name ?? '',
+						'price' => $invoicePacket?->packet?->price ?? '',
+					]);
+				}
+			}
+
+			return [
+				...$invoice->only([
+					'id',
+					'tax',
+					'type',
+					'customer',
+				]),
+				'price_sum' => $invoices->sum('price_sum'),
+				'price' => $invoices->sum('price_item'),
+				'cashier' => $invoice->cashier?->name ?? '',
+				'codes' => $invoices->pluck('code'),
+				'tables' => $tables->pluck('name'),
+				'products' => $products->toArray(),
+				'packets' => $packets->toArray(),
+			];
+		}
+
+		return null;
 	}
 }
