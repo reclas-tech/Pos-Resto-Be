@@ -334,4 +334,50 @@ class OrderService extends Service
 
 		return null;
 	}
+
+	/**
+	 * @param string|null $search
+	 * @param string|null $invoice
+	 * @param string|null $price
+	 * @param string|null $time
+	 * 
+	 * @return \Illuminate\Support\Collection
+	 */
+	public function historyList(string|null $search, string|null $invoice, string|null $price, string|null $time): Collection
+	{
+		$currentDate = Carbon::now();
+
+		$invoices = Invoice::query()->whereDate('created_at', $currentDate);
+
+		if ($invoice) {
+			$invoices->orderBy('code', $invoice);
+		}
+		if ($price) {
+			$invoices->orderBy('price_sum', $price);
+		}
+		if ($time) {
+			$invoices->orderBy('created_at', $time);
+		}
+
+		if ($search !== null) {
+			$invoices->whereAny(
+				[
+					'customer',
+					'code',
+				],
+				'LIKE',
+				"%$search%"
+			);
+		}
+
+		return $invoices->get([
+			"id",
+			"code",
+			"type",
+			"status",
+			"customer",
+			"price_sum",
+			"created_at",
+		]);
+	}
 }

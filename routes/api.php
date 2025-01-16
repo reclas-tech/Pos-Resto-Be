@@ -48,6 +48,7 @@ use App\Http\Controllers\Order\OrderPaymentController;
 use App\Http\Controllers\Packet\PacketListController;
 use App\Http\Controllers\Order\OrderCreateController;
 use App\Http\Controllers\Order\OrderDetailController;
+use App\Http\Controllers\Order\OrderHistoryListController;
 use App\Http\Controllers\Table\TableCreateController;
 use App\Http\Controllers\Table\TableDeleteController;
 use App\Http\Controllers\Table\TableGetOneController;
@@ -177,6 +178,10 @@ Route::prefix('v1')->group(function (): void {
 
 	// Order
 	Route::prefix('order')->group(function (): void {
+		// EMPLOYEE
+		Route::prefix('employee')->middleware('api-employee')->group(function (): void {
+			Route::get('history/list', [OrderHistoryListController::class, 'action']);
+		});
 		// CASHIER
 		Route::prefix('cashier')->middleware(['jwt', 'employee:cashier'])->group(function (): void {
 			Route::get('take-away/list', [OrderTakeAwayListController::class, 'action']);
