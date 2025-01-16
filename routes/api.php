@@ -10,6 +10,7 @@ use App\Http\Controllers\Table\TableListWithConditionController;
 use App\Http\Controllers\Authentication\ProfileAdminController;
 use App\Http\Controllers\Authentication\LogoutAdminController;
 use App\Http\Controllers\Authentication\LoginAdminController;
+use App\Http\Controllers\Order\OrderHistoryDetailController;
 use App\Http\Controllers\Category\CategoryCreateController;
 use App\Http\Controllers\Category\CategoryDeleteController;
 use App\Http\Controllers\Category\CategoryGetAllController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\Employee\EmployeeDeleteController;
 use App\Http\Controllers\Employee\EmployeeGetOneController;
 use App\Http\Controllers\Employee\EmployeeUpdateController;
 use App\Http\Controllers\Order\OrderTakeAwayListController;
+use App\Http\Controllers\Order\OrderHistoryListController;
 use App\Http\Controllers\Category\CategoryListController;
 use App\Http\Controllers\Employee\EmployeeListController;
 use App\Http\Controllers\Example\ExampleCreateController;
@@ -48,7 +50,6 @@ use App\Http\Controllers\Order\OrderPaymentController;
 use App\Http\Controllers\Packet\PacketListController;
 use App\Http\Controllers\Order\OrderCreateController;
 use App\Http\Controllers\Order\OrderDetailController;
-use App\Http\Controllers\Order\OrderHistoryListController;
 use App\Http\Controllers\Table\TableCreateController;
 use App\Http\Controllers\Table\TableDeleteController;
 use App\Http\Controllers\Table\TableGetOneController;
@@ -181,6 +182,7 @@ Route::prefix('v1')->group(function (): void {
 		// EMPLOYEE
 		Route::prefix('employee')->middleware('api-employee')->group(function (): void {
 			Route::get('history/list', [OrderHistoryListController::class, 'action']);
+			Route::get('history/detail/{invoiceId}', [OrderHistoryDetailController::class, 'action']);
 		});
 		// CASHIER
 		Route::prefix('cashier')->middleware(['jwt', 'employee:cashier'])->group(function (): void {
