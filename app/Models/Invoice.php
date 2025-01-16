@@ -57,9 +57,9 @@ class Invoice extends Model
         self::SUCCESS,
         self::CANCEL,
     ];
-    public const PENDING = 'debit';
-    public const SUCCESS = 'qris';
-    public const CANCEL = 'cash';
+    public const PENDING = 'pending';
+    public const SUCCESS = 'success';
+    public const CANCEL = 'cancel';
 
     public const PAYMENT = [
         self::DEBIT,
