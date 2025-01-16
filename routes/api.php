@@ -44,6 +44,7 @@ use App\Http\Controllers\Packet\PacketDeleteController;
 use App\Http\Controllers\Packet\PacketGetAllController;
 use App\Http\Controllers\Packet\PacketGetOneController;
 use App\Http\Controllers\Packet\PacketUpdateController;
+use App\Http\Controllers\Order\OrderPaymentController;
 use App\Http\Controllers\Packet\PacketListController;
 use App\Http\Controllers\Order\OrderCreateController;
 use App\Http\Controllers\Order\OrderDetailController;
@@ -180,6 +181,7 @@ Route::prefix('v1')->group(function (): void {
 		Route::prefix('cashier')->middleware(['jwt', 'employee:cashier'])->group(function (): void {
 			Route::get('take-away/list', [OrderTakeAwayListController::class, 'action']);
 			Route::get('detail/{invoiceId}', [OrderDetailController::class, 'action']);
+			Route::post('payment/{invoiceId}', [OrderPaymentController::class, 'action']);
 		});
 		// WAITER
 		Route::prefix('waiter')->middleware(['jwt', 'employee:waiter'])->group(function (): void {

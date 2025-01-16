@@ -282,4 +282,56 @@ class OrderService extends Service
 
 		return null;
 	}
+
+	/**
+	 * @param string $id
+	 * @param string $method
+	 * 
+	 * @return bool|\Exception|null
+	 */
+	public function payment(string $id, string $method): bool|Exception|null
+	{
+		$currentDate = Carbon::now();
+		$invoice = Invoice::withTrashed()
+			->whereKey($id)
+			->whereDate('created_at', $currentDate)
+			->where('status', Invoice::PENDING)
+			->whereNull('deleted_at')
+			->first();
+
+		if ($invoice) {
+			$invoices = collect();
+
+			$invoices->add($invoice);
+
+			if ($invoice->type === Invoice::DINE_IN) {
+				$result = $this->getRelatedOrder($invoices, collect(), $currentDate);
+
+				$invoices = $result['invoices'];
+			}
+
+			DB::beginTransaction();
+
+			try {
+				foreach ($invoices as $item) {
+					$item->update([
+						'status' => Invoice::SUCCESS,
+						'payment' => $method,
+
+						'cashier_id' => auth('api-employee')->id(),
+					]);
+				}
+
+				DB::commit();
+
+				return true;
+			} catch (Exception $e) {
+				DB::rollBack();
+
+				return $e;
+			}
+		}
+
+		return null;
+	}
 }
