@@ -16,34 +16,18 @@ class PacketSeeder extends Seeder
     {
         $products = Product::all();
 
-        $data = [
-            [
-                'name' => 'Paket 1',
-                'image' => 'paket-1.jpg',
-                'price' => 12000,
-                'stock' => 3,
-                'cogp' => 9500,
-            ],
-            [
-                'name' => 'Paket 2',
-                'image' => 'paket-2.jpg',
-                'price' => 15000,
-                'stock' => 3,
-                'cogp' => 13000,
-            ],
-            [
-                'name' => 'Paket 3',
-                'image' => 'paket-3.jpg',
-                'price' => 9000,
-                'stock' => 3,
-                'cogp' => 8500,
-            ],
-        ];
+        for ($i = 1; $i <= 5; $i++) {
+            $price = fake()->numberBetween(5, 30) * 1000;
 
-        foreach ($data as $key => $item) {
-            $packet = Packet::create($item);
+            $packet = Packet::create([
+                'cogp' => $price - fake()->randomElement([1000, 2000, 3000]),
+                'image' => "paket-$i.jpg",
+                'name' => "Paket $i",
+                'price' => $price,
+                'stock' => 10,
+            ]);
 
-            foreach ($products as $product) {
+            foreach ($products->random(fake()->numberBetween(2, 10)) as $product) {
                 $packet->products()->create([
                     'quantity' => fake()->randomNumber(1, true) ?? 1,
 

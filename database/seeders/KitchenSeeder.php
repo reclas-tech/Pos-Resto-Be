@@ -13,20 +13,10 @@ class KitchenSeeder extends Seeder
      */
     public function run(): void
     {
-        $data = [
-            [
-                'name' => 'Dapur 1',
-            ],
-            [
-                'name' => 'Dapur 2',
-            ],
-            [
-                'name' => 'Dapur 3',
-            ],
-        ];
-
-        foreach ($data as $key => $item) {
-            Kitchen::create($item);
+        for ($i = 1; $i <= 5; $i++) {
+            Kitchen::create([
+                'name' => "Dapur $i",
+            ]);
         }
     }
 }

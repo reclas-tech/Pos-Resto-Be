@@ -13,20 +13,10 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
-        $data = [
-            [
-                'name' => 'Kategori 1',
-            ],
-            [
-                'name' => 'Kategori 2',
-            ],
-            [
-                'name' => 'Kategori 3',
-            ],
-        ];
-
-        foreach ($data as $key => $item) {
-            Category::create($item);
+        for ($i = 1; $i <= 5; $i++) {
+            Category::create([
+                'name' => "Kategori $i",
+            ]);
         }
     }
 }

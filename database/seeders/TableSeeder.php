@@ -13,21 +13,12 @@ class TableSeeder extends Seeder
      */
     public function run(): void
     {
-        $data = [
-            [
-                'name' => 'T-1',
-                'capacity' => 4,
-                'location' => Table::OUTDOOR,
-            ],
-            [
-                'name' => 'T-2',
-                'capacity' => 2,
-                'location' => Table::INDOOR,
-            ],
-        ];
-
-        foreach ($data as $key => $item) {
-            Table::create($item);
+        for ($i = 1; $i <= 20; $i++) {
+            Table::create([
+                'location' => fake()->randomElement([Table::OUTDOOR, Table::INDOOR]),
+                'capacity' => fake()->numberBetween(1, 8),
+                'name' => "T-$i",
+            ]);
         }
     }
 }
