@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,
             PacketSeeder::class,
             TableSeeder::class,
+            InvoiceSeeder::class,
         ]);
     }
 }

@@ -18,33 +18,15 @@ class ProductSeeder extends Seeder
         $category = Category::all();
         $kitchen = Kitchen::all();
 
-        $data = [
-            [
-                'name' => 'Produk 1',
-                'image' => 'produk-1.jpg',
-                'price' => 12000,
-                'stock' => 3,
-                'cogp' => 9500,
-            ],
-            [
-                'name' => 'Produk 2',
-                'image' => 'produk-2.jpg',
-                'price' => 15000,
-                'stock' => 3,
-                'cogp' => 13000,
-            ],
-            [
-                'name' => 'Produk 3',
-                'image' => 'produk-3.jpg',
-                'price' => 9000,
-                'stock' => 3,
-                'cogp' => 8500,
-            ],
-        ];
+        for ($i = 1; $i <= 20; $i++) {
+            $price = fake()->numberBetween(5, 30) * 1000;
 
-        foreach ($data as $key => $item) {
             Product::create([
-                ...$item,
+                'cogp' => $price - fake()->randomElement([1000, 2000, 3000]),
+                'image' => "produk-$i.jpg",
+                'name' => "Produk $i",
+                'price' => $price,
+                'stock' => 15,
 
                 'category_id' => $category->random()->id,
                 'kitchen_id' => $kitchen->random()->id,
