@@ -101,7 +101,7 @@ return [
     |
     */
 
-    'ttl' => (float) env('JWT_TTL', 1),
+    'ttl' => is_numeric(env('JWT_TTL', 1)) ? (float) env('JWT_TTL', 1) : 1,
 
     /*
     |--------------------------------------------------------------------------
@@ -120,7 +120,7 @@ return [
     |
     */
 
-    'refresh_ttl' => (float) env('JWT_REFRESH_TTL', 1440),
+    'refresh_ttl' => is_numeric(env('JWT_REFRESH_TTL', 1440)) ? (float) env('JWT_REFRESH_TTL', 1440) : 1440,
 
     /*
     |--------------------------------------------------------------------------
