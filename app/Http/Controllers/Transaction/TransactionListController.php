@@ -13,11 +13,11 @@ class TransactionListController extends BaseController
         $search = $request->query('search');
         $limit = $request->query('limit');
 
-        $employees = $this->transactionService->list($search, $limit);
+        $transactions = $this->transactionService->list($search, $limit);
 
         return Response::SetAndGet(message: 'Berhasil mendapatkan daftar transaksi', data: [
-            'pagination' => collect($employees->toArray())->except('data'),
-            'items' => $employees->items(),
+            'pagination' => collect($transactions->toArray())->except('data'),
+            'items' => $transactions->items(),
         ]);
     }
 }

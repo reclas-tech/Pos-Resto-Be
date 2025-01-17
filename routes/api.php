@@ -4,6 +4,7 @@ use App\Http\Controllers\Authentication\RefreshAccessTokenEmployeeController;
 use App\Http\Controllers\Authentication\RefreshAccessTokenAdminController;
 use App\Http\Controllers\Authentication\ProfileEmployeeController;
 use App\Http\Controllers\Authentication\LogoutEmployeeController;
+use App\Http\Controllers\Transaction\TransactionDetailController;
 use App\Http\Controllers\Authentication\LoginEmployeeController;
 use App\Http\Controllers\Authentication\PasswordAdminController;
 use App\Http\Controllers\Table\TableListWithConditionController;
@@ -204,6 +205,7 @@ Route::prefix('v1')->group(function (): void {
 		// ADMIN
 		Route::prefix('admin')->middleware('api-admin')->group(function (): void {
 			Route::get('list', [TransactionListController::class, 'action']);
+			Route::get('detail/{invoiceId}', [TransactionDetailController::class, 'action']);
 		});
 	});
 });
