@@ -6,21 +6,22 @@ use App\Http\Controllers\Authentication\ProfileEmployeeController;
 use App\Http\Controllers\Authentication\LogoutEmployeeController;
 use App\Http\Controllers\Authentication\LoginEmployeeController;
 use App\Http\Controllers\Authentication\PasswordAdminController;
-use App\Http\Controllers\Category\CategoryGetAllController;
-use App\Http\Controllers\Packet\PacketGetAllController;
-use App\Http\Controllers\Product\ProductGetAllController;
 use App\Http\Controllers\Table\TableListWithConditionController;
 use App\Http\Controllers\Authentication\ProfileAdminController;
 use App\Http\Controllers\Authentication\LogoutAdminController;
 use App\Http\Controllers\Authentication\LoginAdminController;
+use App\Http\Controllers\Order\OrderHistoryDetailController;
 use App\Http\Controllers\Category\CategoryCreateController;
 use App\Http\Controllers\Category\CategoryDeleteController;
+use App\Http\Controllers\Category\CategoryGetAllController;
 use App\Http\Controllers\Category\CategoryGetOneController;
 use App\Http\Controllers\Category\CategoryUpdateController;
 use App\Http\Controllers\Employee\EmployeeCreateController;
 use App\Http\Controllers\Employee\EmployeeDeleteController;
 use App\Http\Controllers\Employee\EmployeeGetOneController;
 use App\Http\Controllers\Employee\EmployeeUpdateController;
+use App\Http\Controllers\Order\OrderTakeAwayListController;
+use App\Http\Controllers\Order\OrderHistoryListController;
 use App\Http\Controllers\Category\CategoryListController;
 use App\Http\Controllers\Employee\EmployeeListController;
 use App\Http\Controllers\Example\ExampleCreateController;
@@ -35,16 +36,21 @@ use App\Http\Controllers\Kitchen\KitchenGetOneController;
 use App\Http\Controllers\Kitchen\KitchenUpdateController;
 use App\Http\Controllers\Product\ProductCreateController;
 use App\Http\Controllers\Product\ProductDeleteController;
+use App\Http\Controllers\Product\ProductGetAllController;
 use App\Http\Controllers\Product\ProductGetOneController;
 use App\Http\Controllers\Product\ProductUpdateController;
 use App\Http\Controllers\Kitchen\KitchenListController;
 use App\Http\Controllers\Product\ProductListController;
 use App\Http\Controllers\Packet\PacketCreateController;
 use App\Http\Controllers\Packet\PacketDeleteController;
+use App\Http\Controllers\Packet\PacketGetAllController;
 use App\Http\Controllers\Packet\PacketGetOneController;
 use App\Http\Controllers\Packet\PacketUpdateController;
+use App\Http\Controllers\Order\OrderPaymentController;
 use App\Http\Controllers\Packet\PacketListController;
 use App\Http\Controllers\Order\OrderCreateController;
+use App\Http\Controllers\Order\OrderDetailController;
+use App\Http\Controllers\Order\OrderUpdateController;
 use App\Http\Controllers\Table\TableCreateController;
 use App\Http\Controllers\Table\TableDeleteController;
 use App\Http\Controllers\Table\TableGetOneController;
@@ -174,6 +180,18 @@ Route::prefix('v1')->group(function (): void {
 
 	// Order
 	Route::prefix('order')->group(function (): void {
+		// EMPLOYEE
+		Route::prefix('employee')->middleware('api-employee')->group(function (): void {
+			Route::get('history/list', [OrderHistoryListController::class, 'action']);
+			Route::get('history/detail/{invoiceId}', [OrderHistoryDetailController::class, 'action']);
+			Route::put('history/update/{invoiceId}', [OrderUpdateController::class, 'action']);
+		});
+		// CASHIER
+		Route::prefix('cashier')->middleware(['jwt', 'employee:cashier'])->group(function (): void {
+			Route::get('take-away/list', [OrderTakeAwayListController::class, 'action']);
+			Route::get('detail/{invoiceId}', [OrderDetailController::class, 'action']);
+			Route::post('payment/{invoiceId}', [OrderPaymentController::class, 'action']);
+		});
 		// WAITER
 		Route::prefix('waiter')->middleware(['jwt', 'employee:waiter'])->group(function (): void {
 			Route::post('create', [OrderCreateController::class, 'action']);

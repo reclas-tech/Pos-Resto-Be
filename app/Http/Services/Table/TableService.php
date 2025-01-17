@@ -6,6 +6,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 use App\Http\Services\Service;
 use App\Models\Invoice;
 use App\Models\Table;
@@ -154,9 +155,12 @@ class TableService extends Service
 		$unavailable = 0;
 		$available = 0;
 		foreach ($tables as $table) {
-			$check = $table->invoices()->whereHas('invoice', function (Builder $query): void {
-				$query->where('status', Invoice::PENDING);
-			})->exists();
+			$check = $table->invoices()
+				->whereDate('created_at', Carbon::now())
+				->whereHas('invoice', function (Builder $query): void {
+					$query->where('status', Invoice::PENDING);
+				})
+				->exists();
 
 			if ($check) {
 				$check = 'terisi';
