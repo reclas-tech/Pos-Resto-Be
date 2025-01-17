@@ -7,10 +7,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Carbon;
 use App\Http\Services\Service;
-use App\Models\Invoice;
-use App\Models\InvoicePacket;
 use App\Models\InvoiceProduct;
+use App\Models\InvoicePacket;
 use App\Models\InvoiceTable;
+use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Packet;
 use App\Models\Table;
@@ -350,7 +350,7 @@ class OrderService extends Service
 	{
 		$currentDate = Carbon::now();
 
-		$invoices = Invoice::query()->whereDate('created_at', $currentDate);
+		$invoices = Invoice::withTrashed()->whereDate('created_at', $currentDate);
 
 		if ($invoice) {
 			$invoices->orderBy('code', $invoice);
@@ -428,6 +428,137 @@ class OrderService extends Service
 				}),
 				'cashier' => $invoice?->cashier?->name ?? '',
 			];
+		}
+
+		return null;
+	}
+
+	/**
+	 * @param string $id
+	 * @param array|null $products
+	 * @param array|null $packets
+	 * @param string|null $pin
+	 * 
+	 * @return array|bool|\Exception|null
+	 */
+	public function update(string $id, array|null $products, array|null $packets, string|null $pin): array|bool|Exception|null
+	{
+		$employee = auth('api-employee')->user();
+		$currentDate = Carbon::now();
+
+		$invoice = Invoice::whereKey($id)
+			->whereDate('created_at', $currentDate)
+			->where('status', Invoice::PENDING)
+			->first();
+
+		if ($invoice) {
+			if ($pin !== null) {
+				if ($employee->pin === $pin) {
+					DB::beginTransaction();
+
+					try {
+						$invoice->update([
+							'updated_by' => $employee->id,
+							'status' => Invoice::CANCEL,
+						]);
+						$invoice->delete();
+
+						DB::commit();
+
+						return true;
+					} catch (Exception $e) {
+						DB::rollBack();
+
+						return $e;
+					}
+				}
+				return [
+					[
+						'message' => 'PIN tidak valid',
+						'property' => 'pin',
+					]
+				];
+			}
+
+			DB::beginTransaction();
+
+			try {
+				if (is_array($products)) {
+					foreach ($products as $product) {
+						if (isset($product['id'], $product['quantity']) && is_numeric($product['quantity']) && is_integer($product['quantity'])) {
+							$invoiceProduct = $invoice->products()->find($product['id']);
+							if ($invoiceProduct !== null) {
+								$quantity = (int) $product['quantity'];
+								if ($quantity > 0 && $quantity < $invoiceProduct->quantity) {
+									$price = (int) ($invoiceProduct->price_sum / $invoiceProduct->quantity);
+									$profit = (int) ($invoiceProduct->profit / $invoiceProduct->quantity);
+
+									$invoiceProduct->price_sum = $price * $quantity;
+									$invoiceProduct->profit = $profit * $quantity;
+									$invoiceProduct->quantity = $quantity;
+
+									$invoiceProduct->updated_by = $employee->id;
+
+									$invoiceProduct->save();
+								} else if ($quantity === 0) {
+									$invoiceProduct->forceDelete();
+								}
+							}
+						}
+					}
+				}
+				if (is_array($packets)) {
+					foreach ($packets as $packet) {
+						if (isset($packet['id'], $packet['quantity']) && is_numeric($packet['quantity']) && is_integer($packet['quantity'])) {
+							$invoicePacket = $invoice->packets()->find($packet['id']);
+							if ($invoicePacket !== null) {
+								$quantity = (int) $packet['quantity'];
+								if ($quantity > 0 && $quantity < $invoicePacket->quantity) {
+									$price = (int) ($invoicePacket->price_sum / $invoicePacket->quantity);
+									$profit = (int) ($invoicePacket->profit / $invoicePacket->quantity);
+
+									$invoicePacket->price_sum = $price * $quantity;
+									$invoicePacket->profit = $profit * $quantity;
+									$invoicePacket->quantity = $quantity;
+
+									$invoicePacket->updated_by = $employee->id;
+
+									$invoicePacket->save();
+								} else if ($quantity === 0) {
+									$invoicePacket->forceDelete();
+								}
+							}
+						}
+					}
+				}
+
+				if ($invoice->products->count() || $invoice->packets->count()) {
+					$priceItem = $invoice->products->sum('price_sum') + $invoice->packets->sum('price_sum');
+					$profit = $invoice->products->sum('profit') + $invoice->packets->sum('profit');
+
+					$invoice->updated_by = $employee->id;
+					$invoice->price_item = $priceItem;
+					$invoice->profit = $profit;
+
+					$invoice->price_sum = $priceItem + $priceItem * $invoice->tax / 100;
+
+					$invoice->save();
+				} else {
+					$invoice->update([
+						'updated_by' => $employee->id,
+						'status' => Invoice::CANCEL,
+					]);
+					$invoice->delete();
+				}
+
+				DB::commit();
+
+				return true;
+			} catch (Exception $e) {
+				DB::rollBack();
+
+				return $e;
+			}
 		}
 
 		return null;
