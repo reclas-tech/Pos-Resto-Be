@@ -4,10 +4,12 @@ use App\Http\Controllers\Authentication\RefreshAccessTokenEmployeeController;
 use App\Http\Controllers\Authentication\RefreshAccessTokenAdminController;
 use App\Http\Controllers\Authentication\ProfileEmployeeController;
 use App\Http\Controllers\Authentication\LogoutEmployeeController;
+use App\Http\Controllers\Transaction\TransactionDetailController;
 use App\Http\Controllers\Authentication\LoginEmployeeController;
 use App\Http\Controllers\Authentication\PasswordAdminController;
 use App\Http\Controllers\Table\TableListWithConditionController;
 use App\Http\Controllers\Authentication\ProfileAdminController;
+use App\Http\Controllers\Transaction\TransactionListController;
 use App\Http\Controllers\Authentication\LogoutAdminController;
 use App\Http\Controllers\Authentication\LoginAdminController;
 use App\Http\Controllers\Order\OrderHistoryDetailController;
@@ -195,6 +197,15 @@ Route::prefix('v1')->group(function (): void {
 		// WAITER
 		Route::prefix('waiter')->middleware(['jwt', 'employee:waiter'])->group(function (): void {
 			Route::post('create', [OrderCreateController::class, 'action']);
+		});
+	});
+
+	// Transaction
+	Route::prefix('transaction')->group(function (): void {
+		// ADMIN
+		Route::prefix('admin')->middleware('api-admin')->group(function (): void {
+			Route::get('list', [TransactionListController::class, 'action']);
+			Route::get('detail/{invoiceId}', [TransactionDetailController::class, 'action']);
 		});
 	});
 });
