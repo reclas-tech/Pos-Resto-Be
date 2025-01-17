@@ -4,6 +4,8 @@ use App\Http\Controllers\Authentication\RefreshAccessTokenEmployeeController;
 use App\Http\Controllers\Authentication\RefreshAccessTokenAdminController;
 use App\Http\Controllers\Authentication\ProfileEmployeeController;
 use App\Http\Controllers\Authentication\LogoutEmployeeController;
+use App\Http\Controllers\CashOnHand\CloseCashierController;
+use App\Http\Controllers\CashOnHand\OpenCashierController;
 use App\Http\Controllers\Transaction\TransactionDetailController;
 use App\Http\Controllers\Authentication\LoginEmployeeController;
 use App\Http\Controllers\Authentication\PasswordAdminController;
@@ -90,6 +92,12 @@ Route::prefix('v1')->group(function (): void {
 		});
 	});
 
+	//Cash On Hand
+	Route::prefix('cashier')->middleware(['jwt', 'employee:cashier'])->group(function (): void {
+		Route::post('open', [OpenCashierController::class, 'action']);
+		Route::post('close', [CloseCashierController::class, 'action']);
+	});
+
 	// Product
 	Route::prefix('product')->group(function (): void {
 		// ADMIN
@@ -111,7 +119,7 @@ Route::prefix('v1')->group(function (): void {
 		});
 
 		// Waiter
-		Route::prefix('waiter')->middleware(['jwt', 'employee:waiter'])->group(function (): void {
+		Route::prefix('waiter')->group(function (): void {
 			Route::get('all', [ProductGetAllController::class, 'action']);
 		});
 	});
