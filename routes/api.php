@@ -4,6 +4,10 @@ use App\Http\Controllers\Authentication\RefreshAccessTokenEmployeeController;
 use App\Http\Controllers\Authentication\RefreshAccessTokenAdminController;
 use App\Http\Controllers\Authentication\ProfileEmployeeController;
 use App\Http\Controllers\Authentication\LogoutEmployeeController;
+use App\Http\Controllers\CashOnHand\CloseCashierController;
+use App\Http\Controllers\CashOnHand\OpenCashierController;
+use App\Http\Controllers\Dashboard\KitchenIncomeController;
+use App\Http\Controllers\Dashboard\TransactionController;
 use App\Http\Controllers\Transaction\TransactionDetailController;
 use App\Http\Controllers\Dashboard\DashboardYearIncomeController;
 use App\Http\Controllers\Authentication\LoginEmployeeController;
@@ -93,6 +97,12 @@ Route::prefix('v1')->group(function (): void {
 		});
 	});
 
+	//Cash On Hand
+	Route::prefix('cashier')->middleware(['jwt', 'employee:cashier'])->group(function (): void {
+		Route::post('open', [OpenCashierController::class, 'action']);
+		Route::post('close', [CloseCashierController::class, 'action']);
+	});
+
 	// Product
 	Route::prefix('product')->group(function (): void {
 		// ADMIN
@@ -114,7 +124,7 @@ Route::prefix('v1')->group(function (): void {
 		});
 
 		// Waiter
-		Route::prefix('waiter')->middleware(['jwt', 'employee:waiter'])->group(function (): void {
+		Route::prefix('waiter')->group(function (): void {
 			Route::get('all', [ProductGetAllController::class, 'action']);
 		});
 	});
@@ -218,6 +228,8 @@ Route::prefix('v1')->group(function (): void {
 		Route::prefix('admin')->middleware('api-admin')->group(function (): void {
 			Route::get('year-income/get', [DashboardYearIncomeController::class, 'action']);
 			Route::get('summary/get', [DashboardSummaryController::class, 'action']);
+			Route::get('kitchen-income/get', [KitchenIncomeController::class, 'action']);
+			Route::get('transaction/get', [TransactionController::class, 'action']);
 		});
 	});
 

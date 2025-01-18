@@ -2,9 +2,11 @@
 
 namespace App\Http\Services\Dashboard;
 
+use App\Models\Kitchen;
 use Illuminate\Support\Carbon;
 use App\Http\Services\Service;
 use App\Models\Invoice;
+use Illuminate\Support\Collection;
 
 class DashboardService extends Service
 {
@@ -99,4 +101,59 @@ class DashboardService extends Service
 
 		return $data->toArray();
 	}
+
+	/**
+     * 
+     * 
+     * @return \Illuminate\Support\Collection
+     */
+    public function kitchenIncome(): Collection
+    {
+        $today = Carbon::now();
+        $data = collect();
+        $kitchens = Kitchen::with([
+            'products' => function ($query) use ($today) {
+                $query->withSum(['invoiceProduct as sum' => function ($query) use ($today) {
+                    $query->whereDay('created_at', $today); }], 'price_sum');
+            }
+        ])->get();
+
+        foreach ($kitchens as $kitchen) {
+            $sum = 0;
+            foreach($kitchen->products as $product) {
+                $sum += $product->sum;
+            }
+            $data->add([
+                'name' => $kitchen->name,
+                'sum' => $sum
+            ]);
+        }
+
+        return $data;
+    }
+
+	/**
+     * 
+     * 
+     * @return \Illuminate\Support\Collection
+     */
+	public function transaction(): Collection
+    {
+        $today = Carbon::now();
+        $data = collect();
+		$dine_in = Invoice::whereDate('created_at', $today)->where('type', Invoice::DINE_IN)->count();
+		$take_away = Invoice::whereDate('created_at', $today)->where('type', Invoice::TAKE_AWAY)->count();
+
+		$data->add([
+			'name' => 'Dine In',
+			'sum' => $dine_in	
+		]);
+
+		$data->add([
+			'name' => 'Take Away',
+			'sum' => $take_away
+		]);
+
+        return $data;
+    }
 }
