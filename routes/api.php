@@ -5,6 +5,7 @@ use App\Http\Controllers\Authentication\RefreshAccessTokenAdminController;
 use App\Http\Controllers\Authentication\ProfileEmployeeController;
 use App\Http\Controllers\Authentication\LogoutEmployeeController;
 use App\Http\Controllers\Transaction\TransactionDetailController;
+use App\Http\Controllers\Dashboard\DashboardYearIncomeController;
 use App\Http\Controllers\Authentication\LoginEmployeeController;
 use App\Http\Controllers\Authentication\PasswordAdminController;
 use App\Http\Controllers\Table\TableListWithConditionController;
@@ -215,6 +216,7 @@ Route::prefix('v1')->group(function (): void {
 	Route::prefix('dashboard')->group(function (): void {
 		// ADMIN
 		Route::prefix('admin')->middleware('api-admin')->group(function (): void {
+			Route::get('year-income/get', [DashboardYearIncomeController::class, 'action']);
 			Route::get('summary/get', [DashboardSummaryController::class, 'action']);
 		});
 	});

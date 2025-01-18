@@ -27,7 +27,7 @@ class DashboardService extends Service
 		$diff = $second ? $diff * 100 / $second : 0;
 
 		return [
-			'diff' => is_integer($diff) ? (int) $diff : number_format($diff, 2),
+			'diff' => is_integer($diff) ? (int) $diff : (float) number_format($diff, 2),
 			'status' => $status,
 		];
 	}
@@ -73,5 +73,30 @@ class DashboardService extends Service
 				'today' => $todayIncome,
 			],
 		];
+	}
+
+	/**
+	 * @return array
+	 */
+	public function yearIncome(): array
+	{
+		$date = Carbon::now();
+
+		$date->setMonth((int) $date->format('m') - 11);
+
+		$data = collect();
+		while (true) {
+			$data->push([
+				'value' => (int) Invoice::whereYear('created_at', $date)->whereMonth('created_at', $date)->sum('profit'),
+				'month' => $date->getTranslatedMonthName(),
+				'year' => $date->format('Y'),
+			]);
+			if ($date->format('Ym') === Carbon::now()->format('Ym')) {
+				break;
+			}
+			$date->setMonth((int) $date->format('m') + 1);
+		}
+
+		return $data->toArray();
 	}
 }
