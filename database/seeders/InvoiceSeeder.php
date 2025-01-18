@@ -41,16 +41,23 @@ class InvoiceSeeder extends Seeder
         $tempDate->setYear((int) $tempDate->format('Y') - 1);
         $tempDate->setDay(1);
 
-        while ($tempDate <= $currentDate) {
+        while (true) {
             $maxOrder = 5;
-            for ($k = 0; $k < fake()->numberBetween(1, $maxOrder); $k++) {
-                $status = fake()->randomElement([Invoice::SUCCESS, Invoice::CANCEL]);
-                if ($tempDate->format('Ymd') === $currentDate->format('Ymd')) {
-                    $status = fake()->randomElement(Invoice::STATUS);
-                    $maxOrder += 10;
-                }
-
+            $minOrder = 1;
+            if ($tempDate->format('Ymd') === $currentDate->format('Ymd')) {
+                $maxOrder = 30;
+                $minOrder = 10;
+            }
+            for ($k = 0; $k < fake()->numberBetween($minOrder, $maxOrder); $k++) {
                 $type = fake()->randomElement(Invoice::TYPE);
+
+                $status = [Invoice::SUCCESS];
+                if ($tempDate->format('Ymd') === $currentDate->format('Ymd')) {
+                    $status[] = Invoice::PENDING;
+                } else if ($type === Invoice::DINE_IN) {
+                    $status[] = Invoice::CANCEL;
+                }
+                $status = fake()->randomElement($status);
 
                 $id = uuid_create();
 
@@ -135,6 +142,9 @@ class InvoiceSeeder extends Seeder
                 if ($status === Invoice::CANCEL) {
                     $invoice->delete();
                 }
+            }
+            if ($tempDate->format('Ymd') === $currentDate->format('Ymd')) {
+                break;
             }
             $tempDate->setDay((int) $tempDate->format('d') + 1);
         }
