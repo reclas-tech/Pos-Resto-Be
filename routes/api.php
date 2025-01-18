@@ -58,6 +58,7 @@ use App\Http\Controllers\Table\TableDeleteController;
 use App\Http\Controllers\Table\TableGetOneController;
 use App\Http\Controllers\Table\TableUpdateController;
 use App\Http\Controllers\Table\TableListController;
+use App\Http\Controllers\Tax\TaxGetController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('example')->group(function (): void {
@@ -207,5 +208,10 @@ Route::prefix('v1')->group(function (): void {
 			Route::get('list', [TransactionListController::class, 'action']);
 			Route::get('detail/{invoiceId}', [TransactionDetailController::class, 'action']);
 		});
+	});
+
+	// Tax
+	Route::prefix('tax')->group(function (): void {
+		Route::get('get', [TaxGetController::class, 'action'])->middleware('jwt');
 	});
 });
