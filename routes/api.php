@@ -6,6 +6,7 @@ use App\Http\Controllers\Authentication\ProfileEmployeeController;
 use App\Http\Controllers\Authentication\LogoutEmployeeController;
 use App\Http\Controllers\CashOnHand\CloseCashierController;
 use App\Http\Controllers\CashOnHand\OpenCashierController;
+use App\Http\Controllers\Dashboard\KitchenIncomeController;
 use App\Http\Controllers\Transaction\TransactionDetailController;
 use App\Http\Controllers\Dashboard\DashboardYearIncomeController;
 use App\Http\Controllers\Authentication\LoginEmployeeController;
@@ -226,6 +227,7 @@ Route::prefix('v1')->group(function (): void {
 		Route::prefix('admin')->middleware('api-admin')->group(function (): void {
 			Route::get('year-income/get', [DashboardYearIncomeController::class, 'action']);
 			Route::get('summary/get', [DashboardSummaryController::class, 'action']);
+			Route::get('kitchenIncome/get', [KitchenIncomeController::class, 'action']);
 		});
 	});
 
