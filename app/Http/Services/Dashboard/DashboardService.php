@@ -131,4 +131,29 @@ class DashboardService extends Service
 
         return $data;
     }
+
+	/**
+     * 
+     * 
+     * @return \Illuminate\Support\Collection
+     */
+	public function transaction(): Collection
+    {
+        $today = Carbon::now();
+        $data = collect();
+		$dine_in = Invoice::whereDate('created_at', $today)->where('type', Invoice::DINE_IN)->count();
+		$take_away = Invoice::whereDate('created_at', $today)->where('type', Invoice::TAKE_AWAY)->count();
+
+		$data->add([
+			'name' => 'Dine In',
+			'sum' => $dine_in	
+		]);
+
+		$data->add([
+			'name' => 'Take Away',
+			'sum' => $take_away
+		]);
+
+        return $data;
+    }
 }
