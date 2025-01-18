@@ -27,7 +27,7 @@ class DashboardService extends Service
 		$diff = $second ? $diff * 100 / $second : 0;
 
 		return [
-			'diff' => is_integer($diff) ? (int) $diff : (float) number_format($diff, 2),
+			'diff' => is_integer($diff) ? (int) $diff : (float) number_format($diff, 2, '.', ''),
 			'status' => $status,
 		];
 	}
