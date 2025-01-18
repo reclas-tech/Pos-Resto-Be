@@ -11,6 +11,7 @@ use App\Http\Controllers\Table\TableListWithConditionController;
 use App\Http\Controllers\Authentication\ProfileAdminController;
 use App\Http\Controllers\Transaction\TransactionListController;
 use App\Http\Controllers\Authentication\LogoutAdminController;
+use App\Http\Controllers\Dashboard\DashboardSummaryController;
 use App\Http\Controllers\Authentication\LoginAdminController;
 use App\Http\Controllers\Order\OrderHistoryDetailController;
 use App\Http\Controllers\Category\CategoryCreateController;
@@ -207,6 +208,14 @@ Route::prefix('v1')->group(function (): void {
 		Route::prefix('admin')->middleware('api-admin')->group(function (): void {
 			Route::get('list', [TransactionListController::class, 'action']);
 			Route::get('detail/{invoiceId}', [TransactionDetailController::class, 'action']);
+		});
+	});
+
+	// Dashboard
+	Route::prefix('dashboard')->group(function (): void {
+		// ADMIN
+		Route::prefix('admin')->middleware('api-admin')->group(function (): void {
+			Route::get('summary/get', [DashboardSummaryController::class, 'action']);
 		});
 	});
 
