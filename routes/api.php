@@ -5,12 +5,14 @@ use App\Http\Controllers\Authentication\RefreshAccessTokenAdminController;
 use App\Http\Controllers\Authentication\ProfileEmployeeController;
 use App\Http\Controllers\Authentication\LogoutEmployeeController;
 use App\Http\Controllers\Transaction\TransactionDetailController;
+use App\Http\Controllers\Dashboard\DashboardYearIncomeController;
 use App\Http\Controllers\Authentication\LoginEmployeeController;
 use App\Http\Controllers\Authentication\PasswordAdminController;
 use App\Http\Controllers\Table\TableListWithConditionController;
 use App\Http\Controllers\Authentication\ProfileAdminController;
 use App\Http\Controllers\Transaction\TransactionListController;
 use App\Http\Controllers\Authentication\LogoutAdminController;
+use App\Http\Controllers\Dashboard\DashboardSummaryController;
 use App\Http\Controllers\Authentication\LoginAdminController;
 use App\Http\Controllers\Order\OrderHistoryDetailController;
 use App\Http\Controllers\Category\CategoryCreateController;
@@ -58,6 +60,7 @@ use App\Http\Controllers\Table\TableDeleteController;
 use App\Http\Controllers\Table\TableGetOneController;
 use App\Http\Controllers\Table\TableUpdateController;
 use App\Http\Controllers\Table\TableListController;
+use App\Http\Controllers\Tax\TaxGetController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('example')->group(function (): void {
@@ -207,5 +210,19 @@ Route::prefix('v1')->group(function (): void {
 			Route::get('list', [TransactionListController::class, 'action']);
 			Route::get('detail/{invoiceId}', [TransactionDetailController::class, 'action']);
 		});
+	});
+
+	// Dashboard
+	Route::prefix('dashboard')->group(function (): void {
+		// ADMIN
+		Route::prefix('admin')->middleware('api-admin')->group(function (): void {
+			Route::get('year-income/get', [DashboardYearIncomeController::class, 'action']);
+			Route::get('summary/get', [DashboardSummaryController::class, 'action']);
+		});
+	});
+
+	// Tax
+	Route::prefix('tax')->group(function (): void {
+		Route::get('get', [TaxGetController::class, 'action'])->middleware('jwt');
 	});
 });
