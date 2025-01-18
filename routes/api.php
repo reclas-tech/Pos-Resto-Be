@@ -227,7 +227,7 @@ Route::prefix('v1')->group(function (): void {
 		Route::prefix('admin')->middleware('api-admin')->group(function (): void {
 			Route::get('year-income/get', [DashboardYearIncomeController::class, 'action']);
 			Route::get('summary/get', [DashboardSummaryController::class, 'action']);
-			Route::get('kitchenIncome/get', [KitchenIncomeController::class, 'action']);
+			Route::get('kitchen-income/get', [KitchenIncomeController::class, 'action']);
 		});
 	});
 
