@@ -155,12 +155,13 @@ class TableService extends Service
 		$unavailable = 0;
 		$available = 0;
 		foreach ($tables as $table) {
-			$check = $table->invoices()
+			$invoice = $table->invoices()
 				->whereDate('created_at', Carbon::now())
 				->whereHas('invoice', function (Builder $query): void {
 					$query->where('status', Invoice::PENDING);
-				})
-				->exists();
+				});
+
+			$check = $invoice->exists();
 
 			if ($check) {
 				$check = 'terisi';
@@ -178,7 +179,7 @@ class TableService extends Service
 						'capacity',
 						'location',
 					]),
-					'invoice' => $table->invoices()->first()['invoice_id'] ?? null,
+					'invoice' => $invoice->first()['invoice_id'] ?? null,
 					'status' => $check,
 				]);
 			}
