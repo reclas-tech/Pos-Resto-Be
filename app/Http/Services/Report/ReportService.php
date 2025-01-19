@@ -4,6 +4,7 @@ namespace App\Http\Services\Report;
 
 use Illuminate\Support\Carbon;
 use App\Http\Services\Service;
+use App\Models\Charity;
 use App\Models\Invoice;
 
 class ReportService extends Service
@@ -27,7 +28,7 @@ class ReportService extends Service
 			$orders->whereDate('created_at', '<=', $end);
 		}
 
-		$orders = $orders->whereNull('deleted_at')->get();
+		$orders = $orders->where('status', Invoice::SUCCESS)->whereNull('deleted_at')->get();
 
 		$transaction = 0;
 		$product = 0;
@@ -56,6 +57,67 @@ class ReportService extends Service
 			'product' => $product,
 			'income' => $income,
 			'mean' => $mean,
+		];
+	}
+
+	/**
+	 * @param string|null $year
+	 * @param string|null $month
+	 * @param \Illuminate\Support\Carbon|string|null $start
+	 * @param \Illuminate\Support\Carbon|string|null $end
+	 * @param string|null $charity
+	 * 
+	 * @return array
+	 */
+	public function report(string|null $year, string|null $month, Carbon|string|null $start, Carbon|string|null $end, string|null $charity): array
+	{
+		$invoices = Invoice::withTrashed();
+
+		if ($year !== null || $month !== null) {
+			if ($year) {
+				$invoices->whereYear('created_at', $year);
+				if ($month) {
+					$invoices->whereMonth('created_at', $month);
+				}
+			}
+		} else {
+			if ($start !== null) {
+				$invoices->whereDate('created_at', '>=', $start);
+			}
+			if ($end !== null) {
+				$invoices->whereDate('created_at', '<=', $end);
+			}
+		}
+
+		$invoices = $invoices->where('status', Invoice::SUCCESS)->latest()->get();
+
+		if ($year && $month) {
+			if ($charity !== null) {
+				$charity = config('app.charity');
+			}
+			$start = null;
+			$end = null;
+		} else {
+			$start = $invoices->last()?->created_at ?? $start;
+			$end = $invoices->first()?->created_at ?? $end;
+			$month = null;
+			$year = null;
+		}
+
+		$income = $invoices->sum('price_sum');
+		$tax = $invoices->average('tax');
+		$tax ??= 0;
+
+		return [
+			'month' => $month,
+			'year' => $year,
+			'start' => $start,
+			'end' => $end,
+
+			'tax' => $tax * $income / 100,
+			'tax_percent' => $tax,
+			'charity' => $charity,
+			'income' => $income,
 		];
 	}
 }

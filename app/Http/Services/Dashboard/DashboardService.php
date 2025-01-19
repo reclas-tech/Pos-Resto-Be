@@ -40,8 +40,8 @@ class DashboardService extends Service
 		$today = Carbon::now();
 		$yesterday = Carbon::now()->setDay((int) $today->format('d') - 1);
 
-		$todayOrder = Invoice::whereDate('created_at', $today)->get();
-		$yesterdayOrder = Invoice::whereDate('created_at', $yesterday)->get();
+		$todayOrder = Invoice::whereDate('created_at', $today)->where('status', Invoice::SUCCESS)->get();
+		$yesterdayOrder = Invoice::whereDate('created_at', $yesterday)->where('status', Invoice::SUCCESS)->get();
 
 		$todayOrderCount = $todayOrder->count();
 		$yesterdayOrderCount = $yesterdayOrder->count();
@@ -87,7 +87,10 @@ class DashboardService extends Service
 		$data = collect();
 		while (true) {
 			$data->push([
-				'value' => (int) Invoice::whereYear('created_at', $date)->whereMonth('created_at', $date)->sum('profit'),
+				'value' => (int) Invoice::whereYear('created_at', $date)
+					->whereMonth('created_at', $date)
+					->where('status', Invoice::SUCCESS)
+					->sum('profit'),
 				'month' => $date->getTranslatedMonthName(),
 				'year' => $date->format('Y'),
 			]);
