@@ -272,6 +272,7 @@ class OrderService extends Service
 					'tax',
 					'type',
 					'customer',
+					'created_at',
 				]),
 				'price_sum' => $invoices->sum('price_sum'),
 				'price' => $invoices->sum('price_item'),
