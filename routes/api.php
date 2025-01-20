@@ -47,6 +47,7 @@ use App\Http\Controllers\Product\ProductDeleteController;
 use App\Http\Controllers\Product\ProductGetAllController;
 use App\Http\Controllers\Product\ProductGetOneController;
 use App\Http\Controllers\Product\ProductUpdateController;
+use App\Http\Controllers\Report\ReportSummaryController;
 use App\Http\Controllers\Kitchen\KitchenListController;
 use App\Http\Controllers\Product\ProductListController;
 use App\Http\Controllers\Packet\PacketCreateController;
@@ -230,6 +231,14 @@ Route::prefix('v1')->group(function (): void {
 			Route::get('summary/get', [DashboardSummaryController::class, 'action']);
 			Route::get('kitchen-income/get', [KitchenIncomeController::class, 'action']);
 			Route::get('transaction/get', [TransactionController::class, 'action']);
+		});
+	});
+
+	// Report
+	Route::prefix('report')->group(function (): void {
+		// ADMIN
+		Route::prefix('admin')->middleware('api-admin')->group(function (): void {
+			Route::get('summary/get', [ReportSummaryController::class, 'action']);
 		});
 	});
 
