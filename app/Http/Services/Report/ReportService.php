@@ -2,9 +2,9 @@
 
 namespace App\Http\Services\Report;
 
+use App\Models\Kitchen;
 use Illuminate\Support\Carbon;
 use App\Http\Services\Service;
-use App\Models\Charity;
 use App\Models\Invoice;
 
 class ReportService extends Service
@@ -135,6 +135,42 @@ class ReportService extends Service
 				'month' => $startYear->getTranslatedShortMonthName(),
 				'income' => Invoice::whereMonth('created_at', $startYear)->whereYear('created_at', $startYear)->where('status', Invoice::SUCCESS)->sum('price_sum'),
 			]);
+			if ($startYear->format('Ym') === $endYear->format('Ym')) {
+				break;
+			}
+			$startYear->setMonth((int) $startYear->format('m') + 1);
+		};
+		return $data->toArray();
+	}
+
+	public function incomeCompare(Carbon|null $startYear, Carbon|null $endYear): array
+	{
+		$data = collect();
+		while (true) {
+			$kitchens = Kitchen::with([
+				'products' => function ($query) use ($startYear) {
+					$query->withSum(['invoiceProduct as sum' => function ($query) use ($startYear) {
+						$query->whereMonth('created_at', $startYear)->whereYear('created_at', $startYear); }], 'price_sum');
+				}
+			])->get();
+
+			$kitchenIncome = collect();
+			
+			foreach ($kitchens as $kitchen) {
+				$sum = 0;
+				foreach($kitchen->products as $product) {
+					$sum += $product->sum;
+				}
+				$kitchenIncome->add([
+					$kitchen->name => $sum
+				]);
+			}
+
+			$data->add([
+				'month' => $startYear->getTranslatedShortMonthName(),
+				'income' => $kitchenIncome,
+			]);
+			
 			if ($startYear->format('Ym') === $endYear->format('Ym')) {
 				break;
 			}
