@@ -120,4 +120,27 @@ class ReportService extends Service
 			'income' => $income,
 		];
 	}
+
+	/**
+	 * @param \Illuminate\Support\Carbon|null $startYear
+	 * @param \Illuminate\Support\Carbon|null $endYear
+	 * 
+	 * @return array
+	 */
+	public function income(Carbon|null $startYear, Carbon|null $endYear): array
+	{
+		$data = collect();
+		while (true) {
+			$data->add([
+				'month' => $startYear->getTranslatedShortMonthName(),
+				'income' => Invoice::whereMonth('created_at', $startYear)->whereYear('created_at', $startYear)->where('status', Invoice::SUCCESS)->sum('price_sum'),
+			]);
+			if ($startYear->format('Ym') === $endYear->format('Ym')) {
+				break;
+			}
+			$startYear->setMonth((int) $startYear->format('m') + 1);
+		};
+		return $data->toArray();
+	}
+
 }
