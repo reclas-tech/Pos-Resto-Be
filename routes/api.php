@@ -8,6 +8,7 @@ use App\Http\Controllers\CashOnHand\CloseCashierController;
 use App\Http\Controllers\CashOnHand\OpenCashierController;
 use App\Http\Controllers\Dashboard\KitchenIncomeController;
 use App\Http\Controllers\Dashboard\TransactionController;
+use App\Http\Controllers\Report\ReportIncomeCompareController;
 use App\Http\Controllers\Report\ReportIncomeController;
 use App\Http\Controllers\Transaction\TransactionDetailController;
 use App\Http\Controllers\Dashboard\DashboardYearIncomeController;
@@ -241,6 +242,7 @@ Route::prefix('v1')->group(function (): void {
 		Route::prefix('admin')->middleware('api-admin')->group(function (): void {
 			Route::get('summary/get', [ReportSummaryController::class, 'action']);
 			Route::get('income/get', [ReportIncomeController::class, 'action']);
+			Route::get('incomeCompare/get', [ReportIncomeCompareController::class, 'action']);
 		});
 	});
 
