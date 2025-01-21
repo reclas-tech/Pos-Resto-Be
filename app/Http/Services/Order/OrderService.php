@@ -271,6 +271,7 @@ class OrderService extends Service
 					'id',
 					'tax',
 					'type',
+					'status',
 					'customer',
 					'created_at',
 				]),
