@@ -22,6 +22,7 @@ return new class extends Migration {
             $table->enum('status', Invoice::STATUS)->default(Invoice::PENDING);
             $table->string('customer', 255);
             $table->double('tax');
+            $table->unsignedBigInteger('price_item');
             $table->unsignedBigInteger('price_sum');
             $table->unsignedBigInteger('profit');
 

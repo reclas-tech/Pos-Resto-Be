@@ -13,8 +13,7 @@ return new class extends Migration {
         Schema::create('packets', function (Blueprint $table): void {
             $table->uuid('id')->primary();
 
-            // UNIQUE
-            $table->string('name', 255)->unique();
+            $table->string('name', 255);
 
             // REQUIRED
             $table->unsignedBigInteger('cogp');

@@ -13,8 +13,7 @@ return new class extends Migration {
         Schema::create('kitchens', function (Blueprint $table): void {
             $table->uuid('id')->primary();
 
-            // UNIQUE
-            $table->string('name', 255)->unique();
+            $table->string('name', 255);
 
             $table->timestamps();
             $table->softDeletes();

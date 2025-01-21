@@ -54,14 +54,34 @@ class Employee extends User implements JWTSubject
         return $this->hasMany(EmployeeRefreshToken::class);
     }
 
-    public function cashOnHands(): HasMany
+    public function shifts(): HasMany
     {
-        return $this->hasMany(CashOnHand::class, 'cashier_id');
+        return $this->hasMany(CashierShift::class, 'cashier_id');
     }
 
-    public function times(): HasMany
+    public function createdInvoices(): HasMany
     {
-        return $this->hasMany(CashierTime::class, 'cashier_id');
+        return $this->hasMany(Invoice::class, 'created_by');
+    }
+
+    public function updatedInvoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class, 'updated_by');
+    }
+
+    public function checkOutInvoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class, 'cashier_id');
+    }
+
+    public function updatedInvoicePackets(): HasMany
+    {
+        return $this->hasMany(InvoicePacket::class, 'updated_by');
+    }
+
+    public function updatedInvoiceProducts(): HasMany
+    {
+        return $this->hasMany(InvoiceProduct::class, 'updated_by');
     }
 
 
@@ -77,6 +97,22 @@ class Employee extends User implements JWTSubject
             'expired_at' => $exp,
             'token' => $token,
         ]);
+    }
+
+    public function softOrForceDelete(): bool
+    {
+        try {
+            if ($this->shifts->count() || $this->createdInvoices->count() || $this->updatedInvoices->count() || $this->checkOutInvoices->count() || $this->updatedInvoicePackets->count() || $this->updatedInvoiceProducts->count()) {
+                $this->delete();
+            } else {
+                $this->refreshToken()->forceDelete();
+                $this->forceDelete();
+            }
+
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
     public function getJWTCustomClaims(): array

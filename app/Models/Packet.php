@@ -45,6 +45,11 @@ class Packet extends Model
         return $this->hasMany(PacketProduct::class);
     }
 
+    public function invoice(): HasMany
+    {
+        return $this->hasMany(InvoicePacket::class);
+    }
+
 
     /*
     |--------------------------------------------------------------------------

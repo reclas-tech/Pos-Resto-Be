@@ -123,4 +123,13 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Application Attribute
+    |--------------------------------------------------------------------------
+    */
+
+    'tax' => is_numeric(env('USER_TAX', 10)) ? (float) env('USER_TAX', 10) : 10,
+    'charity' => is_numeric(env('USER_CHARITY', 2.5)) ? (float) env('USER_CHARITY', 2.5) : 2.5,
+
 ];
