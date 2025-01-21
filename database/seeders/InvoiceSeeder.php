@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Models\InvoicePacket;
-use App\Models\InvoiceProduct;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
+use App\Models\InvoiceProduct;
+use App\Models\InvoicePacket;
 use App\Models\Employee;
 use App\Models\Invoice;
 use App\Models\Product;
@@ -32,7 +32,7 @@ class InvoiceSeeder extends Seeder
 
         $productCount = $productCount < 5 ? $productCount : 5;
         $packetCount = $packetCount < 5 ? $packetCount : 5;
-        $tableCount = $tableCount < 5 ? $tableCount : 5;
+        $tableCount = $tableCount < 5 ? $tableCount : 2;
 
         $cashier = Employee::firstWhere('role', 'cashier');
         $waiter = Employee::firstWhere('role', 'waiter');
@@ -47,8 +47,8 @@ class InvoiceSeeder extends Seeder
             $maxOrder = 5;
             $minOrder = 1;
             if ($tempDate->format('Ymd') === $currentDate->format('Ymd')) {
-                $maxOrder = 30;
-                $minOrder = 10;
+                $maxOrder = 10;
+                $minOrder = 5;
             }
             for ($k = 0; $k < fake()->numberBetween($minOrder, $maxOrder); $k++) {
                 $type = fake()->randomElement(Invoice::TYPE);
@@ -139,10 +139,17 @@ class InvoiceSeeder extends Seeder
                 }
 
                 if ($type === Invoice::DINE_IN) {
-                    foreach ($tables->random(fake()->numberBetween(2, $tableCount)) as $table) {
+                    $tempCount = fake()->numberBetween(2, $tableCount);
+                    if ($tempCount === 1) {
                         $invoice->tables()->create([
-                            'table_id' => $table->id
+                            'table_id' => $tables->random($tempCount)->id
                         ]);
+                    } else {
+                        foreach ($tables->random($tempCount) as $table) {
+                            $invoice->tables()->create([
+                                'table_id' => $table->id
+                            ]);
+                        }
                     }
                 }
 
