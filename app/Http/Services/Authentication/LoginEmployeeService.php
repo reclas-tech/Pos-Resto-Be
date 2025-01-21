@@ -2,6 +2,7 @@
 
 namespace App\Http\Services\Authentication;
 
+use App\Models\CashierShift;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
 use App\Http\Services\Service;
@@ -29,6 +30,15 @@ class LoginEmployeeService extends Service
 				$accessToken = Token::Generate(['sub' => $refreshTokenInstance->id], accessToken: true);
 
 				DB::commit();
+
+				if($employee->role == 'cashier') {
+					return collect([
+						'access_token' => $accessToken->get('token'),
+						'refresh_token' => $refreshTokenInstance->token,
+						'role' => $employee->role,
+						'any_active_shift' => CashierShift::where('cashier_id', $employee->id)->whereNull('cash_on_hand_end')->exists()
+					]);	
+				}
 
 				return collect([
 					'access_token' => $accessToken->get('token'),
