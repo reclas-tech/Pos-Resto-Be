@@ -142,6 +142,6 @@ class EmployeeService extends Service
 	 */
 	public function delete(Employee $employee): bool|null
 	{
-		return $employee->forceDelete() ?? $employee->delete();
+		return $employee->softOrForceDelete();
 	}
 }
