@@ -23,7 +23,7 @@ class PacketGetOneController extends BaseController
             'image' => $packet->image,
             'products' => $packet->products->map(function ($product) {
                 return [
-                    'id' => $product->id,
+                    'id' => $product->product->id,
                     'name' => $product->product->name,
                     'quantity' => $product->quantity
                 ];

@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\InvoicePacket;
+use App\Models\InvoiceProduct;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
@@ -89,13 +91,21 @@ class InvoiceSeeder extends Seeder
                     $profit = $quantity * ($product->price - $product->cogp);
                     $price = $quantity * $product->price;
 
-                    $invoice->products()->create([
+                    $id = uuid_create();
+
+                    InvoiceProduct::insert([
+                        'id' => $id,
+
                         'note' => fake()->text(),
                         'quantity' => $quantity,
                         'price_sum' => $price,
                         'profit' => $profit,
 
-                        'product_id' => $product->id
+                        'invoice_id' => $invoice->id,
+                        'product_id' => $product->id,
+
+                        'created_at' => $tempDate,
+                        'updated_at' => $tempDate,
                     ]);
 
                     $profitSum += $profit;
@@ -107,13 +117,21 @@ class InvoiceSeeder extends Seeder
                     $profit = $quantity * ($packet->price - $packet->cogp);
                     $price = $quantity * $packet->price;
 
-                    $invoice->packets()->create([
+                    $id = uuid_create();
+
+                    InvoicePacket::insert([
+                        'id' => $id,
+
                         'note' => fake()->text(),
                         'quantity' => $quantity,
                         'price_sum' => $price,
                         'profit' => $profit,
 
-                        'packet_id' => $packet->id
+                        'invoice_id' => $invoice->id,
+                        'packet_id' => $packet->id,
+
+                        'created_at' => $tempDate,
+                        'updated_at' => $tempDate,
                     ]);
 
                     $profitSum += $profit;
