@@ -61,6 +61,7 @@ use App\Http\Controllers\Table\TableDeleteController;
 use App\Http\Controllers\Table\TableGetOneController;
 use App\Http\Controllers\Table\TableUpdateController;
 use App\Http\Controllers\Table\TableListController;
+use App\Http\Controllers\Report\ReportController;
 use App\Http\Controllers\Tax\TaxGetController;
 use Illuminate\Support\Facades\Route;
 
@@ -225,8 +226,9 @@ Route::prefix('v1')->group(function (): void {
 	// Report
 	Route::prefix('report')->group(function (): void {
 		// ADMIN
-		Route::prefix('admin')->middleware('api-admin')->group(function (): void {
+		Route::prefix('admin')->group(function (): void {
 			Route::get('summary/get', [ReportSummaryController::class, 'action']);
+			Route::get('get', [ReportController::class, 'action']);
 		});
 	});
 

@@ -4,7 +4,9 @@ namespace App\Http\Services\Report;
 
 use Illuminate\Support\Carbon;
 use App\Http\Services\Service;
-use App\Models\Charity;
+use App\Models\InvoiceProduct;
+use App\Models\InvoicePacket;
+use App\Models\PacketProduct;
 use App\Models\Invoice;
 
 class ReportService extends Service
@@ -69,7 +71,7 @@ class ReportService extends Service
 	 * 
 	 * @return array
 	 */
-	public function report(string|null $year, string|null $month, Carbon|string|null $start, Carbon|string|null $end, string|null $charity): array
+	public function report(string|null $year, string|null $month, Carbon|string|null $start, Carbon|string|null $end, string|float|int|null $charity): array
 	{
 		$invoices = Invoice::withTrashed();
 
@@ -89,24 +91,75 @@ class ReportService extends Service
 			}
 		}
 
-		$invoices = $invoices->where('status', Invoice::SUCCESS)->latest()->get();
+		$invoices = $invoices->latest()->get();
 
+		$successInvoices = $invoices->where('status', Invoice::SUCCESS)->sortBy('created_at')->collect();
+
+		$avgIncome = (int) $successInvoices->average('price_sum');
+
+		$categories = collect();
+		$kitchens = collect();
+		$productCount = $successInvoices->sum(function (Invoice $invoice) use ($categories, $kitchens): int {
+			$product = $invoice->products->sum(function (InvoiceProduct $invoiceProduct) use ($categories, $kitchens): int {
+				if ($temp = $kitchens->firstWhere('id', $invoiceProduct->product->kitchen_id)) {
+					$temp->quantity += $invoiceProduct->quantity;
+					$temp->income += $invoiceProduct->price_sum;
+				} else {
+					$kitchens->push((object) [
+						'id' => $invoiceProduct->product->kitchen_id,
+						'name' => $invoiceProduct->product->kitchen->name,
+						'quantity' => $invoiceProduct->quantity,
+						'income' => $invoiceProduct->price_sum,
+					]);
+				}
+				if ($temp = $categories->firstWhere('id', $invoiceProduct->product->category_id)) {
+					$temp->quantity += $invoiceProduct->quantity;
+					$temp->income += $invoiceProduct->price_sum;
+				} else {
+					$categories->push((object) [
+						'id' => $invoiceProduct->product->category_id,
+						'name' => $invoiceProduct->product->category->name,
+						'quantity' => $invoiceProduct->quantity,
+						'income' => $invoiceProduct->price_sum,
+					]);
+				}
+				return $invoiceProduct->quantity;
+			});
+			$productInPacket = $invoice->packets->sum(function (InvoicePacket $invoicePacket) use ($kitchens): int {
+				$qty = $invoicePacket->quantity;
+				return $invoicePacket->packet->products->sum(function (PacketProduct $packetProduct) use ($kitchens, $qty): int {
+					return $qty * $packetProduct->quantity;
+				});
+			});
+			return $productInPacket + $product;
+		});
+
+		$income = $successInvoices->sum('price_sum');
+
+		$tax_percent = $successInvoices->average('tax');
+		$tax_percent ??= 0;
+
+		$tax = (int) ($income * $tax_percent / 100);
+
+		$profit = $successInvoices->sum('profit');
+		$cogp = $income - $tax - $profit;
+
+		$charity_percent = null;
 		if ($year && $month) {
 			if ($charity !== null) {
-				$charity = config('app.charity');
+				$charity_percent = config('app.charity');
+				$charity = (int) ($profit * $charity_percent / 100);
+
+				$profit -= $charity;
 			}
 			$start = null;
 			$end = null;
 		} else {
-			$start = $invoices->last()?->created_at ?? $start;
-			$end = $invoices->first()?->created_at ?? $end;
+			$start = $successInvoices->first()?->created_at ?? $start;
+			$end = $successInvoices->last()?->created_at ?? $end;
 			$month = null;
 			$year = null;
 		}
-
-		$income = $invoices->sum('price_sum');
-		$tax = $invoices->average('tax');
-		$tax ??= 0;
 
 		return [
 			'month' => $month,
@@ -114,10 +167,24 @@ class ReportService extends Service
 			'start' => $start,
 			'end' => $end,
 
-			'tax' => $tax * $income / 100,
-			'tax_percent' => $tax,
-			'charity' => $charity,
 			'income' => $income,
+			'tax' => $tax,
+			'cogp' => $cogp,
+			'charity' => $charity,
+			'profit' => $profit,
+
+			'tax_percent' => $tax_percent,
+			'charity_percent' => $tax_percent,
+
+			'transaction' => $invoices->count(),
+			'transaction_success' => $successInvoices->count(),
+			'transaction_failed' => $invoices->where('status', Invoice::CANCEL)->count(),
+
+			'avg_income' => $avgIncome,
+			'product_count' => $productCount,
+
+			'categories' => $categories,
+			'kitchens' => $kitchens,
 		];
 	}
 }
