@@ -117,7 +117,11 @@ class DashboardService extends Service
         $kitchens = Kitchen::with([
             'products' => function ($query) use ($today) {
                 $query->withSum(['invoiceProduct as sum' => function ($query) use ($today) {
-					$query->whereDate('created_at', $today); }], 'price_sum');
+					$query->whereDate('created_at', $today)
+					->whereHas('invoice', function ($query) {
+						$query->where('status', Invoice::SUCCESS);
+					}); 
+				}], 'price_sum');
             }
         ])->get();
 
@@ -144,8 +148,8 @@ class DashboardService extends Service
     {
         $today = Carbon::now();
         $data = collect();
-		$dine_in = Invoice::whereDate('created_at', $today)->where('type', Invoice::DINE_IN)->count();
-		$take_away = Invoice::whereDate('created_at', $today)->where('type', Invoice::TAKE_AWAY)->count();
+		$dine_in = Invoice::whereDate('created_at', $today)->where('type', Invoice::DINE_IN)->where('status', Invoice::SUCCESS)->count();
+		$take_away = Invoice::whereDate('created_at', $today)->where('type', Invoice::TAKE_AWAY)->where('status', Invoice::SUCCESS)->count();
 
 		$data->add([
 			'name' => 'Dine In',
