@@ -128,7 +128,7 @@ Route::prefix('v1')->group(function (): void {
 		});
 
 		// Waiter
-		Route::prefix('waiter')->group(function (): void {
+		Route::prefix('waiter')->middleware(['jwt', 'employee:waiter'])->group(function (): void {
 			Route::get('all', [ProductGetAllController::class, 'action']);
 		});
 	});
@@ -143,7 +143,7 @@ Route::prefix('v1')->group(function (): void {
 	// Kitchen
 	Route::prefix('kitchen')->group(function (): void {
 		// ADMIN
-		Route::prefix('admin')->group(function (): void {
+		Route::prefix('admin')->middleware('api-admin')->group(function (): void {
 			Route::post('create', [KitchenCreateController::class, 'action']);
 			Route::get('list', [KitchenListController::class, 'action']);
 			Route::get('get', [KitchenGetAllController::class, 'action']);
@@ -240,7 +240,7 @@ Route::prefix('v1')->group(function (): void {
 	// Report
 	Route::prefix('report')->group(function (): void {
 		// ADMIN
-		Route::prefix('admin')->group(function (): void {
+		Route::prefix('admin')->middleware('api-admin')->group(function (): void {
 			Route::get('incomeCompare/get', [ReportIncomeCompareController::class, 'action']);
 			Route::get('income/get', [ReportIncomeController::class, 'action']);
 			Route::get('summary/get', [ReportSummaryController::class, 'action']);
