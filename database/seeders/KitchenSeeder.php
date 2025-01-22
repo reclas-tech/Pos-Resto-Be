@@ -16,6 +16,7 @@ class KitchenSeeder extends Seeder
         for ($i = 1; $i <= 5; $i++) {
             Kitchen::create([
                 'name' => "Dapur $i",
+                'ip' => fake()->ipv4(),
             ]);
         }
     }

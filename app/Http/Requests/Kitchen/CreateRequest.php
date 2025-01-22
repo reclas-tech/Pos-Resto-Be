@@ -27,6 +27,7 @@ class CreateRequest extends FormRequest
     {
         return [
             'name' => ['bail', 'required', 'string', 'max:255', Rule::unique('kitchens', 'name')->withoutTrashed()],
+            'ip' => ['bail', 'required', 'string', 'max:255'],
         ];
     }
 
@@ -39,6 +40,7 @@ class CreateRequest extends FormRequest
     {
         return [
             'name' => 'Nama',
+            'ip' => 'IP',
         ];
     }
 

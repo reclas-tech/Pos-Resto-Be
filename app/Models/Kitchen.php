@@ -22,6 +22,7 @@ class Kitchen extends Model
 
     protected $fillable = [
         'name',
+        'ip',
     ];
 
     protected $hidden = [];

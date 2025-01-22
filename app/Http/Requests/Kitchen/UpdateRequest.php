@@ -27,6 +27,7 @@ class UpdateRequest extends FormRequest
     {
         return [
             'name' => ['bail', 'required', 'string', 'max:255', Rule::unique('kitchens', 'name')->ignore($this->route('id'))->withoutTrashed()],
+            'ip' => ['bail', 'required', 'string', 'max:255'],
         ];
     }
 
@@ -39,6 +40,7 @@ class UpdateRequest extends FormRequest
     {
         return [
             'name' => 'Nama',
+            'ip' => 'IP',
         ];
     }
 
