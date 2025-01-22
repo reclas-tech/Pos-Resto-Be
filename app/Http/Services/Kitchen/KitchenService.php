@@ -15,16 +15,18 @@ class KitchenService extends Service
 
 	/**
 	 * @param string $name
+	 * @param string $ip
 	 * 
 	 * @return \App\Models\Kitchen|\Exception
 	 */
-    public function create(string $name): Kitchen|Exception
+	public function create(string $name, string $ip): Kitchen|Exception
 	{
 		DB::beginTransaction();
 
 		try {
 			$kitchen = new Kitchen([
-				'name' => $name
+				'name' => $name,
+				'ip' => $ip
 			]);
 
 			$kitchen->save();
@@ -52,7 +54,7 @@ class KitchenService extends Service
         $kitchen = Kitchen::query();
 
         if ($search) {
-            $kitchen->where('name', 'like', '%' . $search . '%');
+			$kitchen->where('name', 'like', '%' . $search . '%')->orWhere('ip', 'like', '%' . $search . '%');
         }
 
         return $kitchen->paginate($limit ?? $this->limit);
@@ -84,13 +86,15 @@ class KitchenService extends Service
 	/**
      * @param \App\Models\Kitchen $kitchen
 	 * @param string $name
+	 * @param string $ip
 	 * 
 	 * @return void
 	 */
-	public function update(Kitchen $kitchen, string $name): void
+	public function update(Kitchen $kitchen, string $name, string $ip): void
 	{
 
         $kitchen->name = $name;
+        $kitchen->ip = $ip;
 		$kitchen->save();
 
 	}

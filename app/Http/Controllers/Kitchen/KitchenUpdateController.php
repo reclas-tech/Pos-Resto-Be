@@ -18,11 +18,13 @@ class KitchenUpdateController extends BaseController
             
             [
                 'name' => $name,
+                'ip' => $ip,
             ] = $request;
 
             $this->kitchenService->update(
                 kitchen : $kitchen,
                 name: $name,
+                ip: $ip,
             );
 
         } else {

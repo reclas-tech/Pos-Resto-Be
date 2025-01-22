@@ -13,9 +13,10 @@ class KitchenCreateController extends BaseController
 
         [
             'name' => $name,
+            'ip' => $ip,
         ] = $request;
-        
-        $kitchen = $this->kitchenService->create($name);
+
+        $kitchen = $this->kitchenService->create($name, $ip);
 
         $response = new Response(Response::CREATED, 'Buat Dapur Berhasil');
 

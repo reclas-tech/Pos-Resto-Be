@@ -143,7 +143,7 @@ Route::prefix('v1')->group(function (): void {
 	// Kitchen
 	Route::prefix('kitchen')->group(function (): void {
 		// ADMIN
-		Route::prefix('admin')->middleware('api-admin')->group(function (): void {
+		Route::prefix('admin')->group(function (): void {
 			Route::post('create', [KitchenCreateController::class, 'action']);
 			Route::get('list', [KitchenListController::class, 'action']);
 			Route::get('get', [KitchenGetAllController::class, 'action']);
