@@ -117,7 +117,7 @@ class DashboardService extends Service
         $kitchens = Kitchen::with([
             'products' => function ($query) use ($today) {
                 $query->withSum(['invoiceProduct as sum' => function ($query) use ($today) {
-                    $query->whereDay('created_at', $today); }], 'price_sum');
+					$query->whereDate('created_at', $today); }], 'price_sum');
             }
         ])->get();
 
