@@ -9,10 +9,11 @@
     ],
     "license": "MIT",
     "require": {
+        "php": "^8.2",
         "laravel/framework": "^11.31",
         "laravel/tinker": "^2.9",
-        "tymon/jwt-auth": "^2.1",
-        "php": "^8.2"
+        "spatie/laravel-pdf": "^1.5",
+        "tymon/jwt-auth": "^2.1"
     },
     "require-dev": {
         "pestphp/pest-plugin-laravel": "^3.0",
