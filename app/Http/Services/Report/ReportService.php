@@ -220,7 +220,9 @@ class ReportService extends Service
 				'products' => function ($query) use ($startYear) {
 					$query->withSum([
 						'invoiceProduct as sum' => function ($query) use ($startYear) {
-							$query->whereMonth('created_at', $startYear)->whereYear('created_at', $startYear);
+							$query->whereMonth('created_at', $startYear)->whereYear('created_at', $startYear)->whereHas('invoice', function ($query) {
+								$query->where('status', Invoice::SUCCESS);
+							});
 						}
 					], 'price_sum');
 				}
