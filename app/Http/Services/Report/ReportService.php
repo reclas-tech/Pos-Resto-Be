@@ -7,6 +7,7 @@ use App\Http\Services\Service;
 use App\Models\InvoiceProduct;
 use App\Models\InvoicePacket;
 use App\Models\PacketProduct;
+use App\Models\Category;
 use App\Models\Invoice;
 use App\Models\Kitchen;
 
@@ -98,31 +99,30 @@ class ReportService extends Service
 
 		$avgIncome = (int) $successInvoices->average('price_sum');
 
-		$categories = collect();
-		$kitchens = collect();
+		$categories = collect(Category::orderBy('name')->get(['id', 'name'])->toArray())->map(function (array $item) {
+			return (object) [
+				...$item,
+				'quantity' => 0,
+				'income' => 0,
+			];
+		});
+		$kitchens = collect(Kitchen::orderBy('name')->get(['id', 'name'])->toArray())->map(function (array $item) {
+			return (object) [
+				...$item,
+				'quantity' => 0,
+				'income' => 0,
+			];
+		});
+
 		$productCount = $successInvoices->sum(function (Invoice $invoice) use ($categories, $kitchens): int {
 			$product = $invoice->products->sum(function (InvoiceProduct $invoiceProduct) use ($categories, $kitchens): int {
 				if ($temp = $kitchens->firstWhere('id', $invoiceProduct->product->kitchen_id)) {
 					$temp->quantity += $invoiceProduct->quantity;
 					$temp->income += $invoiceProduct->price_sum;
-				} else {
-					$kitchens->push((object) [
-						'id' => $invoiceProduct->product->kitchen_id,
-						'name' => $invoiceProduct->product->kitchen->name,
-						'quantity' => $invoiceProduct->quantity,
-						'income' => $invoiceProduct->price_sum,
-					]);
 				}
 				if ($temp = $categories->firstWhere('id', $invoiceProduct->product->category_id)) {
 					$temp->quantity += $invoiceProduct->quantity;
 					$temp->income += $invoiceProduct->price_sum;
-				} else {
-					$categories->push((object) [
-						'id' => $invoiceProduct->product->category_id,
-						'name' => $invoiceProduct->product->category->name,
-						'quantity' => $invoiceProduct->quantity,
-						'income' => $invoiceProduct->price_sum,
-					]);
 				}
 				return $invoiceProduct->quantity;
 			});
