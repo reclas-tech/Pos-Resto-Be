@@ -3,8 +3,7 @@
 namespace App\Http\Services\Order;
 
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
-use Spatie\LaravelPdf\Facades\Pdf;
+use Illuminate\Support\Carbon;
 use App\Http\Services\Service;
 use App\Models\PrinterSetting;
 
@@ -12,14 +11,30 @@ class InvoiceService extends Service
 {
 	public static function Print(array $kitchens, array $tables)
 	{
-		$printURL = PrinterSetting::first()?->link ?? config('app.print_url');
+		$print = PrinterSetting::first();
+		
+		$printURL = $print?->link ?? config('app.print_url');
+		$printCut = $print?->cut ?? config('app.print_cut');
 
+		$data = [];
 		foreach ($kitchens as $invoice) {
-			Pdf::view('pdf.kitchen', [...$invoice, 'tables' => $tables])->save($invoice['id'] . '.pdf');
-			$invoice['file'] = chunk_split(base64_encode(file_get_contents($invoice['id'] . '.pdf')));
-			Storage::delete($invoice['id'] . '.pdf');
+			$data[] = [
+				'ip' => $invoice['ip'],
+				'cut' => $printCut,
+				'name' => $invoice['name'],
+				'date' => Carbon::parse($invoice['created_at'])->format('Y-m-d h:i'),
+				'code' => $invoice['invoice'],
+				'customer' => $invoice['customer'],
+				'products' => $invoice['products'],
+				'tables' => $tables,
+			];
 		}
-
-		return Http::asJson()->post($printURL, $kitchens);
+		
+		try {
+			$response = Http::asJson()->post($printURL, ['data' => $data]);
+			return $response->body();
+		} catch (\Exception $e) {
+			return $e->getMessage();
+		}
 	}
 }

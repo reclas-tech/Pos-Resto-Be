@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Order;
 
-use App\Http\Requests\Order\CreateRequest;
 use App\Http\Services\Order\InvoiceService;
+use App\Http\Requests\Order\CreateRequest;
 use Illuminate\Http\JsonResponse;
 use App\Helpers\Response;
 
 class OrderCreateController extends BaseController
 {
-    public function action(CreateRequest $request)
+    public function action(CreateRequest $request): JsonResponse
     {
         [
             'customer' => $customer,
