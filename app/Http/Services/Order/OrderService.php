@@ -565,4 +565,16 @@ class OrderService extends Service
 
 		return null;
 	}
+
+	/**
+	 * @return array
+	 */
+	public function yearList(): array
+	{
+		$orders = Invoice::where('status', Invoice::SUCCESS)->orderBy('created_at')->get();
+
+		return $orders->map(function (Invoice $invoice) {
+			return $invoice->created_at->year;
+		})->unique()->toArray();
+	}
 }
