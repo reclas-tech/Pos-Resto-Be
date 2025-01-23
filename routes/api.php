@@ -57,6 +57,7 @@ use App\Http\Controllers\Packet\PacketDeleteController;
 use App\Http\Controllers\Packet\PacketGetAllController;
 use App\Http\Controllers\Packet\PacketGetOneController;
 use App\Http\Controllers\Packet\PacketUpdateController;
+use App\Http\Controllers\Order\OrderYearListController;
 use App\Http\Controllers\Order\OrderPaymentController;
 use App\Http\Controllers\Packet\PacketListController;
 use App\Http\Controllers\Order\OrderCreateController;
@@ -199,6 +200,10 @@ Route::prefix('v1')->group(function (): void {
 
 	// Order
 	Route::prefix('order')->group(function (): void {
+		// ADMIN
+		Route::prefix('admin')->middleware('api-admin')->group(function (): void {
+			Route::get('year/list', [OrderYearListController::class, 'action']);
+		});
 		// EMPLOYEE
 		Route::prefix('employee')->middleware('api-employee')->group(function (): void {
 			Route::get('history/list', [OrderHistoryListController::class, 'action']);
