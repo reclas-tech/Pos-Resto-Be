@@ -2,6 +2,7 @@
 
 namespace App\Http\Services\Order;
 
+use App\Models\PrinterSetting;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
@@ -67,15 +68,20 @@ class OrderService extends Service
 	 * @param array|null $packets
 	 * @param array|null $tables
 	 * 
-	 * @return bool|\Exception
+	 * @return array|\Exception
 	 */
-	public function create(string $customer, string $type, array|null $products, array|null $packets, array|null $tables): bool|Exception
+	public function create(string $customer, string $type, array|null $products, array|null $packets, array|null $tables): array|Exception
 	{
 		$waiter = auth('api-employee')->user();
 		$currentDate = Carbon::now();
 
 		$profitSum = 0;
 		$priceSum = 0;
+
+		$kitchens = collect();
+		$kitchenTables = collect();
+
+		$cut = PrinterSetting::first()?->cut ?? config('app.print_cut');
 
 		DB::beginTransaction();
 
@@ -120,6 +126,26 @@ class OrderService extends Service
 
 						$profitSum += $profit;
 						$priceSum += $price;
+
+						if ($kitchens->firstWhere('id', $product->kitchen->id) === null) {
+							$kitchens->add([
+								'id' => $product->kitchen->id,
+								'ip' => $product->kitchen->ip,
+								'name' => $product->kitchen->name,
+								'invoice' => $invoice->code,
+								'created_at' => $invoice->created_at,
+								'customer' => $invoice->customer,
+								'products' => collect(),
+								'cut' => $cut,
+							]);
+						}
+
+						$kitchens->firstWhere('id', $product->kitchen->id)["products"]->add([
+							'id' => $product->id,
+							'name' => $product->name,
+							'quantity' => $quantity,
+							'note' => $note,
+						]);
 					}
 				}
 			}
@@ -151,6 +177,34 @@ class OrderService extends Service
 
 						$profitSum += $profit;
 						$priceSum += $price;
+
+						foreach ($packet->products as $tempProduct) {
+							$product = $tempProduct->product;
+
+							if ($kitchens->firstWhere('id', $product->kitchen->id) === null) {
+								$kitchens->add([
+									'id' => $product->kitchen->id,
+									'ip' => $product->kitchen->ip,
+									'name' => $product->kitchen->name,
+									'invoice' => $invoice->code,
+									'created_at' => $invoice->created_at,
+									'customer' => $invoice->customer,
+									'products' => collect(),
+									'cut' => $cut,
+								]);
+							}
+
+							if ($kitchens->firstWhere('id', $product->kitchen->id)['products']->firstWhere('id', $product->id) === null) {
+								$kitchens->firstWhere('id', $product->kitchen->id)['products']->add([
+									'id' => $product->id,
+									'name' => $product->name,
+									'quantity' => $quantity * $tempProduct->quantity,
+									'note' => $note,
+								]);
+							} else {
+								$kitchens->firstWhere('id', $product->kitchen->id)['products']->firstWhere('id', $product->id)->quantity += $quantity * $tempProduct->quantity;
+							}
+						}
 					}
 				}
 			}
@@ -161,6 +215,7 @@ class OrderService extends Service
 						$invoice->tables()->create([
 							'table_id' => $table->id
 						]);
+						$kitchenTables->push($table->name);
 					}
 				}
 			}
@@ -173,10 +228,12 @@ class OrderService extends Service
 
 			DB::commit();
 
-			return true;
+			return [
+				'kitchens' => $kitchens->toArray(),
+				'tables' => $kitchenTables->toArray(),
+			];
 		} catch (Exception $e) {
 			DB::rollBack();
-
 			return $e;
 		}
 	}
