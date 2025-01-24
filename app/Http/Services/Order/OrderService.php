@@ -2,7 +2,6 @@
 
 namespace App\Http\Services\Order;
 
-use App\Models\PrinterSetting;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
@@ -81,8 +80,6 @@ class OrderService extends Service
 		$kitchens = collect();
 		$kitchenTables = collect();
 
-		$cut = PrinterSetting::first()?->cut ?? config('app.print_cut');
-
 		DB::beginTransaction();
 
 		try {
@@ -136,11 +133,10 @@ class OrderService extends Service
 								'created_at' => $invoice->created_at,
 								'customer' => $invoice->customer,
 								'products' => collect(),
-								'cut' => $cut,
 							]);
 						}
 
-						$kitchens->firstWhere('id', $product->kitchen->id)["products"]->add([
+						$kitchens->firstWhere('id', $product->kitchen->id)['products']->add((object) [
 							'id' => $product->id,
 							'name' => $product->name,
 							'quantity' => $quantity,
@@ -190,12 +186,11 @@ class OrderService extends Service
 									'created_at' => $invoice->created_at,
 									'customer' => $invoice->customer,
 									'products' => collect(),
-									'cut' => $cut,
 								]);
 							}
 
 							if ($kitchens->firstWhere('id', $product->kitchen->id)['products']->firstWhere('id', $product->id) === null) {
-								$kitchens->firstWhere('id', $product->kitchen->id)['products']->add([
+								$kitchens->firstWhere('id', $product->kitchen->id)['products']->add((object) [
 									'id' => $product->id,
 									'name' => $product->name,
 									'quantity' => $quantity * $tempProduct->quantity,
