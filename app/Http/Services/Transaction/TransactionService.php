@@ -63,21 +63,24 @@ class TransactionService extends Service
 					'price_sum',
 					'created_at',
 				]),
-				'products' => $invoice->products->map(function (InvoiceProduct $invoiceProduct): array {
+				'products' => $invoice->products->map(function (InvoiceProduct $item): array {
+					$invoiceProduct = InvoiceProduct::withTrashed()->whereKey($item->id)->first();
 					return [
 						'quantity' => $invoiceProduct->quantity,
 						'name' => $invoiceProduct->product?->name ?? '',
 						'price' => $invoiceProduct->product?->price ?? 0,
 					];
 				}),
-				'packets' => $invoice->packets->map(function (InvoicePacket $invoicePacket): array {
+				'packets' => $invoice->packets->map(function (InvoicePacket $item): array {
+					$invoicePacket = InvoicePacket::withTrashed()->whereKey($item->id)->first();
 					return [
 						'quantity' => $invoicePacket->quantity,
 						'name' => $invoicePacket->packet?->name ?? '',
 						'price' => $invoicePacket->packet?->price ?? 0,
 					];
 				}),
-				'tables' => $invoice->tables->map(function (InvoiceTable $invoiceTable): string {
+				'tables' => $invoice->tables->map(function (InvoiceTable $item): string {
+					$invoiceTable = InvoiceTable::withTrashed()->whereKey($item->id)->first();
 					return $invoiceTable?->table?->name ?? '';
 				}),
 				'cashier' => $invoice?->cashier?->name ?? '',
