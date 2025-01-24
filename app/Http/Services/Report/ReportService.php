@@ -40,8 +40,9 @@ class ReportService extends Service
 
 		foreach ($orders as $invoice) {
 			$check = false;
-			foreach ($invoice->products as $invoiceProduct) {
-				if ($kitchen === null || ($kitchen !== null && $invoiceProduct->product->kitchen_id === $kitchen)) {
+			foreach ($invoice->products as $item) {
+				$invoiceProduct = InvoiceProduct::withTrashed()->whereKey($item->id)->first();
+				if ($kitchen === null || ($kitchen !== null && $invoiceProduct?->product?->kitchen_id === $kitchen)) {
 					$product += $invoiceProduct->quantity;
 					$income += $invoiceProduct->price_sum;
 					$check = true;
