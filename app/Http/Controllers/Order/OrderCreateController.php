@@ -33,7 +33,7 @@ class OrderCreateController extends BaseController
             $response->set(Response::INTERNAL_SERVER_ERROR, 'Gagal menambahkan pesanan', $order);
         } else {
             $printRes = InvoiceService::Print($order['kitchens'], $order['tables']);
-            $response->set(data: $printRes);
+            $response->set(data: ['invoice_id' => $order['invoice_id'], 'printer' => $printRes]);
         }
 
         return $response->get();

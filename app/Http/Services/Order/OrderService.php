@@ -229,6 +229,7 @@ class OrderService extends Service
 			DB::commit();
 
 			return [
+				'invoice_id' => $invoice->id,
 				'kitchens' => $kitchens->toArray(),
 				'tables' => $kitchenTables->toArray(),
 			];
