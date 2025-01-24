@@ -307,6 +307,7 @@ class OrderService extends Service
 				foreach ($item->products ?? [] as $key => $invoiceProduct) {
 					$products->add([
 						'id' => $invoiceProduct->id,
+						'note' => $invoiceProduct->note,
 						'quantity' => $invoiceProduct->quantity,
 						'price_sum' => $invoiceProduct->price_sum,
 						'name' => $invoiceProduct?->product?->name ?? '',
@@ -316,6 +317,7 @@ class OrderService extends Service
 				foreach ($item->packets ?? [] as $key => $invoicePacket) {
 					$packets->add([
 						'id' => $invoicePacket->id,
+						'note' => $invoicePacket->note,
 						'quantity' => $invoicePacket->quantity,
 						'price_sum' => $invoicePacket->price_sum,
 						'name' => $invoicePacket?->packet?->name ?? '',
