@@ -68,7 +68,7 @@ class KitchenService extends Service
 	 */
     public function getAll(): Collection
 	{
-		$kitchen = Kitchen::all();
+		$kitchen = Kitchen::withTrashed()->get();
 
         return $kitchen;
 	}
