@@ -75,7 +75,7 @@ class PacketService extends Service
 			$packet->where('name', 'like', '%' . $search . '%');
 		}
 
-		return $packet->latest('created_at')->paginate($limit ?? $this->limit);
+		return $packet->latest()->paginate($limit ?? $this->limit);
 
 	}
 
@@ -94,7 +94,7 @@ class PacketService extends Service
 							$query->select(['id', 'name']); }
 					]);
 				}
-			])->latest('created_at')->get();
+			])->latest()->get();
 		}
 
 		$query = Packet::query()->with('products');
@@ -103,7 +103,7 @@ class PacketService extends Service
 			$query->where('name', 'like', '%' . $search . '%');
 		}
 
-		$packet = $query->latest('created_at')->get();
+		$packet = $query->latest()->get();
 
 		return $packet;
 	}

@@ -57,7 +57,7 @@ class KitchenService extends Service
 			$kitchen->where('name', 'like', '%' . $search . '%')->orWhere('ip', 'like', '%' . $search . '%');
         }
 
-        return $kitchen->paginate($limit ?? $this->limit);
+		return $kitchen->latest()->paginate($limit ?? $this->limit);
         
 	}
 
