@@ -55,7 +55,7 @@ class CategoryService extends Service
             $category->where('name', 'like', '%' . $search . '%');
         }
 
-        return $category->paginate($limit ?? $this->limit);
+		return $category->latest('created_at')->paginate($limit ?? $this->limit);
         
 	}
 
@@ -66,9 +66,9 @@ class CategoryService extends Service
 	 */
     public function getAll(): Collection
 	{
-		$kitchen = Category::all();
+		$category = Category::latest('created_at')->get();
 
-        return $kitchen;
+        return $category;
 	}
 
 	/**
