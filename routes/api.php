@@ -4,6 +4,7 @@ use App\Http\Controllers\Authentication\RefreshAccessTokenEmployeeController;
 use App\Http\Controllers\Authentication\RefreshAccessTokenAdminController;
 use App\Http\Controllers\Authentication\ProfileEmployeeController;
 use App\Http\Controllers\Authentication\LogoutEmployeeController;
+use App\Http\Controllers\CashOnHand\CloseCashierInvoiceController;
 use App\Http\Controllers\Transaction\TransactionDetailController;
 use App\Http\Controllers\Dashboard\DashboardYearIncomeController;
 use App\Http\Controllers\Authentication\LoginEmployeeController;
@@ -106,6 +107,7 @@ Route::prefix('v1')->group(function (): void {
 	Route::prefix('cashier')->middleware(['jwt', 'employee:cashier'])->group(function (): void {
 		Route::post('open', [OpenCashierController::class, 'action']);
 		Route::post('close', [CloseCashierController::class, 'action']);
+		Route::get('close/invoice/{id}', [CloseCashierInvoiceController::class, 'action']);
 	});
 
 	// Product

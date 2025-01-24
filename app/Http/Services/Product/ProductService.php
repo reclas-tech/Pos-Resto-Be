@@ -66,7 +66,7 @@ class ProductService extends Service
             $product->where('name', 'like', '%' . $search . '%');
         }
 
-        return $product->paginate($limit ?? $this->limit);
+		return $product->latest()->paginate($limit ?? $this->limit);
 
 	}
 
@@ -80,7 +80,7 @@ class ProductService extends Service
 	{
 		
 		if($search == null && $category == null) {
-			return Product::all();
+			return Product::latest()->get();
 		}
 		
 		$query = Product::query();
@@ -93,7 +93,7 @@ class ProductService extends Service
 			$query->where('category_id', $category);
 		}
 
-		$product = $query->get();
+		$product = $query->latest()->get();
 
         return $product;
 	}
