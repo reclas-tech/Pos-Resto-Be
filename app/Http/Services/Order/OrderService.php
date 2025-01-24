@@ -326,22 +326,26 @@ class OrderService extends Service
 				}
 			}
 
+			$priceItem = $invoices->sum('price_item');
+			$priceSum = $invoices->sum('price_sum');
+
 			return [
 				...$invoice->only([
 					'id',
-					'tax',
 					'type',
 					'status',
 					'customer',
 					'created_at',
 				]),
-				'price_sum' => $invoices->sum('price_sum'),
-				'price' => $invoices->sum('price_item'),
 				'cashier' => $invoice->cashier?->name ?? '',
 				'codes' => $invoices->pluck('code'),
 				'tables' => $tables->pluck('name'),
 				'products' => $products->toArray(),
 				'packets' => $packets->toArray(),
+				'tax_percent' => $invoice->tax,
+				'tax' => $priceSum - $priceItem,
+				'price_sum' => $priceSum,
+				'price' => $priceItem,
 			];
 		}
 
