@@ -127,11 +127,12 @@ class ReportService extends Service
 				}
 				return $invoiceProduct->quantity;
 			});
-			$productInPacket = $invoice->packets->sum(function (InvoicePacket $invoicePacket) use ($kitchens): int {
+			$productInPacket = $invoice->packets->sum(function (InvoicePacket $item) use ($kitchens): int {
+				$invoicePacket = InvoicePacket::withTrashed()->whereKey($item->id)->first();
 				$qty = $invoicePacket->quantity;
-				return $invoicePacket->packet->products->sum(function (PacketProduct $packetProduct) use ($kitchens, $qty): int {
+				return $invoicePacket?->packet?->products?->sum(function (PacketProduct $packetProduct) use ($kitchens, $qty): int {
 					return $qty * $packetProduct->quantity;
-				});
+				}) ?? 0;
 			});
 			return $productInPacket + $product;
 		});
