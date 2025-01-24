@@ -100,14 +100,14 @@ class ReportService extends Service
 
 		$avgIncome = (int) $successInvoices->average('price_sum');
 
-		$categories = collect(Category::orderBy('name')->get(['id', 'name'])->toArray())->map(function (array $item) {
+		$categories = collect(Category::withTrashed()->orderBy('name')->get(['id', 'name'])->toArray())->map(function (array $item) {
 			return (object) [
 				...$item,
 				'quantity' => 0,
 				'income' => 0,
 			];
 		});
-		$kitchens = collect(Kitchen::orderBy('name')->get(['id', 'name'])->toArray())->map(function (array $item) {
+		$kitchens = collect(Kitchen::withTrashed()->orderBy('name')->get(['id', 'name'])->toArray())->map(function (array $item) {
 			return (object) [
 				...$item,
 				'quantity' => 0,
