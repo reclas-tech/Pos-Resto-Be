@@ -470,12 +470,14 @@ class OrderService extends Service
 					'type',
 					'status',
 					'payment',
+					'customer',
 					'price_sum',
 					'created_at',
 				]),
 				'products' => $invoice->products->map(function (InvoiceProduct $invoiceProduct): array {
 					return [
 						'id' => $invoiceProduct->id,
+						'note' => $invoiceProduct->note,
 						'quantity' => $invoiceProduct->quantity,
 						'name' => $invoiceProduct->product?->name ?? '',
 						'price' => $invoiceProduct->product?->price ?? 0,
@@ -484,6 +486,7 @@ class OrderService extends Service
 				'packets' => $invoice->packets->map(function (InvoicePacket $invoicePacket): array {
 					return [
 						'id' => $invoicePacket->id,
+						'note' => $invoicePacket->note,
 						'quantity' => $invoicePacket->quantity,
 						'name' => $invoicePacket->packet?->name ?? '',
 						'price' => $invoicePacket->packet?->price ?? 0,
