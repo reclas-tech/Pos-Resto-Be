@@ -58,8 +58,6 @@ class EmployeeService extends Service
 		if ($search !== null) {
 			$employees->whereAny(
 				[
-					'address',
-					'phone',
 					'name',
 					'role',
 					'pin',
