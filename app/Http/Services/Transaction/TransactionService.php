@@ -8,6 +8,9 @@ use App\Models\InvoiceProduct;
 use App\Models\InvoicePacket;
 use App\Models\InvoiceTable;
 use App\Models\Invoice;
+use App\Models\Product;
+use App\Models\Packet;
+use App\Models\Table;
 
 class TransactionService extends Service
 {
@@ -63,25 +66,25 @@ class TransactionService extends Service
 					'price_sum',
 					'created_at',
 				]),
-				'products' => $invoice->products->map(function (InvoiceProduct $item): array {
-					$invoiceProduct = InvoiceProduct::withTrashed()->whereKey($item->id)->first();
+				'products' => $invoice->products->map(function (InvoiceProduct $invoiceProduct): array {
+					$product = Product::withTrashed()->whereKey($invoiceProduct->product_id)->first();
 					return [
 						'quantity' => $invoiceProduct->quantity,
-						'name' => $invoiceProduct->product?->name ?? '',
-						'price' => $invoiceProduct->product?->price ?? 0,
+						'name' => $product->name ?? '',
+						'price' => $product->price ?? 0,
 					];
 				}),
-				'packets' => $invoice->packets->map(function (InvoicePacket $item): array {
-					$invoicePacket = InvoicePacket::withTrashed()->whereKey($item->id)->first();
+				'packets' => $invoice->packets->map(function (InvoicePacket $invoicePacket): array {
+					$packet = Packet::withTrashed()->whereKey($invoicePacket->packet_id)->first();
 					return [
 						'quantity' => $invoicePacket->quantity,
-						'name' => $invoicePacket->packet?->name ?? '',
-						'price' => $invoicePacket->packet?->price ?? 0,
+						'name' => $packet->name ?? '',
+						'price' => $packet->price ?? 0,
 					];
 				}),
-				'tables' => $invoice->tables->map(function (InvoiceTable $item): string {
-					$invoiceTable = InvoiceTable::withTrashed()->whereKey($item->id)->first();
-					return $invoiceTable?->table?->name ?? '';
+				'tables' => $invoice->tables->map(function (InvoiceTable $invoiceTable): string {
+					$table = Table::withTrashed()->whereKey($invoiceTable->table_id)->first();
+					return $table->name ?? '';
 				}),
 				'cashier' => $invoice?->cashier?->name ?? '',
 			];
