@@ -116,12 +116,13 @@ class ReportService extends Service
 		});
 
 		$productCount = $successInvoices->sum(function (Invoice $invoice) use ($categories, $kitchens): int {
-			$product = $invoice->products->sum(function (InvoiceProduct $invoiceProduct) use ($categories, $kitchens): int {
-				if ($temp = $kitchens->firstWhere('id', $invoiceProduct->product->kitchen_id)) {
+			$product = $invoice->products->sum(function (InvoiceProduct $item) use ($categories, $kitchens): int {
+				$invoiceProduct = InvoiceProduct::withTrashed()->whereKey($item->id)->first();
+				if ($temp = $kitchens->firstWhere('id', $invoiceProduct?->product?->kitchen_id)) {
 					$temp->quantity += $invoiceProduct->quantity;
 					$temp->income += $invoiceProduct->price_sum;
 				}
-				if ($temp = $categories->firstWhere('id', $invoiceProduct->product->category_id)) {
+				if ($temp = $categories->firstWhere('id', $invoiceProduct?->product?->category_id)) {
 					$temp->quantity += $invoiceProduct->quantity;
 					$temp->income += $invoiceProduct->price_sum;
 				}
