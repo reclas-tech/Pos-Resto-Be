@@ -91,13 +91,19 @@ class PacketService extends Service
 				'products' => function ($query) {
 					$query->select(['id', 'quantity', 'product_id', 'packet_id'])->with([
 						'product' => function ($query) {
-							$query->select(['id', 'name']); }
+							$query->withTrashed()->select(['id', 'name']); }
 					]);
 				}
 			])->latest()->get();
 		}
 
-		$query = Packet::query()->with('products');
+		$query = Packet::query()->with([
+			'products' => function ($query) {
+				$query->select(['id', 'quantity', 'product_id', 'packet_id'])->with([
+					'product' => function ($query) {
+						$query->withTrashed()->select(['id', 'name']); }
+				]);
+		}]);
 
 		if ($search) {
 			$query->where('name', 'like', '%' . $search . '%');
@@ -117,7 +123,9 @@ class PacketService extends Service
 	{
 		return Packet::with([
 			'products' => function ($query) {
-				$query->with(['product']);
+				$query->with(['product' => function ($query) {
+					$query->withTrashed();
+				}]);
 			}
 		])->find($id);
 	}
