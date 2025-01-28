@@ -11,4 +11,16 @@ class PrinterService extends Service
 	{
 		return PrinterSetting::first()?->only(['checker_ip', 'link']);
 	}
+
+	public function update(string $checkerIp, string $link): bool
+	{
+		$setting = PrinterSetting::firstOrNew();
+
+		$setting->checker_ip = $checkerIp;
+		$setting->link = $link;
+
+		$setting->cut ??= true;
+
+		return $setting->save();
+	}
 }

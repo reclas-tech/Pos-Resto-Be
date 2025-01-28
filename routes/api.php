@@ -50,6 +50,7 @@ use App\Http\Controllers\Product\ProductDeleteController;
 use App\Http\Controllers\Product\ProductGetAllController;
 use App\Http\Controllers\Product\ProductGetOneController;
 use App\Http\Controllers\Product\ProductUpdateController;
+use App\Http\Controllers\Printer\PrinterUpdateController;
 use App\Http\Controllers\Report\ReportSummaryController;
 use App\Http\Controllers\Kitchen\KitchenListController;
 use App\Http\Controllers\Product\ProductListController;
@@ -267,6 +268,7 @@ Route::prefix('v1')->group(function (): void {
 		// ADMIN
 		Route::prefix('admin')->middleware('api-admin')->group(function (): void {
 			Route::get('get', [PrinterGetController::class, 'action']);
+			Route::get('update', [PrinterUpdateController::class, 'action']);
 		});
 	});
 
