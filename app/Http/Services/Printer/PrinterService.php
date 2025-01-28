@@ -7,7 +7,7 @@ use App\Models\PrinterSetting;
 
 class PrinterService extends Service
 {
-	public function get(): PrinterSetting|null
+	public function get(): array|null
 	{
 		return PrinterSetting::first()?->only(['checker_ip', 'link']);
 	}
