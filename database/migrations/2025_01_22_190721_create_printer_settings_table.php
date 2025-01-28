@@ -14,6 +14,7 @@ return new class extends Migration {
             $table->uuid('id')->primary();
 
             // REQUIRED
+            $table->string('checker_ip', 20);
             $table->text('link');
             $table->boolean('cut');
 

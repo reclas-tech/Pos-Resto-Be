@@ -24,6 +24,8 @@ class DatabaseSeeder extends Seeder
             PacketSeeder::class,
             TableSeeder::class,
             InvoiceSeeder::class,
+
+            PrinterSettingSeeder::class,
         ]);
     }
 }

@@ -20,6 +20,7 @@ class PrinterSetting extends Model
 
     protected $fillable = [
         // REQUIRED
+        'checker_ip',
         'link',
         'cut',
     ];
