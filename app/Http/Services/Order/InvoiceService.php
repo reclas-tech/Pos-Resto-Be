@@ -9,12 +9,18 @@ use App\Models\PrinterSetting;
 
 class InvoiceService extends Service
 {
-	public static function Print(array $kitchens, array $tables)
+	public static function KitchenPrint(array $kitchens, array $tables): string
 	{
 		$print = PrinterSetting::first();
-		
+
+		$printPath = config('app.print_kitchen_api');
+
 		$printURL = $print?->link ?? config('app.print_url');
 		$printCut = $print?->cut ?? config('app.print_cut');
+
+		if (substr($printURL, -1) === '/') {
+			$printURL = substr($printURL, 0, strlen($printURL) - 1) . $printPath;
+		}
 
 		$data = [];
 		foreach ($kitchens as $invoice) {
@@ -29,7 +35,7 @@ class InvoiceService extends Service
 				'tables' => $tables,
 			];
 		}
-		
+
 		try {
 			$response = Http::asJson()->post($printURL, ['data' => $data]);
 			return $response->body();
