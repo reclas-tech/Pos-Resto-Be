@@ -78,36 +78,38 @@ class InvoiceService extends Service
 
 			$printURL .= $printPath;
 
+			$data = [
+				...$invoice->only([
+					'code',
+					'customer',
+					'created_at',
+				]),
+				'products' => $invoice->products()->withTrashed()->get()->map(function (InvoiceProduct $invoiceProduct): array {
+					return [
+						...$invoiceProduct->only([
+							'quantity',
+							'note',
+						]),
+						'name' => $invoiceProduct->product()->withTrashed()->first()?->name ?? '',
+					];
+				}),
+				'packets' => $invoice->packets()->withTrashed()->get()->map(function (InvoicePacket $invoicePacket): array {
+					return [
+						...$invoicePacket->only([
+							'quantity',
+							'note',
+						]),
+						'name' => $invoicePacket->packet()->withTrashed()->first()?->name ?? '',
+					];
+				}),
+				'tables' => $invoice->tables()->withTrashed()->get()->map(function (InvoiceTable $invoiceTable): string {
+					return $invoiceTable->table()->withTrashed()->first()?->name ?? '';
+				}),
+				'ip' => $print?->checker_ip ?? '',
+			];
+
 			try {
-				$response = Http::asJson()->post($printURL, [
-					...$invoice->only([
-						'code',
-						'customer',
-						'created_at',
-					]),
-					'products' => $invoice->products()->withTrashed()->get()->map(function (InvoiceProduct $invoiceProduct): array {
-						return [
-							...$invoiceProduct->only([
-								'quantity',
-								'note',
-							]),
-							'name' => $invoiceProduct->product()->withTrashed()->first()?->name ?? '',
-						];
-					}),
-					'packets' => $invoice->packets()->withTrashed()->get()->map(function (InvoicePacket $invoicePacket): array {
-						return [
-							...$invoicePacket->only([
-								'quantity',
-								'note',
-							]),
-							'name' => $invoicePacket->packet()->withTrashed()->first()?->name ?? '',
-						];
-					}),
-					'tables' => $invoice->tables()->withTrashed()->get()->map(function (InvoiceTable $invoiceTable): string {
-						return $invoiceTable->table()->withTrashed()->first()?->name ?? '';
-					}),
-					'ip' => $print?->checker_ip ?? '',
-				]);
+				$response = Http::asJson()->post($printURL, $data);
 
 				return $response->successful();
 			} catch (\Exception $e) {

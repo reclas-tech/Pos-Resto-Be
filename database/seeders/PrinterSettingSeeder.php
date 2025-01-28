@@ -15,7 +15,7 @@ class PrinterSettingSeeder extends Seeder
     {
         PrinterSetting::create([
             'checker_ip' => '192.168.1.10',
-            'link' => 'http://localhost:8000',
+            'link' => 'http://localhost',
             'cut' => true,
         ]);
     }
