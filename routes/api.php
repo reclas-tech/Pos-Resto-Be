@@ -268,7 +268,7 @@ Route::prefix('v1')->group(function (): void {
 		// ADMIN
 		Route::prefix('admin')->middleware('api-admin')->group(function (): void {
 			Route::get('get', [PrinterGetController::class, 'action']);
-			Route::get('update', [PrinterUpdateController::class, 'action']);
+			Route::put('update', [PrinterUpdateController::class, 'action']);
 		});
 	});
 
