@@ -138,23 +138,16 @@ class ReportService extends Service
 			return $productInPacket + $product;
 		});
 
-		$income = $successInvoices->sum('price_sum');
-
-		$tax_percent = $successInvoices->average('tax');
-		$tax_percent ??= 0;
-
-		$tax = (int) ($income * $tax_percent / 100);
-
-		$profit = $successInvoices->sum('profit');
-		$cogp = $income - $tax - $profit;
+		$income = $successInvoices->sum('price_item');
+		$bruto = $income;
 
 		$charity_percent = null;
 		if ($year && $month) {
 			if ($charity !== null) {
 				$charity_percent = config('app.charity');
-				$charity = (int) ($profit * $charity_percent / 100);
+				$charity = (int) ($bruto * $charity_percent / 100);
 
-				$profit -= $charity;
+				$bruto -= $charity;
 			}
 			$start = null;
 			$end = null;
@@ -165,6 +158,15 @@ class ReportService extends Service
 			$year = null;
 		}
 
+		$tax_percent = $successInvoices->average('tax');
+		$tax_percent ??= 0;
+
+		$tax = (int) ($bruto * $tax_percent / 100);
+		$bruto -= $tax;
+
+		$profit = $successInvoices->sum('profit');
+		$cogp = $income - $profit - ((int) ($income * $tax_percent / 100));
+
 		return [
 			'month' => $month,
 			'year' => $year,
@@ -172,9 +174,11 @@ class ReportService extends Service
 			'end' => $end,
 
 			'income' => $income,
-			'tax' => $tax,
-			'cogp' => $cogp,
 			'charity' => $charity,
+			'tax' => $tax,
+			'bruto' => $bruto,
+
+			'cogp' => $cogp,
 			'profit' => $profit,
 
 			'tax_percent' => $tax_percent,
