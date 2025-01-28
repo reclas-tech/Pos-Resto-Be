@@ -3,9 +3,8 @@
 use App\Http\Controllers\Authentication\RefreshAccessTokenEmployeeController;
 use App\Http\Controllers\Authentication\RefreshAccessTokenAdminController;
 use App\Http\Controllers\Authentication\ProfileEmployeeController;
-use App\Http\Controllers\Authentication\LogoutEmployeeController;
-use App\Http\Controllers\CashOnHand\CashierShiftListController;
 use App\Http\Controllers\CashOnHand\CloseCashierInvoiceController;
+use App\Http\Controllers\Authentication\LogoutEmployeeController;
 use App\Http\Controllers\Transaction\TransactionDetailController;
 use App\Http\Controllers\Dashboard\DashboardYearIncomeController;
 use App\Http\Controllers\Authentication\LoginEmployeeController;
@@ -13,6 +12,7 @@ use App\Http\Controllers\Authentication\PasswordAdminController;
 use App\Http\Controllers\Table\TableListWithConditionController;
 use App\Http\Controllers\Authentication\ProfileAdminController;
 use App\Http\Controllers\Transaction\TransactionListController;
+use App\Http\Controllers\CashOnHand\CashierShiftListController;
 use App\Http\Controllers\Authentication\LogoutAdminController;
 use App\Http\Controllers\Dashboard\DashboardSummaryController;
 use App\Http\Controllers\Report\ReportIncomeCompareController;
@@ -60,6 +60,7 @@ use App\Http\Controllers\Packet\PacketGetAllController;
 use App\Http\Controllers\Packet\PacketGetOneController;
 use App\Http\Controllers\Packet\PacketUpdateController;
 use App\Http\Controllers\Order\OrderYearListController;
+use App\Http\Controllers\Printer\PrinterGetController;
 use App\Http\Controllers\Order\OrderPaymentController;
 use App\Http\Controllers\Packet\PacketListController;
 use App\Http\Controllers\Order\OrderCreateController;
@@ -259,6 +260,14 @@ Route::prefix('v1')->group(function (): void {
 	// Tax
 	Route::prefix('tax')->group(function (): void {
 		Route::get('get', [TaxGetController::class, 'action'])->middleware('jwt');
+	});
+
+	// Printer
+	Route::prefix('printer')->group(function (): void {
+		// ADMIN
+		Route::prefix('admin')->middleware('api-admin')->group(function (): void {
+			Route::get('get', [PrinterGetController::class, 'action']);
+		});
 	});
 
 	// Cashier Shift
