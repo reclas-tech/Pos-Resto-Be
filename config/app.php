@@ -132,7 +132,9 @@ return [
     'tax' => is_numeric(env('USER_TAX', 10)) ? (float) env('USER_TAX', 10) : 10,
     'charity' => is_numeric(env('USER_CHARITY', 2.5)) ? (float) env('USER_CHARITY', 2.5) : 2.5,
 
-    'print_url' => env('APP_PRINT_URL', 'http://localhost/api/print'),
+    'print_kitchen_api' => '/api/print',
+
+    'print_url' => env('APP_PRINT_URL', 'http://localhost'),
     'print_cut' => (bool) env('APP_PRINT_CUT', true),
 
 ];
