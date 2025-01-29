@@ -165,7 +165,7 @@ class ReportService extends Service
 		$bruto += $tax;
 
 		$profit = $successInvoices->sum('profit');
-		$cogp = $income - $profit - ((int) ($income * $tax_percent / 100));
+		$cogp = $income - $profit;
 
 		return [
 			'month' => $month,
