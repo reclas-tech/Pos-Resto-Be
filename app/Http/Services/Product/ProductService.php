@@ -62,6 +62,8 @@ class ProductService extends Service
 	{
         $product = Product::query();
 
+		$product->withAggregate('category AS category', 'name');
+
         if ($search) {
             $product->where('name', 'like', '%' . $search . '%');
         }

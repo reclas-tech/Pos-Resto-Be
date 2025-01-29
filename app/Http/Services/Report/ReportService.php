@@ -162,7 +162,7 @@ class ReportService extends Service
 		$tax_percent ??= 0;
 
 		$tax = (int) ($bruto * $tax_percent / 100);
-		$bruto -= $tax;
+		$bruto += $tax;
 
 		$profit = $successInvoices->sum('profit');
 		$cogp = $income - $profit - ((int) ($income * $tax_percent / 100));
@@ -182,7 +182,7 @@ class ReportService extends Service
 			'profit' => $profit,
 
 			'tax_percent' => $tax_percent,
-			'charity_percent' => $tax_percent,
+			'charity_percent' => $charity_percent,
 
 			'transaction' => $invoices->count(),
 			'transaction_success' => $successInvoices->count(),
