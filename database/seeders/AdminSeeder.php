@@ -15,9 +15,9 @@ class AdminSeeder extends Seeder
     {
         $data = [
             [
-                'email' => 'admin@reclas.tech',
-                'password' => 'admin#reclas',
-                'name' => 'Admin Reclas',
+                'email' => 'adith.ind@gmail.com',
+                'password' => 'wag12345',
+                'name' => 'Admin Waroeng Aceh Garuda',
             ],
         ];
 
