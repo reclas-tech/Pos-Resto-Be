@@ -27,9 +27,9 @@ class UpdateRequest extends FormRequest
     {
         return [
             'name' => ['bail', 'required', 'string', 'max:255', Rule::unique('packets', 'name')->ignore($this->route('id'))->withoutTrashed()],
-            'price' => 'bail|required|numeric|integer',
+            'price' => 'bail|required|numeric|integer|gt:cogp',
             'stock' => 'bail|required|numeric|integer',
-            'cogp' => 'bail|required|numeric|integer',
+            'cogp' => 'bail|required|numeric|integer|lt:price',
             'image' => 'bail|image|mimes:jpeg,png,jpg,svg|max:10240',
             'products' => 'bail|required|array',
             'products.*.id' => ['bail', 'required', 'string', Rule::exists('products', 'id')->withoutTrashed()],

@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->uuid('id')->primary();
 
             // UNIQUE
-            $table->char('pin', 6)->unique();
+            $table->char('pin', 6)->unique()->nullable();
 
             // REQUIRED
             $table->string('name', 255);

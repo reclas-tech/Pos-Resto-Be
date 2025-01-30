@@ -17,6 +17,11 @@ class AdminSeeder extends Seeder
             [
                 'email' => 'adith.ind@gmail.com',
                 'password' => 'wag12345',
+                'name' => 'Owner Waroeng Aceh Garuda',
+            ],
+            [
+                'email' => 'wag_admin@gmail.com',
+                'password' => 'wag12345',
                 'name' => 'Admin Waroeng Aceh Garuda',
             ],
         ];

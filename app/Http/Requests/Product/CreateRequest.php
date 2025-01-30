@@ -27,11 +27,11 @@ class CreateRequest extends FormRequest
     {
         return [
             'name' => ['bail', 'required', 'string', 'max:255', Rule::unique('products', 'name')->withoutTrashed()],
-            'price' => 'bail|required|numeric|integer',
+            'price' => 'bail|required|numeric|integer|gt:cogp',
             'stock' => 'bail|required|numeric|integer',
             'category_id' => ['bail', 'required', 'string', Rule::exists('categories', 'id')->withoutTrashed()],
             'kitchen_id' => ['bail', 'required', 'string', Rule::exists('kitchens', 'id')->withoutTrashed()],
-            'cogp' => 'bail|required|numeric|integer',
+            'cogp' => 'bail|required|numeric|integer|lt:price',
             'image' => 'bail|required|image|mimes:jpeg,png,jpg,svg|max:10240',
         ];
     }

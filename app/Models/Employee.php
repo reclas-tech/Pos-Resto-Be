@@ -103,6 +103,9 @@ class Employee extends User implements JWTSubject
     {
         try {
             if ($this->shifts->count() || $this->createdInvoices->count() || $this->updatedInvoices->count() || $this->checkOutInvoices->count() || $this->updatedInvoicePackets->count() || $this->updatedInvoiceProducts->count()) {
+                $this->update([
+                    'code' => null
+                ]);
                 $this->delete();
             } else {
                 $this->refreshToken()->forceDelete();

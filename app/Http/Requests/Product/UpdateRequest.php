@@ -27,11 +27,11 @@ class UpdateRequest extends FormRequest
     {
         return [
             'name' => ['bail', 'required', 'string', 'max:255', Rule::unique('products', 'name')->ignore($this->route('id'))->withoutTrashed()],
-            'price' => 'bail|required|numeric|integer',
+            'price' => 'bail|required|numeric|integer|gt:cogp',
             'stock' => 'bail|required|numeric|integer',
             'category_id' => ['bail', 'required', 'string', Rule::exists('categories', 'id')->withoutTrashed()],
             'kitchen_id' => ['bail', 'required', 'string', Rule::exists('kitchens', 'id')->withoutTrashed()],
-            'cogp' => 'bail|required|numeric|integer',
+            'cogp' => 'bail|required|numeric|integer|lt:price',
             'image' => 'bail|image|mimes:jpeg,png,jpg,svg|max:10240',
         ];
     }
