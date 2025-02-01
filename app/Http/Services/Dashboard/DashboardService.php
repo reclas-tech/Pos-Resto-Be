@@ -2,11 +2,11 @@
 
 namespace App\Http\Services\Dashboard;
 
-use App\Models\Kitchen;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Carbon;
 use App\Http\Services\Service;
 use App\Models\Invoice;
-use Illuminate\Support\Collection;
+use App\Models\Kitchen;
 
 class DashboardService extends Service
 {
@@ -49,10 +49,10 @@ class DashboardService extends Service
 		$yesterdayOrderCount = $yesterdayOrder->count();
 
 		$todayItemCount = $todayOrder->sum(function (Invoice $invoice): int {
-			return $invoice->products->sum('quantity') + $invoice->packets->sum('quantity');
+			return $invoice->products()->withTrashed()->get()->sum('quantity') + $invoice->packets()->withTrashed()->get()->sum('quantity');
 		});
 		$yesterdayItemCount = $yesterdayOrder->sum(function (Invoice $invoice): int {
-			return $invoice->products->sum('quantity') + $invoice->packets->sum('quantity');
+			return $invoice->products()->withTrashed()->get()->sum('quantity') + $invoice->packets()->withTrashed()->get()->sum('quantity');
 		});
 
 		$todayIncome = $todayOrder->sum('price_sum');
@@ -106,54 +106,56 @@ class DashboardService extends Service
 	}
 
 	/**
-     * 
-     * 
-     * @return \Illuminate\Support\Collection
-     */
-    public function kitchenIncome(): Collection
-    {
-        $today = Carbon::now();
-        $data = collect();
-        $kitchens = Kitchen::with([
-            'products' => function ($query) use ($today) {
-                $query->withSum(['invoiceProduct as sum' => function ($query) use ($today) {
-					$query->whereDate('created_at', $today)
-					->whereHas('invoice', function ($query) {
-						$query->where('status', Invoice::SUCCESS);
-					}); 
-				}], 'price_sum');
-            }
-        ])->get();
+	 * 
+	 * 
+	 * @return \Illuminate\Support\Collection
+	 */
+	public function kitchenIncome(): Collection
+	{
+		$today = Carbon::now();
+		$data = collect();
+		$kitchens = Kitchen::with([
+			'products' => function ($query) use ($today) {
+				$query->withSum([
+					'invoiceProduct as sum' => function ($query) use ($today) {
+						$query->whereDate('created_at', $today)
+							->whereHas('invoice', function ($query) {
+								$query->where('status', Invoice::SUCCESS);
+							});
+					}
+				], 'price_sum');
+			}
+		])->get();
 
-        foreach ($kitchens as $kitchen) {
-            $sum = 0;
-            foreach($kitchen->products as $product) {
-                $sum += $product->sum;
-            }
-            $data->add([
-                'name' => $kitchen->name,
-                'sum' => $sum
-            ]);
-        }
+		foreach ($kitchens as $kitchen) {
+			$sum = 0;
+			foreach ($kitchen->products as $product) {
+				$sum += $product->sum;
+			}
+			$data->add([
+				'name' => $kitchen->name,
+				'sum' => $sum
+			]);
+		}
 
-        return $data;
-    }
+		return $data;
+	}
 
 	/**
-     * 
-     * 
-     * @return \Illuminate\Support\Collection
-     */
+	 * 
+	 * 
+	 * @return \Illuminate\Support\Collection
+	 */
 	public function transaction(): Collection
-    {
-        $today = Carbon::now();
-        $data = collect();
+	{
+		$today = Carbon::now();
+		$data = collect();
 		$dine_in = Invoice::whereDate('created_at', $today)->where('type', Invoice::DINE_IN)->where('status', Invoice::SUCCESS)->count();
 		$take_away = Invoice::whereDate('created_at', $today)->where('type', Invoice::TAKE_AWAY)->where('status', Invoice::SUCCESS)->count();
 
 		$data->add([
 			'name' => 'Dine In',
-			'sum' => $dine_in	
+			'sum' => $dine_in
 		]);
 
 		$data->add([
@@ -161,6 +163,6 @@ class DashboardService extends Service
 			'sum' => $take_away
 		]);
 
-        return $data;
-    }
+		return $data;
+	}
 }
