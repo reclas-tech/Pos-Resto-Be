@@ -18,40 +18,38 @@ use Exception;
 
 class OrderService extends Service
 {
-
 	/**
 	 * @param \Illuminate\Support\Collection $invoices
 	 * @param \Illuminate\Support\Collection $tables
 	 * 
-	 * @return mixed
+	 * @return array|array{invoices: Collection, tables: Collection}
 	 */
-	private function getRelatedOrder(Collection $invoices, Collection $tables, Carbon $currentDate): array
+	private function getRelatedOrder(Collection $invoices, Collection $tables): array
 	{
 		$invoiceCount = $invoices->count();
 		$tableCount = $tables->count();
 
 		foreach ($invoices as $invoice) {
 			foreach ($invoice->tables ?? [] as $invoiceTable) {
-				$temp = Invoice::whereDate('created_at', $currentDate)
-					->whereNotIn('id', $invoices->pluck('id')->toArray())
+				$temp = Invoice::whereNotIn('id', $invoices->pluck('id')->toArray())
 					->where('status', Invoice::PENDING)
 					->where('type', Invoice::DINE_IN)
 					->whereHas('tables', function (Builder $query) use ($invoiceTable): void {
-						$query->where('table_id', $invoiceTable->table->id);
+						$query->where('table_id', $invoiceTable->table_id);
 					})
 					->get();
 
 				if ($temp->count()) {
 					$invoices->add(...$temp);
 				}
-				if ($tables->firstWhere('id', $invoiceTable->table->id) === null) {
-					$tables->add($invoiceTable->table);
+				if ($tables->firstWhere('id', $invoiceTable->table_id) === null) {
+					$tables->add($invoiceTable->table()->withTrashed()->first());
 				}
 			}
 		}
 
 		if ($invoices->count() !== $invoiceCount || $tables->count() !== $tableCount) {
-			return $this->getRelatedOrder($invoices, $tables, $currentDate);
+			return $this->getRelatedOrder($invoices, $tables);
 		}
 
 		return [
@@ -236,8 +234,13 @@ class OrderService extends Service
 	public function takeAwayList(string|null $status = null): array
 	{
 		$invoices = Invoice::query()
-			->whereDate('created_at', Carbon::now())
-			->where('type', Invoice::TAKE_AWAY);
+			->where('type', Invoice::TAKE_AWAY)
+			->where(function (Builder $query): void {
+				$query->where('status', Invoice::PENDING)
+					->orWhere(function (Builder $query): void {
+						$query->where('created_at', '>=', Carbon::yesterday());
+					});
+			});
 
 		if ($status) {
 			if ($status === 'belum bayar') {
@@ -269,10 +272,8 @@ class OrderService extends Service
 	 */
 	public function detail(string $id): array|null
 	{
-		$currentDate = Carbon::now();
 		$invoice = Invoice::withTrashed()
 			->whereKey($id)
-			->whereDate('created_at', $currentDate)
 			->whereNull('deleted_at')
 			->first();
 
@@ -286,7 +287,7 @@ class OrderService extends Service
 			$invoices->add($invoice);
 
 			if ($invoice->type === Invoice::DINE_IN && $invoice->status === Invoice::PENDING) {
-				$result = $this->getRelatedOrder($invoices, $tables, $currentDate);
+				$result = $this->getRelatedOrder($invoices, $tables);
 
 				$invoices = $result['invoices'];
 				$tables = $result['tables'];
@@ -299,8 +300,8 @@ class OrderService extends Service
 						'note' => $invoiceProduct->note,
 						'quantity' => $invoiceProduct->quantity,
 						'price_sum' => $invoiceProduct->price_sum,
-						'name' => $invoiceProduct?->product?->name ?? '',
-						'price' => $invoiceProduct?->product?->price ?? '',
+						'name' => $invoiceProduct->product()->withTrashed()->first()?->name ?? '',
+						'price' => $invoiceProduct->product()->withTrashed()->first()?->price ?? '',
 					]);
 				}
 				foreach ($item->packets ?? [] as $key => $invoicePacket) {
@@ -309,8 +310,8 @@ class OrderService extends Service
 						'note' => $invoicePacket->note,
 						'quantity' => $invoicePacket->quantity,
 						'price_sum' => $invoicePacket->price_sum,
-						'name' => $invoicePacket?->packet?->name ?? '',
-						'price' => $invoicePacket?->packet?->price ?? '',
+						'name' => $invoicePacket->packet()->withTrashed()->first()?->name ?? '',
+						'price' => $invoicePacket->packet()->withTrashed()->first()?->price ?? '',
 					]);
 				}
 			}
@@ -326,7 +327,7 @@ class OrderService extends Service
 					'customer',
 					'created_at',
 				]),
-				'cashier' => $invoice->cashier?->name ?? '',
+				'cashier' => $invoice->cashier()->withTrashed()->first()?->name ?? '',
 				'codes' => $invoices->pluck('code'),
 				'tables' => $tables->pluck('name'),
 				'products' => $products->toArray(),
@@ -349,10 +350,8 @@ class OrderService extends Service
 	 */
 	public function payment(string $id, string $method): bool|Exception|null
 	{
-		$currentDate = Carbon::now();
 		$invoice = Invoice::withTrashed()
 			->whereKey($id)
-			->whereDate('created_at', $currentDate)
 			->where('status', Invoice::PENDING)
 			->whereNull('deleted_at')
 			->first();
@@ -363,7 +362,7 @@ class OrderService extends Service
 			$invoices->add($invoice);
 
 			if ($invoice->type === Invoice::DINE_IN) {
-				$result = $this->getRelatedOrder($invoices, collect(), $currentDate);
+				$result = $this->getRelatedOrder($invoices, collect());
 
 				$invoices = $result['invoices'];
 			}
@@ -446,9 +445,7 @@ class OrderService extends Service
 	 */
 	public function historyDetail(string $id): array|null
 	{
-		$currentDate = Carbon::now();
-
-		$invoice = Invoice::withTrashed()->whereKey($id)->whereDate('created_at', $currentDate)->first();
+		$invoice = Invoice::withTrashed()->whereKey($id)->first();
 
 		if ($invoice) {
 			return [
@@ -468,8 +465,8 @@ class OrderService extends Service
 						'id' => $invoiceProduct->id,
 						'note' => $invoiceProduct->note,
 						'quantity' => $invoiceProduct->quantity,
-						'name' => $invoiceProduct->product?->name ?? '',
-						'price' => $invoiceProduct->product?->price ?? 0,
+						'name' => $invoiceProduct->product()->withTrashed()->first()?->name ?? '',
+						'price' => $invoiceProduct->product()->withTrashed()->first()?->price ?? 0,
 					];
 				}),
 				'packets' => $invoice->packets->map(function (InvoicePacket $invoicePacket): array {
@@ -477,14 +474,14 @@ class OrderService extends Service
 						'id' => $invoicePacket->id,
 						'note' => $invoicePacket->note,
 						'quantity' => $invoicePacket->quantity,
-						'name' => $invoicePacket->packet?->name ?? '',
-						'price' => $invoicePacket->packet?->price ?? 0,
+						'name' => $invoicePacket->packet()->withTrashed()->first()?->name ?? '',
+						'price' => $invoicePacket->packet()->withTrashed()->first()?->price ?? 0,
 					];
 				}),
 				'tables' => $invoice->tables->map(function (InvoiceTable $invoiceTable): string {
-					return $invoiceTable?->table?->name ?? '';
+					return $invoiceTable?->table()->withTrashed()->first()?->name ?? '';
 				}),
-				'cashier' => $invoice?->cashier?->name ?? '',
+				'cashier' => $invoice?->cashier()->withTrashed()->first()?->name ?? '',
 			];
 		}
 
