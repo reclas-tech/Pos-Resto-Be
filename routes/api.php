@@ -35,11 +35,6 @@ use App\Http\Controllers\Order\OrderHistoryListController;
 use App\Http\Controllers\Dashboard\TransactionController;
 use App\Http\Controllers\Category\CategoryListController;
 use App\Http\Controllers\Employee\EmployeeListController;
-use App\Http\Controllers\Example\ExampleCreateController;
-use App\Http\Controllers\Example\ExampleDeleteController;
-use App\Http\Controllers\Example\ExampleGetAllController;
-use App\Http\Controllers\Example\ExampleGetOneController;
-use App\Http\Controllers\Example\ExampleUpdateController;
 use App\Http\Controllers\Kitchen\KitchenCreateController;
 use App\Http\Controllers\Kitchen\KitchenDeleteController;
 use App\Http\Controllers\Kitchen\KitchenGetAllController;
@@ -54,12 +49,12 @@ use App\Http\Controllers\Printer\PrinterUpdateController;
 use App\Http\Controllers\Report\ReportSummaryController;
 use App\Http\Controllers\Kitchen\KitchenListController;
 use App\Http\Controllers\Product\ProductListController;
-use App\Http\Controllers\Report\ReportIncomeController;
 use App\Http\Controllers\Packet\PacketCreateController;
 use App\Http\Controllers\Packet\PacketDeleteController;
 use App\Http\Controllers\Packet\PacketGetAllController;
 use App\Http\Controllers\Packet\PacketGetOneController;
 use App\Http\Controllers\Packet\PacketUpdateController;
+use App\Http\Controllers\Report\ReportIncomeController;
 use App\Http\Controllers\Order\OrderYearListController;
 use App\Http\Controllers\Printer\PrinterGetController;
 use App\Http\Controllers\Order\OrderPaymentController;
@@ -76,13 +71,12 @@ use App\Http\Controllers\Report\ReportController;
 use App\Http\Controllers\Tax\TaxGetController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('example')->group(function (): void {
-	Route::post('create', [ExampleCreateController::class, 'action']);
-	Route::get('list', [ExampleGetAllController::class, 'action']);
-	Route::get('one/{id}', [ExampleGetOneController::class, 'action']);
-	Route::put('update/{id}', [ExampleUpdateController::class, 'action']);
-	Route::delete('delete/{id}', [ExampleDeleteController::class, 'action']);
-});
+
+/*
+|--------------------------------------------------------------------------
+| API Routes - Version 1
+|--------------------------------------------------------------------------
+*/
 
 Route::prefix('v1')->group(function (): void {
 	// Authentication

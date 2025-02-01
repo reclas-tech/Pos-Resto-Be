@@ -28,7 +28,6 @@ class AdminAuthenticate
 
                 if ($admin !== null) {
                     $request->attributes->add(['user_id' => $admin->id]);
-                    $request->attributes->remove('jwt_payload');
 
                     auth('api-admin')->login($admin);
 
