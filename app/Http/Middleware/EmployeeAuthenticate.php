@@ -31,7 +31,6 @@ class EmployeeAuthenticate
 
                 if ($employee !== null) {
                     $request->attributes->add(['user_id' => $employee->id]);
-                    $request->attributes->remove('jwt_payload');
 
                     auth('api-employee')->login($employee);
 

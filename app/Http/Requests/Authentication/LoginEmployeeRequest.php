@@ -25,7 +25,7 @@ class LoginEmployeeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'pin' => 'bail|required|string|min:6|max:6',
+            'pin' => 'bail|required|string|numeric|digits:6',
         ];
     }
 

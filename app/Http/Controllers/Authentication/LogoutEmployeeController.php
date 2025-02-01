@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Authentication;
 use App\Http\Services\Authentication\LogoutEmployeeService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use App\Helpers\Response;
 
 class LogoutEmployeeController extends Controller
@@ -13,9 +14,11 @@ class LogoutEmployeeController extends Controller
     {
     }
 
-    public function action(): JsonResponse
+    public function action(Request $request): JsonResponse
     {
-        $this->logoutService->action();
+        $payload = $request->attributes->get('jwt_payload', []);
+
+        $this->logoutService->action($payload['sub'] ?? '');
 
         return Response::SetAndGet(message: 'Berhasil keluar');
     }

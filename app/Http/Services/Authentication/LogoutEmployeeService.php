@@ -2,19 +2,18 @@
 
 namespace App\Http\Services\Authentication;
 
-use Illuminate\Database\Eloquent\Builder;
 use App\Models\EmployeeRefreshToken;
 use App\Http\Services\Service;
 
 class LogoutEmployeeService extends Service
 {
 	/**
+	 * @param string $id
+	 * 
 	 * @return void
 	 */
-	public function action(): void
+	public function action(string $id): void
 	{
-		EmployeeRefreshToken::whereHas('employee', function (Builder $query): void {
-			$query->whereKey(auth('api-employee')->id());
-		})->delete();
+		EmployeeRefreshToken::whereKey($id)->delete();
 	}
 }
