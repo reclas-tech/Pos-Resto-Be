@@ -33,7 +33,7 @@ class PasswordAdminService extends Service
 				$tokenData = Token::Generate(['sub' => $admin->email], $this->exp);
 				$admin->update(['otp' => (string) $otp]);
 
-				Mail::to($admin->email)->send(new ForgetPasswordMail([...$admin->toArray(), 'otp' => $admin->otp]));
+				Mail::to($admin->email)->send(new ForgetPasswordMail($admin->only(['email', 'otp'])));
 
 				DB::commit();
 
@@ -65,6 +65,8 @@ class PasswordAdminService extends Service
 
 		if ($admin !== null) {
 			$tokenData = Token::Generate(['sub' => $admin->email, 'otp' => 'valid'], $this->exp);
+
+			$admin->refreshToken()->delete();
 
 			return $tokenData;
 		}
