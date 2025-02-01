@@ -40,11 +40,10 @@ class ReportService extends Service
 
 		foreach ($orders as $invoice) {
 			$check = false;
-			foreach ($invoice->products as $item) {
-				$invoiceProduct = InvoiceProduct::withTrashed()->whereKey($item->id)->first();
-				if ($kitchen === null || ($kitchen !== null && $invoiceProduct?->product?->kitchen_id === $kitchen)) {
-					$product += $invoiceProduct->quantity;
-					$income += $invoiceProduct->price_sum;
+			foreach ($$invoice->products()->withTrashed()->get() as $key => $item) {
+				if ($kitchen === null || $item->product()->withTrashed()->first()?->kitchen_id === $kitchen) {
+					$product += $item->quantity;
+					$income += $item->price_sum;
 					$check = true;
 				}
 			}
@@ -116,22 +115,20 @@ class ReportService extends Service
 		});
 
 		$productCount = $successInvoices->sum(function (Invoice $invoice) use ($categories, $kitchens): int {
-			$product = $invoice->products->sum(function (InvoiceProduct $item) use ($categories, $kitchens): int {
-				$invoiceProduct = InvoiceProduct::withTrashed()->whereKey($item->id)->first();
-				if ($temp = $kitchens->firstWhere('id', $invoiceProduct?->product?->kitchen_id)) {
+			$product = $invoice->products()->withTrashed()->get()->sum(function (InvoiceProduct $invoiceProduct) use ($categories, $kitchens): int {
+				if ($temp = $kitchens->firstWhere('id', $invoiceProduct->product()->withTrashed()->first()?->kitchen_id)) {
 					$temp->quantity += $invoiceProduct->quantity;
 					$temp->income += $invoiceProduct->price_sum;
 				}
-				if ($temp = $categories->firstWhere('id', $invoiceProduct?->product?->category_id)) {
+				if ($temp = $categories->firstWhere('id', $invoiceProduct->product()->withTrashed()->first()?->category_id)) {
 					$temp->quantity += $invoiceProduct->quantity;
 					$temp->income += $invoiceProduct->price_sum;
 				}
 				return $invoiceProduct->quantity;
 			});
-			$productInPacket = $invoice->packets->sum(function (InvoicePacket $item) use ($kitchens): int {
-				$invoicePacket = InvoicePacket::withTrashed()->whereKey($item->id)->first();
+			$productInPacket = $invoice->packets()->withTrashed()->get()->sum(function (InvoicePacket $invoicePacket): int {
 				$qty = $invoicePacket->quantity;
-				return $invoicePacket?->packet?->products?->sum(function (PacketProduct $packetProduct) use ($kitchens, $qty): int {
+				return $invoicePacket->packet()->withTrashed()->first()?->products()->withTrashed()->get()->sum(function (PacketProduct $packetProduct) use ($qty): int {
 					return $qty * $packetProduct->quantity;
 				}) ?? 0;
 			});
