@@ -402,9 +402,10 @@ class OrderService extends Service
 	 */
 	public function historyList(string|null $search, string|null $invoice, string|null $price, string|null $time): Collection
 	{
-		$currentDate = Carbon::now();
-
-		$invoices = Invoice::withTrashed()->whereDate('created_at', $currentDate);
+		$invoices = Invoice::withTrashed()->where(function (Builder $query): void {
+			$query->where('created_at', '>=', Carbon::yesterday())
+				->orWhere('status', Invoice::PENDING);
+		});
 
 		if ($invoice) {
 			$invoices->orderBy('code', $invoice);
@@ -545,6 +546,9 @@ class OrderService extends Service
 							if ($invoiceProduct !== null) {
 								$quantity = (int) $product['quantity'];
 								if ($quantity > 0 && $quantity < $invoiceProduct->quantity) {
+									$invoiceProduct->product?->stock += $invoiceProduct->quantity - $quantity;
+									$invoiceProduct->product?->save();
+
 									$price = (int) ($invoiceProduct->price_sum / $invoiceProduct->quantity);
 									$profit = (int) ($invoiceProduct->profit / $invoiceProduct->quantity);
 
@@ -569,6 +573,9 @@ class OrderService extends Service
 							if ($invoicePacket !== null) {
 								$quantity = (int) $packet['quantity'];
 								if ($quantity > 0 && $quantity < $invoicePacket->quantity) {
+									$invoicePacket->packet?->stock += $invoicePacket->quantity - $quantity;
+									$invoicePacket->packet?->save();
+
 									$price = (int) ($invoicePacket->price_sum / $invoicePacket->quantity);
 									$profit = (int) ($invoicePacket->profit / $invoicePacket->quantity);
 
