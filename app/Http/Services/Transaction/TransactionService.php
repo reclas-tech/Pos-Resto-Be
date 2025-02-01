@@ -8,9 +8,6 @@ use App\Models\InvoiceProduct;
 use App\Models\InvoicePacket;
 use App\Models\InvoiceTable;
 use App\Models\Invoice;
-use App\Models\Product;
-use App\Models\Packet;
-use App\Models\Table;
 
 class TransactionService extends Service
 {
@@ -66,27 +63,24 @@ class TransactionService extends Service
 					'price_sum',
 					'created_at',
 				]),
-				'products' => $invoice->products->map(function (InvoiceProduct $invoiceProduct): array {
-					$product = Product::withTrashed()->whereKey($invoiceProduct->product_id)->first();
+				'products' => $invoice->products()->withTrashed()->get()->map(function (InvoiceProduct $invoiceProduct): array {
 					return [
+						'name' => $invoiceProduct->product()->withTrashed()->first()?->name ?? '',
+						'price' => (int) ($invoiceProduct->price_sum / $invoiceProduct->quantity),
 						'quantity' => $invoiceProduct->quantity,
-						'name' => $product->name ?? '',
-						'price' => $product->price ?? 0,
 					];
 				}),
-				'packets' => $invoice->packets->map(function (InvoicePacket $invoicePacket): array {
-					$packet = Packet::withTrashed()->whereKey($invoicePacket->packet_id)->first();
+				'packets' => $invoice->packets()->withTrashed()->get()->map(function (InvoicePacket $invoicePacket): array {
 					return [
+						'name' => $invoicePacket->packet()->withTrashed()->first()?->name ?? '',
+						'price' => (int) ($invoicePacket->price_sum / $invoicePacket->quantity),
 						'quantity' => $invoicePacket->quantity,
-						'name' => $packet->name ?? '',
-						'price' => $packet->price ?? 0,
 					];
 				}),
-				'tables' => $invoice->tables->map(function (InvoiceTable $invoiceTable): string {
-					$table = Table::withTrashed()->whereKey($invoiceTable->table_id)->first();
-					return $table->name ?? '';
+				'tables' => $invoice->tables()->withTrashed()->get()->map(function (InvoiceTable $invoiceTable): string {
+					return $invoiceTable->table()->withTrashed()->first()?->name ?? '';
 				}),
-				'cashier' => $invoice?->cashier?->name ?? '',
+				'cashier' => $invoice->cashier()->withTrashed()->first()?->name ?? '',
 			];
 		}
 
