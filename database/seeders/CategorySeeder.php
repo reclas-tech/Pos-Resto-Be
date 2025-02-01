@@ -13,10 +13,32 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
-        for ($i = 1; $i <= 5; $i++) {
-            Category::create([
-                'name' => "Kategori $i",
-            ]);
+        $data = [
+            [
+                'name' => 'Makanan',
+            ],
+            [
+                'name' => 'Snack',
+            ],
+            [
+                'name' => 'Teh Tarik',
+            ],
+            [
+                'name' => 'Kopi Saring',
+            ],
+            [
+                'name' => 'Minuman Jus',
+            ],
+            [
+                'name' => 'Minuman Float',
+            ],
+            [
+                'name' => 'Minuman Lainnya',
+            ],
+        ];
+
+        foreach ($data as $key => $item) {
+            Category::create($item);
         }
     }
 }

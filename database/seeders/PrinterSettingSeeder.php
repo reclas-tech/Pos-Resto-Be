@@ -14,8 +14,8 @@ class PrinterSettingSeeder extends Seeder
     public function run(): void
     {
         PrinterSetting::create([
-            'checker_ip' => '192.168.1.10',
-            'link' => 'http://localhost',
+            'link' => 'https://seagull-literate-strictly.ngrok-free.app',
+            'checker_ip' => '192.168.10.10',
             'cut' => true,
         ]);
     }

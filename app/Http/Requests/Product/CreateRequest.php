@@ -31,7 +31,7 @@ class CreateRequest extends FormRequest
             'stock' => 'bail|required|numeric|integer',
             'category_id' => ['bail', 'required', 'string', Rule::exists('categories', 'id')->withoutTrashed()],
             'kitchen_id' => ['bail', 'required', 'string', Rule::exists('kitchens', 'id')->withoutTrashed()],
-            'cogp' => 'bail|required|numeric|integer|lt:price',
+            'cogp' => 'bail|required|numeric|integer|lt:price|min:0',
             'image' => 'bail|required|image|mimes:jpeg,png,jpg,svg|max:10240',
         ];
     }

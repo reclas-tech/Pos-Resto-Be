@@ -18,9 +18,9 @@ class DatabaseSeeder extends Seeder
             // EmployeeSeeder::class,
             AdminSeeder::class,
 
-            // CategorySeeder::class,
-            // KitchenSeeder::class,
-            // ProductSeeder::class,
+            CategorySeeder::class,
+            KitchenSeeder::class,
+            ProductSeeder::class,
             // PacketSeeder::class,
             // TableSeeder::class,
             // InvoiceSeeder::class,

@@ -13,10 +13,25 @@ class KitchenSeeder extends Seeder
      */
     public function run(): void
     {
-        for ($i = 1; $i <= 5; $i++) {
+        $data = [
+            [
+                'name' => 'Dapur 1',
+            ],
+            [
+                'name' => 'Dapur 2',
+            ],
+            [
+                'name' => 'Dapur 3',
+            ],
+            [
+                'name' => 'Dapur 4',
+            ],
+        ];
+
+        foreach ($data as $key => $item) {
             Kitchen::create([
-                'name' => "Dapur $i",
-                'ip' => fake()->ipv4(),
+                'ip' => $item['ip'] ?? '192.168.1' . ($key + 1),
+                'name' => $item['name'],
             ]);
         }
     }

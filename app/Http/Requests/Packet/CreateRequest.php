@@ -29,7 +29,7 @@ class CreateRequest extends FormRequest
             'name' => ['bail', 'required', 'string', 'max:255', Rule::unique('packets', 'name')->withoutTrashed()],
             'price' => 'bail|required|numeric|integer|gt:cogp',
             'stock' => 'bail|required|numeric|integer',
-            'cogp' => 'bail|required|numeric|integer|lt:price',
+            'cogp' => 'bail|required|numeric|integer|lt:price|min:0',
             'image' => 'bail|required|image|mimes:jpeg,png,jpg,svg|max:10240',
             'products' => 'bail|required|array',
             'products.*.id' => ['bail', 'required', 'string', Rule::exists('products', 'id')->withoutTrashed()],
