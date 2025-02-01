@@ -138,4 +138,6 @@ return [
     'print_url' => env('APP_PRINT_URL', 'http://localhost'),
     'print_cut' => (bool) env('APP_PRINT_CUT', true),
 
+    'print_token' => 'reclas-madewithlovebyreclas-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtYWRld2l0aGxvdmVieXJlY2xhcyIsImlhdCI6MTUxNjIzOTAyMn0.SZ_8-5ABbYj0-Q-IpLGn-YEnwBdcbF_BcZN10BE4ATo',
+
 ];

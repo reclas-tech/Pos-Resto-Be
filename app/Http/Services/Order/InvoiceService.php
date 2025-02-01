@@ -49,7 +49,10 @@ class InvoiceService extends Service
 		}
 
 		try {
-			$response = Http::asJson()->withHeader('ngrok-skip-browser-warning', 'true')->post($printURL, ['data' => $data]);
+			$response = Http::asJson()->withHeaders([
+				'Authorization' => config('app.print_token'),
+				'ngrok-skip-browser-warning' => 'true',
+			])->post($printURL, ['data' => $data]);
 			return $response->body();
 		} catch (\Exception $e) {
 			return $e->getMessage();
@@ -109,7 +112,10 @@ class InvoiceService extends Service
 			];
 
 			try {
-				$response = Http::asJson()->withHeader('ngrok-skip-browser-warning', 'true')->post($printURL, $data);
+				$response = Http::asJson()->withHeaders([
+					'Authorization' => config('app.print_token'),
+					'ngrok-skip-browser-warning' => 'true',
+				])->post($printURL, $data);
 
 				return $response->successful();
 			} catch (\Exception $e) {

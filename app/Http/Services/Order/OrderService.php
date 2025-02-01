@@ -115,17 +115,14 @@ class OrderService extends Service
 							'product_id' => $product->id,
 						]);
 
-						$stock = $product->stock - $quantity;
-						$stock = $stock >= 0 ? $stock : 0;
-
-						$product->stock = $stock;
+						$product->stock -= $quantity;
 						$product->save();
 
 						$profitSum += $profit;
 						$priceSum += $price;
 
 						if ($kitchens->firstWhere('id', $product->kitchen->id) === null) {
-							$kitchens->add([
+							$kitchens->add((object) [
 								'id' => $product->kitchen->id,
 								'ip' => $product->kitchen->ip,
 								'name' => $product->kitchen->name,
@@ -136,7 +133,7 @@ class OrderService extends Service
 							]);
 						}
 
-						$kitchens->firstWhere('id', $product->kitchen->id)['products']->add((object) [
+						$kitchens->firstWhere('id', $product->kitchen->id)?->products->add((object) [
 							'id' => $product->id,
 							'name' => $product->name,
 							'quantity' => $quantity,
@@ -165,20 +162,17 @@ class OrderService extends Service
 							'packet_id' => $packet->id,
 						]);
 
-						$stock = $packet->stock - $quantity;
-						$stock = $stock >= 0 ? $stock : 0;
-
-						$packet->stock = $stock;
+						$packet->stock -= $quantity;
 						$packet->save();
 
 						$profitSum += $profit;
 						$priceSum += $price;
 
 						foreach ($packet->products as $tempProduct) {
-							$product = $tempProduct->product;
+							$product = $tempProduct->product()->withTrashed()->first();
 
-							if ($kitchens->firstWhere('id', $product->kitchen->id) === null) {
-								$kitchens->add([
+							if ($kitchens->firstWhere('id', $product?->kitchen_id) === null) {
+								$kitchens->add((object) [
 									'id' => $product->kitchen->id,
 									'ip' => $product->kitchen->ip,
 									'name' => $product->kitchen->name,
@@ -189,15 +183,15 @@ class OrderService extends Service
 								]);
 							}
 
-							if ($kitchens->firstWhere('id', $product->kitchen->id)['products']->firstWhere('id', $product->id) === null) {
-								$kitchens->firstWhere('id', $product->kitchen->id)['products']->add((object) [
+							if ($kitchens->firstWhere('id', $product->kitchen->id)?->products->firstWhere('id', $product->id) === null) {
+								$kitchens->firstWhere('id', $product->kitchen->id)?->products->add((object) [
 									'id' => $product->id,
 									'name' => $product->name,
 									'quantity' => $quantity * $tempProduct->quantity,
 									'note' => $note,
 								]);
 							} else {
-								$kitchens->firstWhere('id', $product->kitchen->id)['products']->firstWhere('id', $product->id)->quantity += $quantity * $tempProduct->quantity;
+								$kitchens->firstWhere('id', $product->kitchen->id)?->products->firstWhere('id', $product->id)->quantity += $quantity * $tempProduct->quantity;
 							}
 						}
 					}
