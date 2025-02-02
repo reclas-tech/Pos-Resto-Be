@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Seeder;
 use App\Models\Category;
 use App\Models\Kitchen;
@@ -224,7 +225,7 @@ class ProductSeeder extends Seeder
         foreach ($data as $key => $item) {
             Product::create([
                 'cogp' => $item['cogp'] ?? 0,
-                'image' => $item['image'] ?? '/image-default.jpg',
+                'image' => $item['image'] ?? Storage::url('image-default.jpg'),
                 'name' => $item['name'],
                 'price' => $item['price'],
                 'stock' => $item['stock'] ?? 20,
