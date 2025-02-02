@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\SerializeDate;
 
 class AdminRefreshToken extends Model
 {
-    use HasUuids, SoftDeletes;
+    use HasUuids, SoftDeletes, SerializeDate;
 
 
     /*

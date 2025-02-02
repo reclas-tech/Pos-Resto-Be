@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\SerializeDate;
 
 class Charity extends Model
 {
-    use HasUuids;
+    use HasUuids, SerializeDate;
 
 
     /*

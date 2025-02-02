@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Carbon;
+use App\Traits\SerializeDate;
 
 class Employee extends User implements JWTSubject
 {
-    use HasUuids, SoftDeletes;
+    use HasUuids, SoftDeletes, SerializeDate;
 
 
     /*

@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\SerializeDate;
 
 class Product extends Model
 {
-    use HasUuids, SoftDeletes;
+    use HasUuids, SoftDeletes, SerializeDate;
 
 
     /*
@@ -62,7 +63,7 @@ class Product extends Model
     public function packetProduct(): HasMany
     {
         return $this->hasMany(PacketProduct::class);
-    }    
+    }
 
     /*
     |--------------------------------------------------------------------------
