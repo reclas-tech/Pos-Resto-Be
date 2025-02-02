@@ -37,13 +37,13 @@ class InvoiceService extends Service
 		$data = [];
 		foreach ($kitchens as $invoice) {
 			$data[] = [
-				'ip' => $invoice['ip'],
+				'ip' => $invoice->ip,
 				'cut' => $printCut,
-				'name' => $invoice['name'],
-				'date' => Carbon::parse($invoice['created_at'])->format('Y-m-d h:i'),
-				'code' => $invoice['invoice'],
-				'customer' => $invoice['customer'],
-				'products' => $invoice['products'],
+				'name' => $invoice->name,
+				'date' => Carbon::parse($invoice->created_at)->format('Y-m-d h:i'),
+				'code' => $invoice->invoice,
+				'customer' => $invoice->customer,
+				'products' => $invoice->products,
 				'tables' => $tables,
 			];
 		}
