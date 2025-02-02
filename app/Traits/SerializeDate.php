@@ -9,10 +9,10 @@ trait SerializeDate
     /**
      * @param \DateTimeInterface $date
      * 
-     * @return Carbon
+     * @return string
      */
-    protected function serializeDate(\DateTimeInterface $date): Carbon
+    protected function serializeDate(\DateTimeInterface $date): string
     {
-        return Carbon::parse($date, config('app.timezone'));
+        return Carbon::parse($date, config('app.timezone'))->toIso8601String();
     }
 }
