@@ -185,12 +185,11 @@ class OrderService extends Service
 								$kitchens->firstWhere('id', $product->kitchen->id)?->products->add((object) [
 									'id' => $product->id,
 									'name' => $product->name,
-									'quantity' => $quantity * $tempProduct->quantity,
+									'quantity' => 0,
 									'note' => $note,
 								]);
-							} else {
-								$kitchens->firstWhere('id', $product->kitchen->id)?->products->firstWhere('id', $product->id)->quantity += $quantity * $tempProduct->quantity;
 							}
+							$kitchens->firstWhere('id', $product->kitchen->id)?->products->firstWhere('id', $product->id)?->quantity += $quantity * $tempProduct->quantity;
 						}
 					}
 				}
@@ -258,7 +257,7 @@ class OrderService extends Service
 					'customer',
 					'created_at',
 				]),
-				'item_count' => $invoice->products->sum('quantity') + $invoice->packets->sum('quantity'),
+				'item_count' => $invoice->products()->sum('quantity') + $invoice->packets()->sum('quantity'),
 				'status' => $invoice->payment !== null ? 'sudah bayar' : 'belum bayar',
 				'price' => $invoice->price_sum,
 			];
@@ -461,7 +460,7 @@ class OrderService extends Service
 					'price_sum',
 					'created_at',
 				]),
-				'products' => $invoice->products->map(function (InvoiceProduct $invoiceProduct): array {
+				'products' => $invoice->products()->get()->map(function (InvoiceProduct $invoiceProduct): array {
 					return [
 						'id' => $invoiceProduct->id,
 						'note' => $invoiceProduct->note,
@@ -470,7 +469,7 @@ class OrderService extends Service
 						'price' => $invoiceProduct->product()->withTrashed()->first()?->price ?? 0,
 					];
 				}),
-				'packets' => $invoice->packets->map(function (InvoicePacket $invoicePacket): array {
+				'packets' => $invoice->packets()->get()->map(function (InvoicePacket $invoicePacket): array {
 					return [
 						'id' => $invoicePacket->id,
 						'note' => $invoicePacket->note,
