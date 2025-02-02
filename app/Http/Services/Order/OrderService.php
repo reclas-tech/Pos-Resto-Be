@@ -189,7 +189,7 @@ class OrderService extends Service
 									'note' => $note,
 								]);
 							}
-							$kitchens->firstWhere('id', $product->kitchen->id)?->products->firstWhere('id', $product->id)?->quantity += $quantity * $tempProduct->quantity;
+							$kitchens->firstWhere('id', $product->kitchen->id)->products->firstWhere('id', $product->id)->quantity += $quantity * $tempProduct->quantity;
 						}
 					}
 				}
@@ -545,8 +545,10 @@ class OrderService extends Service
 							if ($invoiceProduct !== null) {
 								$quantity = (int) $product['quantity'];
 								if ($quantity > 0 && $quantity < $invoiceProduct->quantity) {
-									$invoiceProduct->product?->stock += $invoiceProduct->quantity - $quantity;
-									$invoiceProduct->product?->save();
+									if ($invoiceProduct->product) {
+										$invoiceProduct->product->stock += $invoiceProduct->quantity - $quantity;
+										$invoiceProduct->product->save();
+									}
 
 									$price = (int) ($invoiceProduct->price_sum / $invoiceProduct->quantity);
 									$profit = (int) ($invoiceProduct->profit / $invoiceProduct->quantity);
@@ -572,8 +574,10 @@ class OrderService extends Service
 							if ($invoicePacket !== null) {
 								$quantity = (int) $packet['quantity'];
 								if ($quantity > 0 && $quantity < $invoicePacket->quantity) {
-									$invoicePacket->packet?->stock += $invoicePacket->quantity - $quantity;
-									$invoicePacket->packet?->save();
+									if ($invoicePacket->packet) {
+										$invoicePacket->packet->stock += $invoicePacket->quantity - $quantity;
+										$invoicePacket->packet->save();
+									}
 
 									$price = (int) ($invoicePacket->price_sum / $invoicePacket->quantity);
 									$profit = (int) ($invoicePacket->profit / $invoicePacket->quantity);
