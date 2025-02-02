@@ -224,7 +224,7 @@ class ProductSeeder extends Seeder
         foreach ($data as $key => $item) {
             Product::create([
                 'cogp' => $item['cogp'] ?? 0,
-                'image' => $item['image'] ?? '',
+                'image' => $item['image'] ?? '/image-default.jpg',
                 'name' => $item['name'],
                 'price' => $item['price'],
                 'stock' => $item['stock'] ?? 20,
