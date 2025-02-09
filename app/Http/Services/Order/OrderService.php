@@ -499,10 +499,8 @@ class OrderService extends Service
 	public function update(string $id, array|null $products, array|null $packets, string|null $pin): array|bool|Exception|null
 	{
 		$employee = auth('api-employee')->user();
-		$currentDate = Carbon::now();
 
 		$invoice = Invoice::whereKey($id)
-			->whereDate('created_at', $currentDate)
 			->where('status', Invoice::PENDING)
 			->first();
 
