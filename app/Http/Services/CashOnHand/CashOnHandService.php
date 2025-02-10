@@ -91,9 +91,12 @@ class CashOnHandService extends Service
 	{
 		$data = collect();
 
-		$date = Carbon::parse($cashon->started_at)->format('Y-m-d');
+		$startDate = Carbon::parse($cashon->started_at)->format('Y-m-d');
+		$startTime = Carbon::parse($cashon->started_at)->format('H:i:s');
+		$endDate = Carbon::parse($cashon->ended_at)->format('Y-m-d');
+		$endTime = Carbon::parse($cashon->ended_at)->format('H:i:s');
 
-		$transaction = Invoice::whereDate('created_at', $date)->get();
+		$transaction = Invoice::whereDate('created_at', '>=', $startDate)->whereTime('created_at', '>=', $startTime)->whereDate('created_at', '<=', $endDate)->whereTime('created_at', '<=', $endTime)->get();
 
 		$income = $transaction->where('status', Invoice::SUCCESS)->sum('price_sum');
 		$transaction_count = $transaction->where('status', Invoice::SUCCESS)->count();
@@ -153,8 +156,11 @@ class CashOnHandService extends Service
 		$data = $category->latest()->paginate($limit ?? $this->limit);
 
 		$data->getCollection()->transform(function ($item) {
-			$date = Carbon::parse($item->started_at)->format('Y-m-d');
-			$transaction = Invoice::whereDate('created_at', $date)->get();
+			$startDate = Carbon::parse($item->started_at)->format('Y-m-d');
+			$startTime = Carbon::parse($item->started_at)->format('H:i:s');
+			$endDate = Carbon::parse($item->ended_at)->format('Y-m-d');
+			$endTime = Carbon::parse($item->ended_at)->format('H:i:s');
+			$transaction = Invoice::whereDate('created_at', '>=', $startDate)->whereTime('created_at', '>=', $startTime)->whereDate('created_at', '<=', $endDate)->whereTime('created_at', '<=', $endTime)->get();
 			$income = $transaction->where('status', Invoice::SUCCESS)->sum('price_sum');
 			$item->income = $income;
 			return $item;
