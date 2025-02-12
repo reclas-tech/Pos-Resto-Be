@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use App\Http\Services\Service;
+use App\Models\InvoiceTable;
 use App\Models\Invoice;
 use App\Models\Table;
 use Exception;
+use Illuminate\Support\Carbon;
 
 class TableService extends Service
 {
@@ -190,5 +192,56 @@ class TableService extends Service
 			'unavailable' => $unavailable,
 			'available' => $available,
 		];
+	}
+
+	/**
+	 * @param string $fromId
+	 * @param array $toIds
+	 * 
+	 * @return bool|Exception|null
+	 */
+	public function changeOrderTable(string $fromId, array $toIds): bool|Exception|null
+	{
+		if ($from = $this->getById($fromId)) {
+			$tos = Table::findMany($toIds);
+
+			if ($tos->count()) {
+				if ($invoice = $from->invoices()->whereRelation('invoice', 'status', Invoice::PENDING)->first()?->invoice) {
+					$currentDate = Carbon::now();
+
+					DB::beginTransaction();
+
+					try {
+						InvoiceTable::whereRelation('invoice', 'status', Invoice::PENDING)
+							->whereBelongsTo($from, 'table')
+							->forceDelete();
+
+						$tos->map(function (Table $table) use ($currentDate, $invoice): array {
+							return [
+								'id' => uuid_create(),
+
+								'invoice_id' => $invoice->id,
+								'table_id' => $table->id,
+
+								'created_at' => $currentDate,
+								'updated_at' => $currentDate,
+							];
+						});
+
+						$invoice->tables()->insert($tos->toArray());
+
+						DB::commit();
+
+						return true;
+					} catch (Exception $e) {
+						DB::rollBack();
+
+						return $e;
+					}
+				}
+			}
+		}
+
+		return null;
 	}
 }

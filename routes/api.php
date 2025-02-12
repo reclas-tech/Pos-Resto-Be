@@ -32,6 +32,7 @@ use App\Http\Controllers\Employee\EmployeeUpdateController;
 use App\Http\Controllers\Order\OrderTakeAwayListController;
 use App\Http\Controllers\CashOnHand\OpenCashierController;
 use App\Http\Controllers\Order\OrderHistoryListController;
+use App\Http\Controllers\Table\TableOrderChangeController;
 use App\Http\Controllers\Dashboard\TransactionController;
 use App\Http\Controllers\Category\CategoryListController;
 use App\Http\Controllers\Employee\EmployeeListController;
@@ -182,6 +183,7 @@ Route::prefix('v1')->group(function (): void {
 		// EMPLOYEE
 		Route::prefix('employee')->middleware('api-employee')->group(function (): void {
 			Route::get('list', [TableListWithConditionController::class, 'action']);
+			Route::post('change', [TableOrderChangeController::class, 'action']);
 		});
 	});
 
