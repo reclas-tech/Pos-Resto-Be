@@ -45,18 +45,4 @@ class CreateRequest extends FormRequest
             'location' => 'Lokasi',
         ];
     }
-
-    public function messages(): array
-    {
-        return [
-            'unique' => ':attribute sudah digunakan.',
-            'integer' => ':attribute harus berupa integer.',
-            'required' => ':attribute wajib diisi.',
-            'string' => ':attribute harus berupa teks.',
-            'max' => ':attribute tidak boleh lebih dari :max karakter.',
-            'numeric' => ':attribute harus berupa angka.',
-            'min' => ':attribute harus lebih besar dari 0.',
-            'in' => ':attribute harus diisi dengan indoor atau outdoor.',
-        ];
-    }
 }
