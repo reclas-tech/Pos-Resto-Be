@@ -6,12 +6,12 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 use App\Http\Services\Service;
 use App\Models\InvoiceTable;
 use App\Models\Invoice;
 use App\Models\Table;
 use Exception;
-use Illuminate\Support\Carbon;
 
 class TableService extends Service
 {
@@ -203,41 +203,43 @@ class TableService extends Service
 	public function changeOrderTable(string $fromId, array $toIds): bool|Exception|null
 	{
 		if ($from = $this->getById($fromId)) {
-			$tos = Table::findMany($toIds);
+			$invoices = $from->invoices()->whereRelation('invoice', 'status', Invoice::PENDING)->get();
+			$tables = Table::findMany($toIds);
 
-			if ($tos->count()) {
-				if ($invoice = $from->invoices()->whereRelation('invoice', 'status', Invoice::PENDING)->first()?->invoice) {
-					$currentDate = Carbon::now();
+			if ($tables->count() && $invoices->count()) {
+				$currentDate = Carbon::now();
 
-					DB::beginTransaction();
+				DB::beginTransaction();
 
-					try {
-						InvoiceTable::whereRelation('invoice', 'status', Invoice::PENDING)
-							->whereBelongsTo($from, 'table')
-							->forceDelete();
+				try {
+					InvoiceTable::whereRelation('invoice', 'status', Invoice::PENDING)
+						->whereBelongsTo($from, 'table')
+						->forceDelete();
 
-						$tos->map(function (Table $table) use ($currentDate, $invoice): array {
-							return [
+					$data = [];
+					foreach ($tables as $table) {
+						foreach ($invoices as $invoice) {
+							$data[] = [
 								'id' => uuid_create(),
 
-								'invoice_id' => $invoice->id,
+								'invoice_id' => $invoice->invoice_id,
 								'table_id' => $table->id,
 
 								'created_at' => $currentDate,
 								'updated_at' => $currentDate,
 							];
-						});
-
-						$invoice->tables()->insert($tos->toArray());
-
-						DB::commit();
-
-						return true;
-					} catch (Exception $e) {
-						DB::rollBack();
-
-						return $e;
+						}
 					}
+
+					$invoice->tables()->insert($data);
+
+					DB::commit();
+
+					return true;
+				} catch (Exception $e) {
+					DB::rollBack();
+
+					return $e;
 				}
 			}
 		}
