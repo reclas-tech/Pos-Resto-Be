@@ -35,6 +35,7 @@ use App\Http\Controllers\Order\OrderHistoryListController;
 use App\Http\Controllers\Table\TableOrderChangeController;
 use App\Http\Controllers\Dashboard\TransactionController;
 use App\Http\Controllers\Category\CategoryListController;
+use App\Http\Controllers\Discount\DiscountListController;
 use App\Http\Controllers\Employee\EmployeeListController;
 use App\Http\Controllers\Kitchen\KitchenCreateController;
 use App\Http\Controllers\Kitchen\KitchenDeleteController;
@@ -101,7 +102,7 @@ Route::prefix('v1')->group(function (): void {
 		});
 	});
 
-	//Cash On Hand
+	// Cash On Hand
 	Route::prefix('cashier')->middleware(['jwt', 'employee:cashier'])->group(function (): void {
 		Route::post('open', [OpenCashierController::class, 'action']);
 		Route::post('close', [CloseCashierController::class, 'action']);
@@ -134,7 +135,7 @@ Route::prefix('v1')->group(function (): void {
 		});
 	});
 
-	//Packet
+	// Packet
 	Route::prefix('packet')->middleware(['jwt', 'employee:waiter'])->group(function (): void {
 		Route::prefix('waiter')->group(function (): void {
 			Route::get('all', [PacketGetAllController::class, 'action']);
@@ -254,9 +255,23 @@ Route::prefix('v1')->group(function (): void {
 		});
 	});
 
+	// Cashier Shift
+	Route::prefix('cashier-shift')->group(function (): void {
+		// ADMIN
+		Route::prefix('admin')->middleware('api-admin')->group(function (): void {
+			Route::get('list', [CashierShiftListController::class, 'action']);
+			Route::get('detail/{id}', [CloseCashierInvoiceController::class, 'action']);
+		});
+	});
+
 	// Tax
 	Route::prefix('tax')->group(function (): void {
 		Route::get('get', [TaxGetController::class, 'action'])->middleware('jwt');
+	});
+
+	// Discount
+	Route::prefix('discount')->group(function (): void {
+		Route::get('list', [DiscountListController::class, 'action'])->middleware('jwt');
 	});
 
 	// Printer
@@ -265,15 +280,6 @@ Route::prefix('v1')->group(function (): void {
 		Route::prefix('admin')->middleware('api-admin')->group(function (): void {
 			Route::get('get', [PrinterGetController::class, 'action']);
 			Route::put('update', [PrinterUpdateController::class, 'action']);
-		});
-	});
-
-	// Cashier Shift
-	Route::prefix('cashier-shift')->group(function (): void {
-		// ADMIN
-		Route::prefix('admin')->middleware('api-admin')->group(function (): void {
-			Route::get('list', [CashierShiftListController::class, 'action']);
-			Route::get('detail/{id}', [CloseCashierInvoiceController::class, 'action']);
 		});
 	});
 });
