@@ -203,7 +203,11 @@ class TableService extends Service
 	public function changeOrderTable(string $fromId, array $toIds): bool|Exception|null
 	{
 		if ($from = $this->getById($fromId)) {
-			$invoices = $from->invoices()->whereRelation('invoice', 'status', Invoice::PENDING)->get();
+			$invoices = Invoice::whereHas('tables', function (Builder $query) use ($from): void {
+				$query->whereBelongsTo($from, 'table');
+			})
+				->where('status', Invoice::PENDING)
+				->get();
 			$tables = Table::findMany($toIds);
 
 			if ($tables->count() && $invoices->count()) {
@@ -212,9 +216,7 @@ class TableService extends Service
 				DB::beginTransaction();
 
 				try {
-					InvoiceTable::whereRelation('invoice', 'status', Invoice::PENDING)
-						->whereBelongsTo($from, 'table')
-						->forceDelete();
+					$from->invoices()->whereRelation('invoice', 'status', Invoice::PENDING)->forceDelete();
 
 					$data = [];
 					foreach ($tables as $table) {
@@ -222,7 +224,7 @@ class TableService extends Service
 							$data[] = [
 								'id' => uuid_create(),
 
-								'invoice_id' => $invoice->invoice_id,
+								'invoice_id' => $invoice->id,
 								'table_id' => $table->id,
 
 								'created_at' => $currentDate,
@@ -231,7 +233,7 @@ class TableService extends Service
 						}
 					}
 
-					$invoice->tables()->insert($data);
+					InvoiceTable::insert($data);
 
 					DB::commit();
 
