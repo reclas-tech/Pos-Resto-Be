@@ -9,7 +9,8 @@ class TransactionController extends BaseController
 {
     public function action(): JsonResponse
     {
-        $income =  $this->dashboardService->transaction();
+        $income = $this->dashboardService->transaction();
+
         return Response::SetAndGet(message: 'Jumlah Transaksi Berhasil Didapatkan', data: $income->toArray());
     }
 }

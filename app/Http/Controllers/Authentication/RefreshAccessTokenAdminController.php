@@ -20,10 +20,10 @@ class RefreshAccessTokenAdminController extends Controller
 
         $data = $this->service->action($token);
 
-        if ($data !== null) {
-            return Response::SetAndGet(message: 'Token berhasil diperbarui', data: $data);
+        if ($data === null) {
+            return Response::SetAndGet(Response::UNAUTHORIZED, 'Anda tidak memiliki akses');
         }
 
-        return Response::SetAndGet(Response::UNAUTHORIZED, 'Anda tidak memiliki akses');
+        return Response::SetAndGet(message: 'Token berhasil diperbarui', data: $data);
     }
 }

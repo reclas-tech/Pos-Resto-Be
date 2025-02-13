@@ -11,12 +11,10 @@ class TransactionDetailController extends BaseController
     {
         $transaction = $this->transactionService->detail($invoiceId);
 
-        $response = new Response(message: 'Berhasil mendapatkan rincian transaksi', data: $transaction);
-
         if ($transaction === null) {
-            $response->set(Response::NOT_FOUND, 'Transaksi tidak dapat ditemukan');
+            return Response::SetAndGet(Response::NOT_FOUND, 'Transaksi tidak dapat ditemukan');
         }
 
-        return $response->get();
+        return Response::SetAndGet(message: 'Berhasil mendapatkan rincian transaksi', data: $transaction);
     }
 }

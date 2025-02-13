@@ -10,13 +10,12 @@ class TableCreateController extends BaseController
 {
     public function action(CreateRequest $request): JsonResponse
     {
-
         [
-            'name' => $name,
             'capacity' => $capacity,
-            'location' => $location
+            'location' => $location,
+            'name' => $name,
         ] = $request;
-        
+
         $table = $this->tableService->create($name, $capacity, $location);
 
         $response = new Response(Response::CREATED, 'Buat Meja Berhasil');

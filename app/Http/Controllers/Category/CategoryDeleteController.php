@@ -11,14 +11,12 @@ class CategoryDeleteController extends BaseController
     {
         $category = $this->categoryService->getById($id);
 
-        $response = new Response(message: 'Hapus Kategori Berhasil');
-
-        if ($category !== null) {
-            $this->categoryService->delete($category);
-        } else {
-            $response->set(Response::NOT_FOUND, 'Data kategori tidak dapat ditemukan');
+        if ($category === null) {
+            return Response::SetAndGet(Response::NOT_FOUND, 'Data kategori tidak dapat ditemukan');
         }
 
-        return $response->get();
+        $this->categoryService->delete($category);
+
+        return Response::SetAndGet(message: 'Hapus Kategori Berhasil');
     }
 }

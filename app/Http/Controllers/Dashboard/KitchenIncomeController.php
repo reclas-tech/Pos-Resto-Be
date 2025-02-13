@@ -9,7 +9,8 @@ class KitchenIncomeController extends BaseController
 {
     public function action(): JsonResponse
     {
-        $income =  $this->dashboardService->kitchenIncome();
+        $income = $this->dashboardService->kitchenIncome();
+
         return Response::SetAndGet(message: 'Pendapatan Dapur Berhasil Didapatkan', data: $income->toArray());
     }
 }

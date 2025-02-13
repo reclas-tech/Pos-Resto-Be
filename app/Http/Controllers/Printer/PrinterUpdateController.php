@@ -19,7 +19,7 @@ class PrinterUpdateController extends BaseController
             $link = substr($link, 0, strlen($link) - 1);
         }
 
-        $printerSetting = $this->printerService->update($checkerIp, $link);
+        $this->printerService->update($checkerIp, $link);
 
         return Response::SetAndGet(message: 'Berhasil memperbarui pengaturan printer');
     }

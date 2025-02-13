@@ -14,10 +14,10 @@ class CloseCashierInvoiceController extends BaseController
 
         if ($cashon === null) {
             return Response::SetAndGet(Response::NOT_FOUND, 'Data struk tidak dapat ditemukan');
-        }   
+        }
 
         $data = $this->cashOnHandService->closeCashierInvoice($cashon);
 
-        return Response::SetAndGet(message: 'Data struk Berhasil Didapatkan', data:$data );
+        return Response::SetAndGet(message: 'Data struk Berhasil Didapatkan', data: $data);
     }
 }

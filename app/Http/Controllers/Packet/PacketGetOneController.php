@@ -9,7 +9,8 @@ class PacketGetOneController extends BaseController
 {
     public function action(string $id): JsonResponse
     {
-        $packet =  $this->packetService->getByIdWithRelations($id);
+        $packet = $this->packetService->getByIdWithRelations($id);
+
         if ($packet === null) {
             return Response::SetAndGet(Response::NOT_FOUND, 'Data paket tidak dapat ditemukan');
         }
@@ -30,6 +31,6 @@ class PacketGetOneController extends BaseController
             })
         ];
 
-        return Response::SetAndGet(message: 'Paket Berhasil Didapatkan', data: $data );
+        return Response::SetAndGet(message: 'Paket Berhasil Didapatkan', data: $data);
     }
 }

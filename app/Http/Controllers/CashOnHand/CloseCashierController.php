@@ -10,12 +10,10 @@ class CloseCashierController extends BaseController
 {
     public function action(CloseCashierRequest $request): JsonResponse
     {
-        $response = new Response(message: 'Edit Kategori Berhasil');
-
         [
             'cash' => $cash,
         ] = $request;
-        
+
         $cashon = $this->cashOnHandService->closeCashier($cash);
 
         $response = new Response(Response::OK, 'Input Cash On Hand Terakhir Berhasil');

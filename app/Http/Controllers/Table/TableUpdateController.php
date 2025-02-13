@@ -10,29 +10,26 @@ class TableUpdateController extends BaseController
 {
     public function action(UpdateRequest $request, string $id): JsonResponse
     {
-        $response = new Response(message: 'Edit Meja Berhasil');
-
         $table = $this->tableService->getById($id);
 
-        if ($table !== null) {
-            
-            [
-                'name' => $name,
-                'capacity' => $capacity,
-                'location' => $location
-            ] = $request;
-
-            $this->tableService->update(
-                table : $table,
-                name: $name,
-                capacity: $capacity,
-                location: $location
-            );
-
-        } else {
-            $response->set(Response::NOT_FOUND, 'Data meja tidak dapat ditemukan');
+        if ($table === null) {
+            return Response::SetAndGet(Response::NOT_FOUND, 'Data meja tidak dapat ditemukan');
         }
 
-        return $response->get();
+        [
+            'capacity' => $capacity,
+            'location' => $location,
+            'name' => $name,
+        ] = $request;
+
+        $this->tableService->update(
+            table: $table,
+
+            capacity: $capacity,
+            location: $location,
+            name: $name,
+        );
+
+        return Response::SetAndGet(message: 'Edit Meja Berhasil');
     }
 }

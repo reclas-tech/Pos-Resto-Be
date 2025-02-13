@@ -9,7 +9,8 @@ class KitchenGetAllController extends BaseController
 {
     public function action(): JsonResponse
     {
-        $kitchen =  $this->kitchenService->getAll();
+        $kitchen = $this->kitchenService->getAll();
+
         return Response::SetAndGet(message: 'Semua Dapur Berhasil Didapatkan', data: $kitchen->toArray());
     }
 }

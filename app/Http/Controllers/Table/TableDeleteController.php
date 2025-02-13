@@ -11,14 +11,12 @@ class TableDeleteController extends BaseController
     {
         $table = $this->tableService->getById($id);
 
-        $response = new Response(message: 'Hapus Meja Berhasil');
-
-        if ($table !== null) {
-            $this->tableService->delete($table);
-        } else {
-            $response->set(Response::NOT_FOUND, 'Data meja tidak dapat ditemukan');
+        if ($table === null) {
+            return Response::SetAndGet(Response::NOT_FOUND, 'Data meja tidak dapat ditemukan');
         }
 
-        return $response->get();
+        $this->tableService->delete($table);
+
+        return Response::SetAndGet(message: 'Hapus Meja Berhasil');
     }
 }

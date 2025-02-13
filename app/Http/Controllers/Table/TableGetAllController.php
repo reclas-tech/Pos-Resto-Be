@@ -9,7 +9,8 @@ class TableGetAllController extends BaseController
 {
     public function action(): JsonResponse
     {
-        $table =  $this->tableService->getAll();
+        $table = $this->tableService->getAll();
+
         return Response::SetAndGet(message: 'Semua Meja Berhasil Didapatkan', data: $table->toArray());
     }
 }

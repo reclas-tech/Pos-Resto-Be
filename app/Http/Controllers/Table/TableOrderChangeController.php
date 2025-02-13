@@ -10,7 +10,6 @@ class TableOrderChangeController extends BaseController
 {
     public function action(OrderChangeRequest $request): JsonResponse
     {
-
         [
             'from' => $from,
             'to' => $to,

@@ -11,12 +11,10 @@ class OrderDetailController extends BaseController
     {
         $order = $this->orderService->detail($invoiceId);
 
-        $response = new Response(message: 'Berhasil mendapatkan rincian pesanan', data: $order);
-
         if ($order === null) {
-            $response->set(Response::NOT_FOUND, 'Pesanan tidak dapat ditemukan');
+            return Response::SetAndGet(Response::NOT_FOUND, 'Pesanan tidak dapat ditemukan');
         }
 
-        return $response->get();
+        return Response::SetAndGet(message: 'Berhasil mendapatkan rincian pesanan', data: $order);
     }
 }

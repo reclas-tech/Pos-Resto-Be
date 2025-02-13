@@ -10,11 +10,10 @@ class CategoryCreateController extends BaseController
 {
     public function action(CreateRequest $request): JsonResponse
     {
-
         [
             'name' => $name,
         ] = $request;
-        
+
         $category = $this->categoryService->create($name);
 
         $response = new Response(Response::CREATED, 'Buat Kategori Berhasil');

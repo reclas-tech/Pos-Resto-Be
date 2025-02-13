@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\CashOnHand;
 
-use App\Http\Controllers\Controller;
 use App\Http\Services\CashOnHand\CashOnHandService;
+use App\Http\Controllers\Controller;
 
 class BaseController extends Controller
 {

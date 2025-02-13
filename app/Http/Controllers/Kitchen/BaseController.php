@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Kitchen;
 
-use App\Http\Controllers\Controller;
 use App\Http\Services\Kitchen\KitchenService;
+use App\Http\Controllers\Controller;
 
 class BaseController extends Controller
 {

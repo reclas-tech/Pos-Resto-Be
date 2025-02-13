@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Product;
 
-use App\Http\Controllers\Controller;
 use App\Http\Services\Product\ProductService;
+use App\Http\Controllers\Controller;
 
 class BaseController extends Controller
 {

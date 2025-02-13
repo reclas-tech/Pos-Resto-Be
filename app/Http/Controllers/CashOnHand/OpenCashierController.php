@@ -14,7 +14,7 @@ class OpenCashierController extends BaseController
         [
             'cash' => $cash,
         ] = $request;
-        
+
         $cashon = $this->cashOnHandService->openCashier($cash);
 
         $response = new Response(Response::CREATED, 'Input Cash On Hand Berhasil');
