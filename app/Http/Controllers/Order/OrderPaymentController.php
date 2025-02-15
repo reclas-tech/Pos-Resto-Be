@@ -12,9 +12,11 @@ class OrderPaymentController extends BaseController
     {
         [
             'method' => $method,
+
+            'discount_id' => $discountId,
         ] = $request;
 
-        $order = $this->orderService->payment($invoiceId, $method);
+        $order = $this->orderService->payment($invoiceId, $method, $discountId);
 
         $response = new Response(message: "Berhasil melakukan pembayaran dengan ($method)");
 

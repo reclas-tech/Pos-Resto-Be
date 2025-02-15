@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Carbon;
 use App\Http\Services\Service;
+use App\Models\Discount;
 use App\Models\InvoiceProduct;
 use App\Models\InvoicePacket;
 use App\Models\InvoiceTable;
@@ -347,13 +348,18 @@ class OrderService extends Service
 	 * 
 	 * @return bool|\Exception|null
 	 */
-	public function payment(string $id, string $method): bool|Exception|null
+	public function payment(string $id, string $method, string|null $discountId): bool|Exception|null
 	{
 		$invoice = Invoice::withTrashed()
 			->whereKey($id)
 			->where('status', Invoice::PENDING)
 			->whereNull('deleted_at')
 			->first();
+
+		$discount = null;
+		if ($discountId) {
+			$discount = Discount::find($discountId)?->value;
+		}
 
 		if ($invoice) {
 			$invoices = collect();
@@ -370,9 +376,20 @@ class OrderService extends Service
 
 			try {
 				foreach ($invoices as $item) {
+					$temp = $discount ? (int) (($item->price_item * $discount) / 100) : 0;
+
+					$price = $item->price_item - $temp;
+					$price += (int) (($price * $item->tax) / 100);
+
+					$profit = $item->profit - $temp;
+
 					$item->update([
 						'status' => Invoice::SUCCESS,
 						'payment' => $method,
+
+						'discount' => $discount,
+						'price_sum' => $price,
+						'profit' => $profit,
 
 						'cashier_id' => auth('api-employee')->id(),
 					]);

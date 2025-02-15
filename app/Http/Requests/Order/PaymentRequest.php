@@ -27,6 +27,8 @@ class PaymentRequest extends FormRequest
     {
         return [
             'method' => 'bail|required|string|in:' . Invoice::CASH . ',' . Invoice::DEBIT . ',' . Invoice::QRIS,
+
+            'discount_id' => 'bail|nullable|string|exists:discounts,id',
         ];
     }
 
@@ -39,6 +41,8 @@ class PaymentRequest extends FormRequest
     {
         return [
             'method' => 'Metode pembayaran',
+
+            'discount_id' => 'Potongan harga',
         ];
     }
 }
