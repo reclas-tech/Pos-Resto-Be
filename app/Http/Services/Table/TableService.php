@@ -29,18 +29,15 @@ class TableService extends Service
 		DB::beginTransaction();
 
 		try {
-			$table = new Table([
+			$table = Table::create([
 				'name' => $name,
 				'capacity' => $capacity,
 				'location' => $location
 			]);
 
-			$table->save();
-
 			DB::commit();
 
 			return $table;
-
 		} catch (Exception $e) {
 			DB::rollBack();
 
@@ -59,9 +56,12 @@ class TableService extends Service
 	{
 		$query = Table::query();
 
-		if ($search) {
-			$query->where('name', 'like', '%' . $search . '%');
-		}
+		$query->when(
+			$search !== null,
+			function (Builder $query) use ($search): Builder {
+				return $query->whereLike('name', $search);
+			}
+		);
 
 		$table = $query->paginate($limit ?? $this->limit);
 
@@ -70,12 +70,10 @@ class TableService extends Service
 				$query->where('status', Invoice::PENDING);
 			})->exists();
 
-			if ($check) {
-				$check = 'terisi';
-			} else {
-				$check = 'tersedia';
-			}
+			$check = $check ? 'terisi' : 'tersedia';
+
 			$item->status = $check;
+
 			return $item->only([
 				'id',
 				'name',
@@ -86,7 +84,6 @@ class TableService extends Service
 		});
 
 		return $table;
-
 	}
 
 	/**
@@ -121,13 +118,11 @@ class TableService extends Service
 	 */
 	public function update(Table $table, string $name, int $capacity, string $location): void
 	{
-
 		$table->name = $name;
 		$table->capacity = $capacity;
 		$table->location = $location;
 
 		$table->save();
-
 	}
 
 	/**
@@ -140,6 +135,7 @@ class TableService extends Service
 		if ($table->invoices()->exists()) {
 			return $table->delete();
 		}
+
 		return $table->forceDelete();
 	}
 

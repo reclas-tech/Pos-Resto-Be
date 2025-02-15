@@ -17,14 +17,10 @@ class OpenCashierController extends BaseController
 
         $cashon = $this->cashOnHandService->openCashier($cash);
 
-        $response = new Response(Response::CREATED, 'Input Cash On Hand Berhasil');
-
-        if (!$cashon instanceof \Exception) {
-            $response->set(data: $cashon->toArray());
-        } else {
-            $response->set(Response::INTERNAL_SERVER_ERROR, 'Input Cash On Hand Gagal', $cashon);
+        if ($cashon === null || $cashon instanceof \Exception) {
+            return Response::SetAndGet(Response::INTERNAL_SERVER_ERROR, 'Input Cash On Hand Gagal', $cashon);
         }
 
-        return $response->get();
+        return Response::SetAndGet(Response::CREATED, 'Input Cash On Hand Berhasil', $cashon->toArray());
     }
 }

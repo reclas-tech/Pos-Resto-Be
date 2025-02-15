@@ -24,33 +24,33 @@ class PasswordAdminService extends Service
 	{
 		$admin = Admin::firstWhere('email', $email);
 
-		if ($admin !== null) {
-			DB::beginTransaction();
-
-			try {
-				$otp = fake()->randomNumber(6, true);
-
-				$tokenData = Token::Generate(['sub' => $admin->email], $this->exp);
-				$admin->update(['otp' => (string) $otp]);
-
-				Mail::to($admin->email)->send(new ForgetPasswordMail($admin->only(['email', 'otp'])));
-
-				DB::commit();
-
-				return $tokenData;
-			} catch (Exception $e) {
-				DB::rollBack();
-
-				return $e;
-			}
+		if ($admin === null) {
+			return [
+				[
+					'message' => 'Email tidak valid',
+					'property' => 'email',
+				],
+			];
 		}
 
-		return [
-			[
-				'message' => 'Email tidak valid',
-				'property' => 'email',
-			],
-		];
+		DB::beginTransaction();
+
+		try {
+			$otp = fake()->randomNumber(6, true);
+
+			$tokenData = Token::Generate(['sub' => $admin->email], $this->exp);
+			$admin->update(['otp' => (string) $otp]);
+
+			Mail::to($admin->email)->send(new ForgetPasswordMail($admin->only(['email', 'otp'])));
+
+			DB::commit();
+
+			return $tokenData;
+		} catch (Exception $e) {
+			DB::rollBack();
+
+			return $e;
+		}
 	}
 
 	/**
@@ -63,20 +63,20 @@ class PasswordAdminService extends Service
 	{
 		$admin = Admin::where('email', $email)->where('otp', $otp)->first();
 
-		if ($admin !== null) {
-			$tokenData = Token::Generate(['sub' => $admin->email, 'otp' => 'valid'], $this->exp);
-
-			$admin->refreshToken()->delete();
-
-			return $tokenData;
+		if ($admin === null) {
+			return [
+				[
+					'message' => 'Kode OTP tidak valid',
+					'property' => 'otp',
+				],
+			];
 		}
 
-		return [
-			[
-				'message' => 'Kode OTP tidak valid',
-				'property' => 'otp',
-			],
-		];
+		$tokenData = Token::Generate(['sub' => $admin->email, 'otp' => 'valid'], $this->exp);
+
+		$admin->refreshToken()->delete();
+
+		return $tokenData;
 	}
 
 	/**
@@ -89,12 +89,12 @@ class PasswordAdminService extends Service
 	{
 		$admin = Admin::where('email', $email)->first();
 
-		if ($admin !== null && $admin?->otp !== null) {
-			$admin->update(['password' => $password, 'otp' => null]);
-
-			return true;
+		if ($admin === null || $admin?->otp === null) {
+			return false;
 		}
 
-		return false;
+		$admin->update(['password' => $password, 'otp' => null]);
+
+		return true;
 	}
 }

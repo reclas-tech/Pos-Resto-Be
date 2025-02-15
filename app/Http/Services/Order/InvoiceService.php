@@ -49,10 +49,13 @@ class InvoiceService extends Service
 		}
 
 		try {
-			$response = Http::asJson()->withHeaders([
-				'Authorization' => config('app.print_token'),
-				'ngrok-skip-browser-warning' => 'true',
-			])->post($printURL, ['data' => $data]);
+			$response = Http::asJson()
+				->withHeaders([
+					'Authorization' => config('app.print_token'),
+					'ngrok-skip-browser-warning' => 'true',
+				])
+				->post($printURL, ['data' => $data]);
+
 			return $response->body();
 		} catch (\Exception $e) {
 			return $e->getMessage();
@@ -68,61 +71,63 @@ class InvoiceService extends Service
 	{
 		$invoice = Invoice::where('type', Invoice::DINE_IN)->whereKey($id)->first();
 
-		if ($invoice) {
-			$print = PrinterSetting::first();
-
-			$printPath = config('app.print_checker_api');
-
-			$printURL = $print?->link ?? config('app.print_url');
-
-			if (substr($printURL, -1) === '/') {
-				$printURL = substr($printURL, 0, strlen($printURL) - 1);
-			}
-
-			$printURL .= $printPath;
-
-			$data = [
-				...$invoice->only([
-					'code',
-					'customer',
-					'created_at',
-				]),
-				'products' => $invoice->products()->withTrashed()->get()->map(function (InvoiceProduct $invoiceProduct): array {
-					return [
-						...$invoiceProduct->only([
-							'quantity',
-							'note',
-						]),
-						'name' => $invoiceProduct->product()->withTrashed()->first()?->name ?? '',
-					];
-				}),
-				'packets' => $invoice->packets()->withTrashed()->get()->map(function (InvoicePacket $invoicePacket): array {
-					return [
-						...$invoicePacket->only([
-							'quantity',
-							'note',
-						]),
-						'name' => $invoicePacket->packet()->withTrashed()->first()?->name ?? '',
-					];
-				}),
-				'tables' => $invoice->tables()->withTrashed()->get()->map(function (InvoiceTable $invoiceTable): string {
-					return $invoiceTable->table()->withTrashed()->first()?->name ?? '';
-				}),
-				'ip' => $print?->checker_ip ?? '',
-			];
-
-			try {
-				$response = Http::asJson()->withHeaders([
-					'Authorization' => config('app.print_token'),
-					'ngrok-skip-browser-warning' => 'true',
-				])->post($printURL, $data);
-
-				return $response->successful();
-			} catch (\Exception $e) {
-				return false;
-			}
+		if ($invoice === null) {
+			return false;
 		}
 
-		return false;
+		$print = PrinterSetting::first();
+
+		$printPath = config('app.print_checker_api');
+
+		$printURL = $print?->link ?? config('app.print_url');
+
+		if (substr($printURL, -1) === '/') {
+			$printURL = substr($printURL, 0, strlen($printURL) - 1);
+		}
+
+		$printURL .= $printPath;
+
+		$data = [
+			...$invoice->only([
+				'code',
+				'customer',
+				'created_at',
+			]),
+			'products' => $invoice->products()->withTrashed()->get()->map(function (InvoiceProduct $invoiceProduct): array {
+				return [
+					...$invoiceProduct->only([
+						'quantity',
+						'note',
+					]),
+					'name' => $invoiceProduct->product()->withTrashed()->first()?->name ?? '',
+				];
+			}),
+			'packets' => $invoice->packets()->withTrashed()->get()->map(function (InvoicePacket $invoicePacket): array {
+				return [
+					...$invoicePacket->only([
+						'quantity',
+						'note',
+					]),
+					'name' => $invoicePacket->packet()->withTrashed()->first()?->name ?? '',
+				];
+			}),
+			'tables' => $invoice->tables()->withTrashed()->get()->map(function (InvoiceTable $invoiceTable): string {
+				return $invoiceTable->table()->withTrashed()->first()?->name ?? '';
+			}),
+			'ip' => $print?->checker_ip ?? '',
+		];
+
+		try {
+			$response = Http::asJson()
+				->withHeaders([
+					'Authorization' => config('app.print_token'),
+					'ngrok-skip-browser-warning' => 'true',
+				])
+				->post($printURL, $data);
+
+			return $response->successful();
+		} catch (\Exception $e) {
+			return false;
+		}
 	}
 }

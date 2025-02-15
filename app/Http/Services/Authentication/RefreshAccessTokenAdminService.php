@@ -18,28 +18,27 @@ class RefreshAccessTokenAdminService extends Service
 	{
 		$currentRefreshToken = AdminRefreshToken::where('token', $token)->first();
 
-		if ($currentRefreshToken) {
-			$refreshTokenExp = $currentRefreshToken->expired_at;
-			$refreshToken = $currentRefreshToken;
-			$id = $currentRefreshToken->id;
-
-			if (Carbon::now()->diffInHours($refreshTokenExp, true) < 1) {
-				$refreshToken = Token::Generate(refreshToken: true);
-
-				$id = $currentRefreshToken->admin->setRefreshToken($refreshToken->get('token'), $refreshToken->get('exp'))->id;
-
-				$currentRefreshToken->delete();
-
-			}
-
-			$accessToken = Token::Generate(['sub' => $id], accessToken: true);
-
-			return [
-				'refresh_token' => $refreshToken['token'],
-				'access_token' => $accessToken['token'],
-			];
+		if ($currentRefreshToken === null) {
+			return null;
 		}
 
-		return null;
+		$refreshTokenExp = $currentRefreshToken->expired_at;
+		$refreshToken = $currentRefreshToken;
+		$id = $currentRefreshToken->id;
+
+		if (Carbon::now()->diffInHours($refreshTokenExp, true) < 1) {
+			$refreshToken = Token::Generate(refreshToken: true);
+
+			$id = $currentRefreshToken->admin->setRefreshToken($refreshToken->get('token'), $refreshToken->get('exp'))->id;
+
+			$currentRefreshToken->delete();
+		}
+
+		$accessToken = Token::Generate(['sub' => $id], accessToken: true);
+
+		return [
+			'refresh_token' => $refreshToken['token'],
+			'access_token' => $accessToken['token'],
+		];
 	}
 }

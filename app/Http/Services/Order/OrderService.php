@@ -7,10 +7,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Carbon;
 use App\Http\Services\Service;
-use App\Models\Discount;
 use App\Models\InvoiceProduct;
 use App\Models\InvoicePacket;
 use App\Models\InvoiceTable;
+use App\Models\Discount;
 use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Packet;
@@ -95,6 +95,7 @@ class OrderService extends Service
 				'created_by' => $waiter->id,
 			]);
 
+			$tempDatas = [];
 			foreach ($products ?? [] as $item) {
 				if (isset($item['id'], $item['quantity'])) {
 					$product = Product::find($item['id']);
@@ -105,14 +106,19 @@ class OrderService extends Service
 						$price = $quantity * $product->price;
 						$note = $item['note'] ?? null;
 
-						$invoice->products()->create([
+						$tempDatas[] = [
+							'id' => uuid_create(),
+
 							'quantity' => $quantity,
 							'price_sum' => $price,
 							'profit' => $profit,
 							'note' => $note,
 
 							'product_id' => $product->id,
-						]);
+
+							'created_at' => $currentDate,
+							'updated_at' => $currentDate,
+						];
 
 						$product->stock -= $quantity;
 						$product->save();
@@ -142,6 +148,9 @@ class OrderService extends Service
 				}
 			}
 
+			$invoice->products()->insert($tempDatas);
+
+			$tempDatas = [];
 			foreach ($packets ?? [] as $item) {
 				if (isset($item['id'], $item['quantity'])) {
 					$packet = Packet::find($item['id']);
@@ -152,14 +161,19 @@ class OrderService extends Service
 						$price = $quantity * $packet->price;
 						$note = $item['note'] ?? null;
 
-						$invoice->packets()->create([
+						$tempDatas[] = [
+							'id' => uuid_create(),
+
 							'quantity' => $quantity,
 							'price_sum' => $price,
 							'profit' => $profit,
 							'note' => $note,
 
 							'packet_id' => $packet->id,
-						]);
+
+							'created_at' => $currentDate,
+							'updated_at' => $currentDate,
+						];
 
 						$packet->stock -= $quantity;
 						$packet->save();
@@ -196,15 +210,25 @@ class OrderService extends Service
 				}
 			}
 
+			$invoice->packets()->insert($tempDatas);
+
 			if ($invoice->type === Invoice::DINE_IN) {
+				$tempDatas = [];
 				foreach ($tables ?? [] as $item) {
 					if ($table = Table::find($item)) {
-						$invoice->tables()->create([
-							'table_id' => $table->id
-						]);
+						$tempDatas[] = [
+							'id' => uuid_create(),
+
+							'table_id' => $table->id,
+
+							'created_at' => $currentDate,
+							'updated_at' => $currentDate,
+						];
 						$kitchenTables->push($table->name);
 					}
 				}
+
+				$invoice->tables()->insert($tempDatas);
 			}
 
 			$invoice->price_sum = $priceSum + ((int) ($priceSum * $invoice->tax / 100));
@@ -217,8 +241,9 @@ class OrderService extends Service
 
 			return [
 				'invoice_id' => $invoice->id,
-				'kitchens' => $kitchens->toArray(),
+
 				'tables' => $kitchenTables->toArray(),
+				'kitchens' => $kitchens->toArray(),
 			];
 		} catch (Exception $e) {
 			DB::rollBack();
@@ -237,9 +262,7 @@ class OrderService extends Service
 			->where('type', Invoice::TAKE_AWAY)
 			->where(function (Builder $query): void {
 				$query->where('status', Invoice::PENDING)
-					->orWhere(function (Builder $query): void {
-						$query->where('created_at', '>=', Carbon::yesterday());
-					});
+					->orWhere('created_at', '>=', Carbon::yesterday());
 			});
 
 		if ($status) {
@@ -423,26 +446,38 @@ class OrderService extends Service
 				->orWhere('status', Invoice::PENDING);
 		});
 
-		if ($invoice) {
-			$invoices->orderBy('code', $invoice);
-		}
-		if ($price) {
-			$invoices->orderBy('price_sum', $price);
-		}
-		if ($time) {
-			$invoices->orderBy('created_at', $time);
-		}
+		$invoices->when(
+			$invoice !== null,
+			function (Builder $query) use ($invoice): Builder {
+				return $query->orderBy('code', $invoice);
+			}
+		);
+		$invoices->when(
+			$price !== null,
+			function (Builder $query) use ($price): Builder {
+				return $query->orderBy('price_sum', $price);
+			}
+		);
+		$invoices->when(
+			$time !== null,
+			function (Builder $query) use ($time): Builder {
+				return $query->orderBy('created_at', $time);
+			}
+		);
 
-		if ($search !== null) {
-			$invoices->whereAny(
-				[
-					'customer',
-					'code',
-				],
-				'LIKE',
-				"%$search%"
-			);
-		}
+		$invoices->when(
+			$search !== null,
+			function (Builder $query) use ($search): Builder {
+				return $query->whereAny(
+					[
+						'customer',
+						'code',
+					],
+					'LIKE',
+					"%$search%"
+				);
+			}
+		);
 
 		return $invoices->get([
 			"id",
@@ -464,45 +499,45 @@ class OrderService extends Service
 	{
 		$invoice = Invoice::withTrashed()->whereKey($id)->first();
 
-		if ($invoice) {
-			return [
-				...$invoice->only([
-					'id',
-					'tax',
-					'code',
-					'type',
-					'status',
-					'payment',
-					'customer',
-					'price_sum',
-					'created_at',
-				]),
-				'products' => $invoice->products()->get()->map(function (InvoiceProduct $invoiceProduct): array {
-					return [
-						'id' => $invoiceProduct->id,
-						'note' => $invoiceProduct->note,
-						'quantity' => $invoiceProduct->quantity,
-						'name' => $invoiceProduct->product()->withTrashed()->first()?->name ?? '',
-						'price' => $invoiceProduct->product()->withTrashed()->first()?->price ?? 0,
-					];
-				}),
-				'packets' => $invoice->packets()->get()->map(function (InvoicePacket $invoicePacket): array {
-					return [
-						'id' => $invoicePacket->id,
-						'note' => $invoicePacket->note,
-						'quantity' => $invoicePacket->quantity,
-						'name' => $invoicePacket->packet()->withTrashed()->first()?->name ?? '',
-						'price' => $invoicePacket->packet()->withTrashed()->first()?->price ?? 0,
-					];
-				}),
-				'tables' => $invoice->tables->map(function (InvoiceTable $invoiceTable): string {
-					return $invoiceTable?->table()->withTrashed()->first()?->name ?? '';
-				}),
-				'cashier' => $invoice?->cashier()->withTrashed()->first()?->name ?? '',
-			];
+		if ($invoice === null) {
+			return null;
 		}
 
-		return null;
+		return [
+			...$invoice->only([
+				'id',
+				'tax',
+				'code',
+				'type',
+				'status',
+				'payment',
+				'customer',
+				'price_sum',
+				'created_at',
+			]),
+			'products' => $invoice->products()->get()->map(function (InvoiceProduct $invoiceProduct): array {
+				return [
+					'id' => $invoiceProduct->id,
+					'note' => $invoiceProduct->note,
+					'quantity' => $invoiceProduct->quantity,
+					'name' => $invoiceProduct->product()->withTrashed()->first()?->name ?? '',
+					'price' => $invoiceProduct->product()->withTrashed()->first()?->price ?? 0,
+				];
+			}),
+			'packets' => $invoice->packets()->get()->map(function (InvoicePacket $invoicePacket): array {
+				return [
+					'id' => $invoicePacket->id,
+					'note' => $invoicePacket->note,
+					'quantity' => $invoicePacket->quantity,
+					'name' => $invoicePacket->packet()->withTrashed()->first()?->name ?? '',
+					'price' => $invoicePacket->packet()->withTrashed()->first()?->price ?? 0,
+				];
+			}),
+			'tables' => $invoice->tables->map(function (InvoiceTable $invoiceTable): string {
+				return $invoiceTable?->table()->withTrashed()->first()?->name ?? '';
+			}),
+			'cashier' => $invoice?->cashier()->withTrashed()->first()?->name ?? '',
+		];
 	}
 
 	/**
@@ -521,27 +556,12 @@ class OrderService extends Service
 			->where('status', Invoice::PENDING)
 			->first();
 
-		if ($invoice) {
-			if ($pin !== null) {
-				if ($employee->pin === $pin) {
-					DB::beginTransaction();
+		if ($invoice === null) {
+			return null;
+		}
 
-					try {
-						$invoice->update([
-							'updated_by' => $employee->id,
-							'status' => Invoice::CANCEL,
-						]);
-						$invoice->delete();
-
-						DB::commit();
-
-						return true;
-					} catch (Exception $e) {
-						DB::rollBack();
-
-						return $e;
-					}
-				}
+		if ($pin !== null) {
+			if ($employee->pin !== $pin) {
 				return [
 					[
 						'message' => 'PIN tidak valid',
@@ -553,83 +573,11 @@ class OrderService extends Service
 			DB::beginTransaction();
 
 			try {
-				if (is_array($products)) {
-					foreach ($products as $product) {
-						if (isset($product['id'], $product['quantity']) && is_numeric($product['quantity']) && is_integer($product['quantity'])) {
-							$invoiceProduct = $invoice->products()->find($product['id']);
-							if ($invoiceProduct !== null) {
-								$quantity = (int) $product['quantity'];
-								if ($quantity > 0 && $quantity < $invoiceProduct->quantity) {
-									if ($invoiceProduct->product) {
-										$invoiceProduct->product->stock += $invoiceProduct->quantity - $quantity;
-										$invoiceProduct->product->save();
-									}
-
-									$price = (int) ($invoiceProduct->price_sum / $invoiceProduct->quantity);
-									$profit = (int) ($invoiceProduct->profit / $invoiceProduct->quantity);
-
-									$invoiceProduct->price_sum = $price * $quantity;
-									$invoiceProduct->profit = $profit * $quantity;
-									$invoiceProduct->quantity = $quantity;
-
-									$invoiceProduct->updated_by = $employee->id;
-
-									$invoiceProduct->save();
-								} else if ($quantity === 0) {
-									$invoiceProduct->forceDelete();
-								}
-							}
-						}
-					}
-				}
-				if (is_array($packets)) {
-					foreach ($packets as $packet) {
-						if (isset($packet['id'], $packet['quantity']) && is_numeric($packet['quantity']) && is_integer($packet['quantity'])) {
-							$invoicePacket = $invoice->packets()->find($packet['id']);
-							if ($invoicePacket !== null) {
-								$quantity = (int) $packet['quantity'];
-								if ($quantity > 0 && $quantity < $invoicePacket->quantity) {
-									if ($invoicePacket->packet) {
-										$invoicePacket->packet->stock += $invoicePacket->quantity - $quantity;
-										$invoicePacket->packet->save();
-									}
-
-									$price = (int) ($invoicePacket->price_sum / $invoicePacket->quantity);
-									$profit = (int) ($invoicePacket->profit / $invoicePacket->quantity);
-
-									$invoicePacket->price_sum = $price * $quantity;
-									$invoicePacket->profit = $profit * $quantity;
-									$invoicePacket->quantity = $quantity;
-
-									$invoicePacket->updated_by = $employee->id;
-
-									$invoicePacket->save();
-								} else if ($quantity === 0) {
-									$invoicePacket->forceDelete();
-								}
-							}
-						}
-					}
-				}
-
-				if ($invoice->products->count() || $invoice->packets->count()) {
-					$priceItem = $invoice->products->sum('price_sum') + $invoice->packets->sum('price_sum');
-					$profit = $invoice->products->sum('profit') + $invoice->packets->sum('profit');
-
-					$invoice->updated_by = $employee->id;
-					$invoice->price_item = $priceItem;
-					$invoice->profit = $profit;
-
-					$invoice->price_sum = $priceItem + $priceItem * $invoice->tax / 100;
-
-					$invoice->save();
-				} else {
-					$invoice->update([
-						'updated_by' => $employee->id,
-						'status' => Invoice::CANCEL,
-					]);
-					$invoice->delete();
-				}
+				$invoice->update([
+					'updated_by' => $employee->id,
+					'status' => Invoice::CANCEL,
+				]);
+				$invoice->delete();
 
 				DB::commit();
 
@@ -641,7 +589,95 @@ class OrderService extends Service
 			}
 		}
 
-		return null;
+		DB::beginTransaction();
+
+		try {
+			if (is_array($products)) {
+				foreach ($products as $product) {
+					if (isset($product['id'], $product['quantity']) && is_numeric($product['quantity']) && is_integer($product['quantity'])) {
+						$invoiceProduct = $invoice->products()->find($product['id']);
+						if ($invoiceProduct !== null) {
+							$quantity = (int) $product['quantity'];
+							if ($quantity > 0 && $quantity < $invoiceProduct->quantity) {
+								if ($invoiceProduct->product) {
+									$invoiceProduct->product->stock += $invoiceProduct->quantity - $quantity;
+									$invoiceProduct->product->save();
+								}
+
+								$price = (int) ($invoiceProduct->price_sum / $invoiceProduct->quantity);
+								$profit = (int) ($invoiceProduct->profit / $invoiceProduct->quantity);
+
+								$invoiceProduct->price_sum = $price * $quantity;
+								$invoiceProduct->profit = $profit * $quantity;
+								$invoiceProduct->quantity = $quantity;
+
+								$invoiceProduct->updated_by = $employee->id;
+
+								$invoiceProduct->save();
+							} else if ($quantity === 0) {
+								$invoiceProduct->forceDelete();
+							}
+						}
+					}
+				}
+			}
+			if (is_array($packets)) {
+				foreach ($packets as $packet) {
+					if (isset($packet['id'], $packet['quantity']) && is_numeric($packet['quantity']) && is_integer($packet['quantity'])) {
+						$invoicePacket = $invoice->packets()->find($packet['id']);
+						if ($invoicePacket !== null) {
+							$quantity = (int) $packet['quantity'];
+							if ($quantity > 0 && $quantity < $invoicePacket->quantity) {
+								if ($invoicePacket->packet) {
+									$invoicePacket->packet->stock += $invoicePacket->quantity - $quantity;
+									$invoicePacket->packet->save();
+								}
+
+								$price = (int) ($invoicePacket->price_sum / $invoicePacket->quantity);
+								$profit = (int) ($invoicePacket->profit / $invoicePacket->quantity);
+
+								$invoicePacket->price_sum = $price * $quantity;
+								$invoicePacket->profit = $profit * $quantity;
+								$invoicePacket->quantity = $quantity;
+
+								$invoicePacket->updated_by = $employee->id;
+
+								$invoicePacket->save();
+							} else if ($quantity === 0) {
+								$invoicePacket->forceDelete();
+							}
+						}
+					}
+				}
+			}
+
+			if ($invoice->products->count() || $invoice->packets->count()) {
+				$priceItem = $invoice->products->sum('price_sum') + $invoice->packets->sum('price_sum');
+				$profit = $invoice->products->sum('profit') + $invoice->packets->sum('profit');
+
+				$invoice->updated_by = $employee->id;
+				$invoice->price_item = $priceItem;
+				$invoice->profit = $profit;
+
+				$invoice->price_sum = $priceItem + $priceItem * $invoice->tax / 100;
+
+				$invoice->save();
+			} else {
+				$invoice->update([
+					'updated_by' => $employee->id,
+					'status' => Invoice::CANCEL,
+				]);
+				$invoice->delete();
+			}
+
+			DB::commit();
+
+			return true;
+		} catch (Exception $e) {
+			DB::rollBack();
+
+			return $e;
+		}
 	}
 
 	/**

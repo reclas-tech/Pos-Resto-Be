@@ -2,12 +2,13 @@
 
 namespace App\Http\Services\Packet;
 
-use App\Models\Packet;
-use App\Models\PacketProduct;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 use App\Http\Services\Service;
+use App\Models\Packet;
 use Exception;
 
 class PacketService extends Service
@@ -26,11 +27,12 @@ class PacketService extends Service
 	 */
 	public function create(string $name, int $price, int $stock, int $cogp, string $image, array $products): Packet|Exception
 	{
+		$currentDate = Carbon::now();
+
 		DB::beginTransaction();
 
 		try {
-
-			$packet = new Packet([
+			$packet = Packet::create([
 				'name' => $name,
 				'price' => $price,
 				'stock' => $stock,
@@ -38,17 +40,20 @@ class PacketService extends Service
 				'image' => $image,
 			]);
 
-			$packet->save();
-
+			$temp = [];
 			foreach ($products as $product) {
-				$packetProduct = new PacketProduct([
+				$temp[] = [
+					'id' => uuid_create(),
+
 					'quantity' => $product['quantity'],
 					'product_id' => $product['id'],
-					'packet_id' => $packet->id
-				]);
 
-				$packetProduct->save();
+					'created_at' => $currentDate,
+					'updated_at' => $currentDate,
+				];
 			}
+
+			$packet->products()->insert($temp);
 
 			DB::commit();
 
@@ -71,9 +76,12 @@ class PacketService extends Service
 	{
 		$packet = Packet::query();
 
-		if ($search) {
-			$packet->where('name', 'like', '%' . $search . '%');
-		}
+		$packet->when(
+			$search !== null,
+			function (Builder $query) use ($search): Builder {
+				return $query->whereLike('name', $search);
+			}
+		);
 
 		return $packet->latest()->paginate($limit ?? $this->limit);
 
@@ -86,28 +94,22 @@ class PacketService extends Service
 	 */
 	public function getAll(string|null $search = null): Collection
 	{
-		if ($search == null) {
-			return Packet::with([
-				'products' => function ($query) {
-					$query->select(['id', 'quantity', 'product_id', 'packet_id'])->with([
-						'product' => function ($query) {
-							$query->withTrashed()->select(['id', 'name']); }
-					]);
-				}
-			])->latest()->get();
-		}
-
 		$query = Packet::query()->with([
 			'products' => function ($query) {
 				$query->select(['id', 'quantity', 'product_id', 'packet_id'])->with([
 					'product' => function ($query) {
-						$query->withTrashed()->select(['id', 'name']); }
+						$query->withTrashed()->select(['id', 'name']);
+					}
 				]);
-		}]);
+			}
+		]);
 
-		if ($search) {
-			$query->where('name', 'like', '%' . $search . '%');
-		}
+		$query->when(
+			$search !== null,
+			function (Builder $query) use ($search): Builder {
+				return $query->whereLike('name', $search);
+			}
+		);
 
 		$packet = $query->latest()->get();
 
@@ -123,9 +125,11 @@ class PacketService extends Service
 	{
 		return Packet::with([
 			'products' => function ($query) {
-				$query->with(['product' => function ($query) {
-					$query->withTrashed();
-				}]);
+				$query->with([
+					'product' => function ($query) {
+						$query->withTrashed();
+					}
+				]);
 			}
 		])->find($id);
 	}
@@ -153,38 +157,42 @@ class PacketService extends Service
 	 */
 	public function update(Packet $packet, string $name, int $price, int $stock, int $cogp, string $image, array $products): void
 	{
+		$currentDate = Carbon::now();
+
 		DB::beginTransaction();
 
-		$packet->name = $name;
-		$packet->price = $price;
-		$packet->stock = $stock;
-		$packet->cogp = $cogp;
-		$packet->image = $image;
-		$packet->save();
-
 		try {
+			$packet->name = $name;
+			$packet->price = $price;
+			$packet->stock = $stock;
+			$packet->cogp = $cogp;
+			$packet->image = $image;
 
-			PacketProduct::where('packet_id', $packet->id)->delete();
+			$packet->save();
 
+			$packet->products()->forceDelete();
+
+			$temp = [];
 			foreach ($products as $product) {
-				$packetProduct = new PacketProduct([
+				$temp[] = [
+					'id' => uuid_create(),
+
 					'quantity' => $product['quantity'],
 					'product_id' => $product['id'],
-					'packet_id' => $packet->id
-				]);
 
-				$packetProduct->save();
+					'created_at' => $currentDate,
+					'updated_at' => $currentDate,
+				];
 			}
 
+			$packet->products()->insert($temp);
+
+			DB::commit();
 		} catch (Exception $e) {
-
 			DB::rollBack();
+
 			throw $e;
-
 		}
-
-		DB::commit();
-
 	}
 
 	/**
@@ -197,7 +205,9 @@ class PacketService extends Service
 		if ($packet->invoice()->exists()) {
 			return $packet->delete();
 		}
+
 		$packet->products()->forceDelete();
+
 		return $packet->forceDelete();
 	}
 }

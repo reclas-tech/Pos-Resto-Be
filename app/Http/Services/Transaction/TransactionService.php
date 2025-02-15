@@ -3,6 +3,7 @@
 namespace App\Http\Services\Transaction;
 
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use App\Http\Services\Service;
 use App\Models\InvoiceProduct;
 use App\Models\InvoicePacket;
@@ -23,15 +24,18 @@ class TransactionService extends Service
 	{
 		$invoices = Invoice::withTrashed();
 
-		if ($search !== null) {
-			$invoices->whereAny(
-				[
-					'code',
-				],
-				'LIKE',
-				"%$search%"
-			);
-		}
+		$invoices->when(
+			$search !== null,
+			function (Builder $query) use ($search): Builder {
+				return $query->whereAny(
+					[
+						'code',
+					],
+					'LIKE',
+					"%$search%"
+				);
+			}
+		);
 
 		return $invoices->latest()->paginate($limit ?? $this->limit, [
 			'id',
@@ -51,39 +55,39 @@ class TransactionService extends Service
 	{
 		$invoice = Invoice::withTrashed()->whereKey($id)->first();
 
-		if ($invoice) {
-			return [
-				...$invoice->only([
-					'id',
-					'tax',
-					'code',
-					'type',
-					'status',
-					'payment',
-					'price_sum',
-					'created_at',
-				]),
-				'products' => $invoice->products()->withTrashed()->get()->map(function (InvoiceProduct $invoiceProduct): array {
-					return [
-						'name' => $invoiceProduct->product()->withTrashed()->first()?->name ?? '',
-						'price' => (int) ($invoiceProduct->price_sum / $invoiceProduct->quantity),
-						'quantity' => $invoiceProduct->quantity,
-					];
-				}),
-				'packets' => $invoice->packets()->withTrashed()->get()->map(function (InvoicePacket $invoicePacket): array {
-					return [
-						'name' => $invoicePacket->packet()->withTrashed()->first()?->name ?? '',
-						'price' => (int) ($invoicePacket->price_sum / $invoicePacket->quantity),
-						'quantity' => $invoicePacket->quantity,
-					];
-				}),
-				'tables' => $invoice->tables()->withTrashed()->get()->map(function (InvoiceTable $invoiceTable): string {
-					return $invoiceTable->table()->withTrashed()->first()?->name ?? '';
-				}),
-				'cashier' => $invoice->cashier()->withTrashed()->first()?->name ?? '',
-			];
+		if (!$invoice) {
+			return null;
 		}
 
-		return null;
+		return [
+			...$invoice->only([
+				'id',
+				'tax',
+				'code',
+				'type',
+				'status',
+				'payment',
+				'price_sum',
+				'created_at',
+			]),
+			'products' => $invoice->products()->withTrashed()->get()->map(function (InvoiceProduct $invoiceProduct): array {
+				return [
+					'name' => $invoiceProduct->product()->withTrashed()->first()?->name ?? '',
+					'price' => (int) ($invoiceProduct->price_sum / $invoiceProduct->quantity),
+					'quantity' => $invoiceProduct->quantity,
+				];
+			}),
+			'packets' => $invoice->packets()->withTrashed()->get()->map(function (InvoicePacket $invoicePacket): array {
+				return [
+					'name' => $invoicePacket->packet()->withTrashed()->first()?->name ?? '',
+					'price' => (int) ($invoicePacket->price_sum / $invoicePacket->quantity),
+					'quantity' => $invoicePacket->quantity,
+				];
+			}),
+			'tables' => $invoice->tables()->withTrashed()->get()->map(function (InvoiceTable $invoiceTable): string {
+				return $invoiceTable->table()->withTrashed()->first()?->name ?? '';
+			}),
+			'cashier' => $invoice->cashier()->withTrashed()->first()?->name ?? '',
+		];
 	}
 }
