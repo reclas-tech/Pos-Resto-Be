@@ -46,7 +46,9 @@ class PacketService extends Service
 					'id' => uuid_create(),
 
 					'quantity' => $product['quantity'],
+
 					'product_id' => $product['id'],
+					'packet_id' => $packet->id,
 
 					'created_at' => $currentDate,
 					'updated_at' => $currentDate,
@@ -178,7 +180,9 @@ class PacketService extends Service
 					'id' => uuid_create(),
 
 					'quantity' => $product['quantity'],
+
 					'product_id' => $product['id'],
+					'packet_id' => $packet->id,
 
 					'created_at' => $currentDate,
 					'updated_at' => $currentDate,

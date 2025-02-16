@@ -114,6 +114,7 @@ class OrderService extends Service
 							'profit' => $profit,
 							'note' => $note,
 
+							'invoice_id' => $invoice->id,
 							'product_id' => $product->id,
 
 							'created_at' => $currentDate,
@@ -169,6 +170,7 @@ class OrderService extends Service
 							'profit' => $profit,
 							'note' => $note,
 
+							'invoice_id' => $invoice->id,
 							'packet_id' => $packet->id,
 
 							'created_at' => $currentDate,
@@ -219,6 +221,7 @@ class OrderService extends Service
 						$tempDatas[] = [
 							'id' => uuid_create(),
 
+							'invoice_id' => $invoice->id,
 							'table_id' => $table->id,
 
 							'created_at' => $currentDate,
