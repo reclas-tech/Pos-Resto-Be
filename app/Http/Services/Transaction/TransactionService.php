@@ -29,6 +29,7 @@ class TransactionService extends Service
 			function (Builder $query) use ($search): Builder {
 				return $query->whereAny(
 					[
+						'created_at',
 						'code',
 					],
 					'LIKE',
