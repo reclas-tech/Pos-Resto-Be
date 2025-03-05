@@ -79,21 +79,50 @@ class OrderService extends Service
 		$kitchens = collect();
 		$kitchenTables = collect();
 
+		$invoice = null;
+		if ($type === Invoice::DINE_IN) {
+			$invoice = Invoice::where('type', $type)
+				->where('status', Invoice::PENDING)
+				->whereHas('tables', function (Builder $query) use ($tables): void {
+					$query->whereIn('table_id', $tables ?? []);
+				})
+				->first();
+		}
+
 		DB::beginTransaction();
 
 		try {
-			$count = Invoice::withTrashed()->whereDate('created_at', $currentDate)->count() + 1;
-			$invoice = Invoice::create([
-				'code' => 'INV-' . $currentDate->format('Ymd') . '-' . $count,
-				'tax' => config('app.tax'),
-				'price_item' => $priceSum,
-				'price_sum' => $priceSum,
-				'customer' => $customer,
-				'profit' => $profitSum,
-				'type' => $type,
+			if ($invoice === null) {
+				$count = Invoice::withTrashed()->whereDate('created_at', $currentDate)->count() + 1;
+				$invoice = Invoice::create([
+					'code' => 'INV-' . $currentDate->format('Ymd') . '-' . $count,
+					'tax' => config('app.tax'),
+					'price_item' => $priceSum,
+					'price_sum' => $priceSum,
+					'customer' => $customer,
+					'profit' => $profitSum,
+					'type' => $type,
 
-				'created_by' => $waiter->id,
-			]);
+					'created_by' => $waiter->id,
+				]);
+			} else {
+				$priceSum = $invoice->price_item;
+				$profitSum = $invoice->profit;
+
+				$invoice->update([
+					'updated_by' => $waiter->id,
+				]);
+			}
+
+			$checkerDatas = [
+				...$invoice->only([
+					'code',
+					'customer',
+				]),
+				'created_at' => $invoice->updated_at,
+				'products' => [],
+				'packets' => [],
+			];
 
 			$tempDatas = [];
 			foreach ($products ?? [] as $item) {
@@ -145,11 +174,19 @@ class OrderService extends Service
 							'quantity' => $quantity,
 							'note' => $note,
 						]);
+
+						$checkerDatas['products'][] = [
+							'name' => $product->name,
+							'quantity' => $quantity,
+							'note' => $note,
+						];
 					}
 				}
 			}
 
-			$invoice->products()->insert($tempDatas);
+			if (count($tempDatas)) {
+				$invoice->products()->insert($tempDatas);
+			}
 
 			$tempDatas = [];
 			foreach ($packets ?? [] as $item) {
@@ -205,6 +242,12 @@ class OrderService extends Service
 									'quantity' => 0,
 									'note' => $note,
 								]);
+
+								$checkerDatas['packets'][] = [
+									'name' => $product->name,
+									'quantity' => $quantity,
+									'note' => $note,
+								];
 							}
 							$kitchens->firstWhere('id', $product->kitchen->id)->products->firstWhere('id', $product->id)->quantity += $quantity * $tempProduct->quantity;
 						}
@@ -212,26 +255,32 @@ class OrderService extends Service
 				}
 			}
 
-			$invoice->packets()->insert($tempDatas);
+			if (count($tempDatas)) {
+				$invoice->packets()->insert($tempDatas);
+			}
 
 			if ($invoice->type === Invoice::DINE_IN) {
 				$tempDatas = [];
 				foreach ($tables ?? [] as $item) {
 					if ($table = Table::find($item)) {
-						$tempDatas[] = [
-							'id' => uuid_create(),
+						if ($invoice->tables()->whereKey($item)->doesntExist()) {
+							$tempDatas[] = [
+								'id' => uuid_create(),
 
-							'invoice_id' => $invoice->id,
-							'table_id' => $table->id,
+								'invoice_id' => $invoice->id,
+								'table_id' => $table->id,
 
-							'created_at' => $currentDate,
-							'updated_at' => $currentDate,
-						];
+								'created_at' => $currentDate,
+								'updated_at' => $currentDate,
+							];
+						}
 						$kitchenTables->push($table->name);
 					}
 				}
 
-				$invoice->tables()->insert($tempDatas);
+				if (count($tempDatas)) {
+					$invoice->tables()->insert($tempDatas);
+				}
 			}
 
 			$invoice->price_sum = $priceSum + ((int) ($priceSum * $invoice->tax / 100));
@@ -247,9 +296,11 @@ class OrderService extends Service
 
 				'tables' => $kitchenTables->toArray(),
 				'kitchens' => $kitchens->toArray(),
+				'checkers' => $checkerDatas,
 			];
 		} catch (Exception $e) {
 			DB::rollBack();
+
 			return $e;
 		}
 	}

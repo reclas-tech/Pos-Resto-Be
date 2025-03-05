@@ -6,10 +6,6 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Carbon;
 use App\Http\Services\Service;
 use App\Models\PrinterSetting;
-use App\Models\InvoiceProduct;
-use App\Models\InvoicePacket;
-use App\Models\InvoiceTable;
-use App\Models\Invoice;
 
 class InvoiceService extends Service
 {
@@ -63,18 +59,12 @@ class InvoiceService extends Service
 	}
 
 	/**
-	 * @param string $id
+	 * @param array $data
 	 * 
 	 * @return bool
 	 */
-	public static function CheckerPrint(string $id): bool
+	public static function CheckerPrint(array $data): bool
 	{
-		$invoice = Invoice::where('type', Invoice::DINE_IN)->whereKey($id)->first();
-
-		if ($invoice === null) {
-			return false;
-		}
-
 		$print = PrinterSetting::first();
 
 		$printPath = config('app.print_checker_api');
@@ -87,35 +77,7 @@ class InvoiceService extends Service
 
 		$printURL .= $printPath;
 
-		$data = [
-			...$invoice->only([
-				'code',
-				'customer',
-				'created_at',
-			]),
-			'products' => $invoice->products()->withTrashed()->get()->map(function (InvoiceProduct $invoiceProduct): array {
-				return [
-					...$invoiceProduct->only([
-						'quantity',
-						'note',
-					]),
-					'name' => $invoiceProduct->product()->withTrashed()->first()?->name ?? '',
-				];
-			}),
-			'packets' => $invoice->packets()->withTrashed()->get()->map(function (InvoicePacket $invoicePacket): array {
-				return [
-					...$invoicePacket->only([
-						'quantity',
-						'note',
-					]),
-					'name' => $invoicePacket->packet()->withTrashed()->first()?->name ?? '',
-				];
-			}),
-			'tables' => $invoice->tables()->withTrashed()->get()->map(function (InvoiceTable $invoiceTable): string {
-				return $invoiceTable->table()->withTrashed()->first()?->name ?? '';
-			}),
-			'ip' => $print?->checker_ip ?? '',
-		];
+		$data['ip'] = $print?->checker_ip ?? '';
 
 		try {
 			$response = Http::asJson()
