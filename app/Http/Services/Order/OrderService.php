@@ -535,16 +535,23 @@ class OrderService extends Service
 			}
 		);
 
-		return $invoices->get([
-			"id",
-			"code",
-			"type",
-			"status",
-			"customer",
-			"discount",
-			"price_sum",
-			"created_at",
+		$invoices = $invoices->get()->map(fn(Invoice $invoice): array => [
+			...$invoice->only([
+				"id",
+				"code",
+				"type",
+				"status",
+				"customer",
+				"discount",
+				"price_sum",
+				"created_at",
+			]),
+			'tables' => $invoice->tables()->get()->map(
+				fn(InvoiceTable $invoiceTable): string => $invoiceTable->table?->name ?? ''
+			),
 		]);
+
+		return $invoices;
 	}
 
 	/**
