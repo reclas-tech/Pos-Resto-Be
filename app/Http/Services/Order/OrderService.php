@@ -585,6 +585,7 @@ class OrderService extends Service
 					'id' => $invoiceProduct->id,
 					'note' => $invoiceProduct->note,
 					'quantity' => $invoiceProduct->quantity,
+					'price_sum' => $invoiceProduct->price_sum,
 					'name' => $invoiceProduct->product()->withTrashed()->first()?->name ?? '',
 					'price' => $invoiceProduct->product()->withTrashed()->first()?->price ?? 0,
 				];
@@ -594,6 +595,7 @@ class OrderService extends Service
 					'id' => $invoicePacket->id,
 					'note' => $invoicePacket->note,
 					'quantity' => $invoicePacket->quantity,
+					'price_sum' => $invoicePacket->price_sum,
 					'name' => $invoicePacket->packet()->withTrashed()->first()?->name ?? '',
 					'price' => $invoicePacket->packet()->withTrashed()->first()?->price ?? 0,
 				];
