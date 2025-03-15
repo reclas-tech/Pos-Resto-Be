@@ -10,7 +10,6 @@ class KitchenCreateController extends BaseController
 {
     public function action(CreateRequest $request): JsonResponse
     {
-
         [
             'name' => $name,
             'ip' => $ip,

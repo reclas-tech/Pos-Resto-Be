@@ -10,25 +10,22 @@ class CategoryUpdateController extends BaseController
 {
     public function action(UpdateRequest $request, string $id): JsonResponse
     {
-        $response = new Response(message: 'Edit Kategori Berhasil');
-
         $category = $this->categoryService->getById($id);
 
-        if ($category !== null) {
-            
-            [
-                'name' => $name,
-            ] = $request;
-
-            $this->categoryService->update(
-                category : $category,
-                name: $name,
-            );
-
-        } else {
-            $response->set(Response::NOT_FOUND, 'Data kategori tidak dapat ditemukan');
+        if ($category === null) {
+            return Response::SetAndGet(Response::NOT_FOUND, 'Data kategori tidak dapat ditemukan');
         }
 
-        return $response->get();
+        [
+            'name' => $name,
+        ] = $request;
+
+        $this->categoryService->update(
+            category: $category,
+
+            name: $name,
+        );
+
+        return Response::SetAndGet(message: 'Edit Kategori Berhasil');
     }
 }

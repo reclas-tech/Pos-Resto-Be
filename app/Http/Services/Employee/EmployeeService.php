@@ -112,15 +112,15 @@ class EmployeeService extends Service
 	 */
 	public function update(Employee $employee, string $pin, string $address, string $phone, string $name, string $role): bool|Exception
 	{
-		$employee->address = $address;
-		$employee->phone = $phone;
-		$employee->name = $name;
-		$employee->role = $role;
-		$employee->pin = $pin;
-
 		DB::beginTransaction();
 
 		try {
+			$employee->address = $address;
+			$employee->phone = $phone;
+			$employee->name = $name;
+			$employee->role = $role;
+			$employee->pin = $pin;
+
 			$employee->save();
 
 			DB::commit();

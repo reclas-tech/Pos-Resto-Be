@@ -21,42 +21,46 @@ class LoginEmployeeService extends Service
 	{
 		$employee = Employee::firstWhere('pin', $pin);
 
-		if ($employee !== null) {
-			DB::beginTransaction();
+		if ($employee === null) {
+			return [
+				[
+					'message' => 'PIN tidak valid',
+					'property' => 'pin',
+				],
+			];
+		}
 
-			try {
-				$tokenData = Token::Generate(refreshToken: true);
-				$refreshTokenInstance = $employee->setRefreshToken($tokenData->get('token'), $tokenData->get('exp'));
-				$accessToken = Token::Generate(['sub' => $refreshTokenInstance->id], accessToken: true);
+		DB::beginTransaction();
+
+		try {
+			$tokenData = Token::Generate(refreshToken: true);
+			$refreshTokenInstance = $employee->setRefreshToken($tokenData->get('token'), $tokenData->get('exp'));
+			$accessToken = Token::Generate(['sub' => $refreshTokenInstance->id], accessToken: true);
+
+			if ($employee->role == 'cashier') {
+				$employee->refreshToken()->whereKeyNot($refreshTokenInstance->id)->delete();
 
 				DB::commit();
-
-				if ($employee->role == 'cashier') {
-					return collect([
-						'access_token' => $accessToken->get('token'),
-						'refresh_token' => $refreshTokenInstance->token,
-						'role' => $employee->role,
-						'any_active_shift' => CashierShift::where('cashier_id', $employee->id)->whereNull('cash_on_hand_end')->exists()
-					]);
-				}
 
 				return collect([
 					'access_token' => $accessToken->get('token'),
 					'refresh_token' => $refreshTokenInstance->token,
 					'role' => $employee->role,
+					'any_active_shift' => CashierShift::where('cashier_id', $employee->id)->whereNull('cash_on_hand_end')->exists()
 				]);
-			} catch (Exception $e) {
-				DB::rollBack();
-
-				return $e;
 			}
-		}
 
-		return [
-			[
-				'message' => 'PIN tidak valid',
-				'property' => 'pin',
-			],
-		];
+			DB::commit();
+
+			return collect([
+				'access_token' => $accessToken->get('token'),
+				'refresh_token' => $refreshTokenInstance->token,
+				'role' => $employee->role,
+			]);
+		} catch (Exception $e) {
+			DB::rollBack();
+
+			return $e;
+		}
 	}
 }

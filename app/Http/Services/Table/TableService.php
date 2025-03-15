@@ -6,7 +6,9 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 use App\Http\Services\Service;
+use App\Models\InvoiceTable;
 use App\Models\Invoice;
 use App\Models\Table;
 use Exception;
@@ -27,18 +29,15 @@ class TableService extends Service
 		DB::beginTransaction();
 
 		try {
-			$table = new Table([
+			$table = Table::create([
 				'name' => $name,
 				'capacity' => $capacity,
 				'location' => $location
 			]);
 
-			$table->save();
-
 			DB::commit();
 
 			return $table;
-
 		} catch (Exception $e) {
 			DB::rollBack();
 
@@ -57,9 +56,12 @@ class TableService extends Service
 	{
 		$query = Table::query();
 
-		if ($search) {
-			$query->where('name', 'like', '%' . $search . '%');
-		}
+		$query->when(
+			$search !== null,
+			function (Builder $query) use ($search): Builder {
+				return $query->whereLike('name', $search);
+			}
+		);
 
 		$table = $query->paginate($limit ?? $this->limit);
 
@@ -68,12 +70,10 @@ class TableService extends Service
 				$query->where('status', Invoice::PENDING);
 			})->exists();
 
-			if ($check) {
-				$check = 'terisi';
-			} else {
-				$check = 'tersedia';
-			}
+			$check = $check ? 'terisi' : 'tersedia';
+
 			$item->status = $check;
+
 			return $item->only([
 				'id',
 				'name',
@@ -84,7 +84,6 @@ class TableService extends Service
 		});
 
 		return $table;
-
 	}
 
 	/**
@@ -119,13 +118,11 @@ class TableService extends Service
 	 */
 	public function update(Table $table, string $name, int $capacity, string $location): void
 	{
-
 		$table->name = $name;
 		$table->capacity = $capacity;
 		$table->location = $location;
 
 		$table->save();
-
 	}
 
 	/**
@@ -138,6 +135,7 @@ class TableService extends Service
 		if ($table->invoices()->exists()) {
 			return $table->delete();
 		}
+
 		return $table->forceDelete();
 	}
 
@@ -190,5 +188,60 @@ class TableService extends Service
 			'unavailable' => $unavailable,
 			'available' => $available,
 		];
+	}
+
+	/**
+	 * @param string $fromId
+	 * @param array $toIds
+	 * 
+	 * @return bool|Exception|null
+	 */
+	public function changeOrderTable(string $fromId, array $toIds): bool|Exception|null
+	{
+		if ($from = $this->getById($fromId)) {
+			$invoices = Invoice::whereHas('tables', function (Builder $query) use ($from): void {
+				$query->whereBelongsTo($from, 'table');
+			})
+				->where('status', Invoice::PENDING)
+				->get();
+			$tables = Table::findMany($toIds);
+
+			if ($tables->count() && $invoices->count()) {
+				$currentDate = Carbon::now();
+
+				DB::beginTransaction();
+
+				try {
+					$from->invoices()->whereRelation('invoice', 'status', Invoice::PENDING)->forceDelete();
+
+					$data = [];
+					foreach ($tables as $table) {
+						foreach ($invoices as $invoice) {
+							$data[] = [
+								'id' => uuid_create(),
+
+								'invoice_id' => $invoice->id,
+								'table_id' => $table->id,
+
+								'created_at' => $currentDate,
+								'updated_at' => $currentDate,
+							];
+						}
+					}
+
+					InvoiceTable::insert($data);
+
+					DB::commit();
+
+					return true;
+				} catch (Exception $e) {
+					DB::rollBack();
+
+					return $e;
+				}
+			}
+		}
+
+		return null;
 	}
 }

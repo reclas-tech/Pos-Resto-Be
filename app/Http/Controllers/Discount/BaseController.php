@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Discount;
 
-use App\Http\Controllers\Controller;
 use App\Http\Services\Discount\DiscountService;
+use App\Http\Controllers\Controller;
 
 class BaseController extends Controller
 {

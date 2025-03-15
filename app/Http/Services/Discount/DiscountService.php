@@ -2,23 +2,16 @@
 
 namespace App\Http\Services\Discount;
 
-use App\Models\Discount;
-use Illuminate\Database\Eloquent\Collection;
 use App\Http\Services\Service;
+use App\Models\Discount;
 
 class DiscountService extends Service
 {
-
 	/**
-     * 
-	 * 
-	 * @return \Illuminate\Database\Eloquent\Collection
+	 * @return array
 	 */
-    public function getAll(): Collection
+	public function list(): array
 	{
-		$discount = Discount::latest()->select('percent')->get();
-
-        return $discount;
+		return Discount::orderBy('value')->get()->toArray();
 	}
-	
 }

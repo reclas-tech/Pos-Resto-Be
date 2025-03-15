@@ -106,13 +106,12 @@ class DashboardService extends Service
 	}
 
 	/**
-	 * 
-	 * 
 	 * @return \Illuminate\Support\Collection
 	 */
 	public function kitchenIncome(): Collection
 	{
 		$today = Carbon::now();
+
 		$data = collect();
 		$kitchens = Kitchen::with([
 			'products' => function ($query) use ($today) {
@@ -149,7 +148,9 @@ class DashboardService extends Service
 	public function transaction(): Collection
 	{
 		$today = Carbon::now();
+
 		$data = collect();
+
 		$dine_in = Invoice::whereDate('created_at', $today)->where('type', Invoice::DINE_IN)->where('status', Invoice::SUCCESS)->count();
 		$take_away = Invoice::whereDate('created_at', $today)->where('type', Invoice::TAKE_AWAY)->where('status', Invoice::SUCCESS)->count();
 

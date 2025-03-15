@@ -3,15 +3,14 @@
 namespace App\Http\Controllers\Product;
 
 use App\Http\Requests\Product\CreateRequest;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
 use App\Helpers\Response;
-use Illuminate\Support\Facades\Storage;
 
 class ProductCreateController extends BaseController
 {
     public function action(CreateRequest $request): JsonResponse
     {
-
         [
             'name' => $name,
             'category_id' => $category_id,
@@ -21,10 +20,10 @@ class ProductCreateController extends BaseController
             'cogp' => $cogp,
             'image' => $image
         ] = $request;
-        
+
         $store = $image->store('public/products');
-        
-        $url =  Storage::url($store);
+
+        $url = Storage::url($store);
 
         $product = $this->productService->create(
             name: $name,

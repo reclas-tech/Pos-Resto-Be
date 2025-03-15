@@ -17,10 +17,10 @@ class ProfileEmployeeController extends Controller
     {
         $profile = $this->profileService->action();
 
-        if ($profile !== null) {
-            return Response::SetAndGet(message: 'Profil pengguna berhasil didapatkan', data: $profile);
+        if ($profile === null) {
+            return Response::SetAndGet(Response::NOT_FOUND, 'Profil tidak dapat ditemukan');
         }
 
-        return Response::SetAndGet(Response::INTERNAL_SERVER_ERROR, 'Terdapat kesalahan internal sistem');
+        return Response::SetAndGet(message: 'Profil pengguna berhasil didapatkan', data: $profile);
     }
 }

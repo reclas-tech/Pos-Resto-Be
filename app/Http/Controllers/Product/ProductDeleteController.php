@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Product;
 
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
 use App\Helpers\Response;
-use Illuminate\Support\Facades\Storage;
 
 class ProductDeleteController extends BaseController
 {
@@ -12,20 +12,18 @@ class ProductDeleteController extends BaseController
     {
         $product = $this->productService->getById($id);
 
-        $response = new Response(message: 'Hapus Produk Berhasil');
-        
+        if ($product === null) {
+            return Response::SetAndGet(Response::NOT_FOUND, 'Data produk tidak dapat ditemukan');
+        }
+
         $path = str_replace(url('storage') . '/', '', $product->image);
 
         if (Storage::disk('public')->exists($path)) {
             Storage::disk('public')->delete($path);
         }
 
-        if ($product !== null) {
-            $this->productService->delete($product);
-        } else {
-            $response->set(Response::NOT_FOUND, 'Data produk tidak dapat ditemukan');
-        }
+        $this->productService->delete($product);
 
-        return $response->get();
+        return Response::SetAndGet(message: 'Hapus Produk Berhasil');
     }
 }

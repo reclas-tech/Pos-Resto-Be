@@ -11,14 +11,15 @@ class ReportIncomeCompareController extends BaseController
 {
     public function action(Request $request): JsonResponse
     {
-        $year = $request->query('year'); 
+        $year = $request->query('year');
+
         $startYear = Carbon::now();
         $endYear = Carbon::now();
-        
+
         if ($year) {
             $startYear->setYear((int) $year)->startOfYear();
             $endYear->setYear((int) $year)->endOfYear();
-        }else{
+        } else {
             $startYear->startOfYear();
             $endYear->endOfYear();
         }

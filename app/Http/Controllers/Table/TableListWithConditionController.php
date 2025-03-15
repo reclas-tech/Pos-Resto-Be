@@ -11,6 +11,7 @@ class TableListWithConditionController extends BaseController
     public function action(Request $request): JsonResponse
     {
         $status = $request->query('status');
+
         $status = in_array($status, ['tersedia', 'terisi']) ? $status : null;
 
         $tables = $this->tableService->listWithCondition($status);

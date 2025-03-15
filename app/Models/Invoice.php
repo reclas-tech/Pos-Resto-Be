@@ -30,6 +30,7 @@ class Invoice extends Model
         'price_item',
         'price_sum',
         'customer',
+        'discount',
         'profit',
         'status',
         'type',

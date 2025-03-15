@@ -40,14 +40,4 @@ class CloseCashierRequest extends FormRequest
             'cash' => 'Cash On Hand',
         ];
     }
-
-    public function messages(): array
-    {
-        return [
-            'required' => ':attribute wajib diisi.',
-            'numeric' => ':attribute harus berupa angka.',
-            'integer' => ':attribute harus berupa integer.',
-            'min' => ':attribute minimal :min.',
-        ];
-    }
 }

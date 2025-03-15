@@ -11,12 +11,10 @@ class EmployeeGetOneController extends BaseController
     {
         $employee = $this->employeeService->getById($id);
 
-        $response = new Response(message: 'Berhasil mendapatkan data karyawan', data: $employee?->toArray());
-
         if ($employee === null) {
-            $response->set(Response::NOT_FOUND, 'Data karyawan tidak dapat ditemukan');
+            return Response::SetAndGet(Response::NOT_FOUND, 'Data karyawan tidak dapat ditemukan');
         }
 
-        return $response->get();
+        return Response::SetAndGet(message: 'Berhasil mendapatkan data karyawan', data: $employee->toArray());
     }
 }

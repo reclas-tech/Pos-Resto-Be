@@ -2,14 +2,15 @@
 
 namespace App\Http\Services\CashOnHand;
 
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Collection;
+use App\Http\Services\Service;
 use App\Models\CashierShift;
 use App\Models\Employee;
 use App\Models\Invoice;
 use Carbon\Carbon;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
-use App\Http\Services\Service;
 use Exception;
 
 class CashOnHandService extends Service
@@ -20,26 +21,29 @@ class CashOnHandService extends Service
 	/**
 	 * @param int $cash
 	 * 
-	 * @return \App\Models\CashierShift|\Exception
+	 * @return CashierShift|Exception|null
 	 */
-	public function openCashier(int $cash): CashierShift|Exception
+	public function openCashier(int $cash): CashierShift|Exception|null
 	{
-		DB::beginTransaction();
 		$cashier = Employee::where('id', auth('api-employee')->id())->where('role', 'cashier')->first();
-		try {
 
-			$cashon = new CashierShift([
+		if ($cashier === null || CashierShift::where('cashier_id', $cashier?->id)->whereNull('cash_on_hand_end')->exists()) {
+			return null;
+		}
+
+		DB::beginTransaction();
+
+		try {
+			$cashon = CashierShift::create([
 				'cash_on_hand_start' => $cash,
 				'started_at' => now(),
-				'cashier_id' => $cashier->id
-			]);
 
-			$cashon->save();
+				'cashier_id' => $cashier->id,
+			]);
 
 			DB::commit();
 
 			return $cashon;
-
 		} catch (Exception $e) {
 			DB::rollBack();
 
@@ -47,26 +51,28 @@ class CashOnHandService extends Service
 		}
 	}
 
-
 	/**
 	 * @param int $cash
 	 * 
-	 * @return \App\Models\CashierShift|\Exception
+	 * @return CashierShift|Exception|null
 	 */
-	public function closeCashier(int $cash): CashierShift|Exception
+	public function closeCashier(int $cash): CashierShift|Exception|null
 	{
 		$cashon = CashierShift::where('cashier_id', auth('api-employee')->id())->whereNull('cash_on_hand_end')->first();
+
+		if ($cashon === null) {
+			return null;
+		}
 
 		try {
 			$cashon->cash_on_hand_end = $cash;
 			$cashon->ended_at = now();
 			$cashon->save();
+
+			return $cashon;
 		} catch (Exception $e) {
 			return $e;
 		}
-
-		return $cashon;
-
 	}
 
 	/**
@@ -76,11 +82,9 @@ class CashOnHandService extends Service
 	 */
 	public function getOne(string $id): CashierShift|null
 	{
-
 		return CashierShift::where('id', $id)->first();
 
 	}
-
 
 	/**
 	 * @param \App\Models\CashierShift $cashon
@@ -91,12 +95,21 @@ class CashOnHandService extends Service
 	{
 		$data = collect();
 
-		$startDate = Carbon::parse($cashon->started_at)->format('Y-m-d');
-		$startTime = Carbon::parse($cashon->started_at)->format('H:i:s');
-		$endDate = Carbon::parse($cashon->ended_at)->format('Y-m-d');
-		$endTime = Carbon::parse($cashon->ended_at)->format('H:i:s');
+		$transaction = Invoice::query();
 
-		$transaction = Invoice::whereDate('created_at', '>=', $startDate)->whereTime('created_at', '>=', $startTime)->whereDate('created_at', '<=', $endDate)->whereTime('created_at', '<=', $endTime)->get();
+		$transaction->where('cashier_id', $cashon->cashier_id);
+
+		$transaction->when(
+			$cashon->ended_at,
+			function (Builder $query) use ($cashon): Builder {
+				return $query->whereBetween('updated_at', [$cashon->started_at, $cashon->ended_at]);
+			},
+			function (Builder $query) use ($cashon): Builder {
+				return $query->where('updated_at', '>=', $cashon->started_at);
+			},
+		);
+
+		$transaction = $transaction->get();
 
 		$income = $transaction->where('status', Invoice::SUCCESS)->sum('price_sum');
 		$transaction_count = $transaction->where('status', Invoice::SUCCESS)->count();
@@ -129,13 +142,11 @@ class CashOnHandService extends Service
 		]);
 
 		return $data;
-
 	}
 
 	/**
 	 * @param string|null $search
 	 * @param int|null $limit
-	 * 
 	 * 
 	 * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
 	 */

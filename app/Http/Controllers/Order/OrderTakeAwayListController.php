@@ -11,6 +11,7 @@ class OrderTakeAwayListController extends BaseController
     public function action(Request $request): JsonResponse
     {
         $status = $request->query('status');
+
         $status = in_array($status, ['belum bayar', 'sudah bayar']) ? $status : null;
 
         $orders = $this->orderService->takeAwayList($status);

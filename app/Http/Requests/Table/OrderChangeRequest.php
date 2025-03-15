@@ -4,9 +4,8 @@ namespace App\Http\Requests\Table;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Traits\RequestErrorMessage;
-use Illuminate\Validation\Rule;
 
-class CreateRequest extends FormRequest
+class OrderChangeRequest extends FormRequest
 {
     use RequestErrorMessage;
 
@@ -26,9 +25,8 @@ class CreateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['bail', 'required', 'string', 'max:255', Rule::unique('tables', 'name')->withoutTrashed()],
-            'capacity' => 'bail|required|numeric|min:1|integer',
-            'location' => 'bail|required|string|in:indoor,outdoor',
+            'from' => 'bail|required|string|exists:tables,id',
+            'to' => 'bail|required|array|exists:tables,id',
         ];
     }
 
@@ -40,9 +38,9 @@ class CreateRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'name' => 'Nama',
-            'capacity' => 'Kapasitas',
-            'location' => 'Lokasi',
+            'from' => 'Meja semula',
+            'to.*' => 'Meja tujuan',
+            'to' => 'Meja tujuan',
         ];
     }
 }

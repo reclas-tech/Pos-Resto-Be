@@ -2,6 +2,7 @@
 
 namespace App\Http\Services\Report;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use App\Http\Services\Service;
 use App\Models\InvoiceProduct;
@@ -24,13 +25,19 @@ class ReportService extends Service
 	{
 		$orders = Invoice::withTrashed();
 
-		if ($start) {
-			$orders->whereDate('created_at', '>=', $start);
-		}
+		$orders->when(
+			$start !== null,
+			function (Builder $query) use ($start): Builder {
+				return $query->whereDate('created_at', '>=', $start);
+			}
+		);
 
-		if ($end) {
-			$orders->whereDate('created_at', '<=', $end);
-		}
+		$orders->when(
+			$end !== null,
+			function (Builder $query) use ($end): Builder {
+				return $query->whereDate('created_at', '<=', $end);
+			}
+		);
 
 		$orders = $orders->where('status', Invoice::SUCCESS)->whereNull('deleted_at')->get();
 
@@ -78,19 +85,31 @@ class ReportService extends Service
 		$invoices = Invoice::withTrashed();
 
 		if ($year !== null || $month !== null) {
-			if ($year) {
-				$invoices->whereYear('created_at', $year);
-				if ($month) {
-					$invoices->whereMonth('created_at', $month);
+			$invoices->when(
+				$year !== null,
+				function (Builder $query) use ($month, $year): Builder {
+					return $query->whereYear('created_at', $year)
+						->when(
+							$month !== null,
+							function (Builder $query) use ($month): Builder {
+								return $query->whereMonth('created_at', $month);
+							}
+						);
 				}
-			}
+			);
 		} else {
-			if ($start !== null) {
-				$invoices->whereDate('created_at', '>=', $start);
-			}
-			if ($end !== null) {
-				$invoices->whereDate('created_at', '<=', $end);
-			}
+			$invoices->when(
+				$start !== null,
+				function (Builder $query) use ($start): Builder {
+					return $query->whereDate('created_at', '>=', $start);
+				}
+			);
+			$invoices->when(
+				$end !== null,
+				function (Builder $query) use ($end): Builder {
+					return $query->whereDate('created_at', '<=', $end);
+				}
+			);
 		}
 
 		$invoices = $invoices->latest()->get();
@@ -216,6 +235,12 @@ class ReportService extends Service
 		return $data->toArray();
 	}
 
+	/**
+	 * @param \Illuminate\Support\Carbon|null $startYear
+	 * @param \Illuminate\Support\Carbon|null $endYear
+	 * 
+	 * @return array
+	 */
 	public function incomeCompare(Carbon|null $startYear, Carbon|null $endYear): array
 	{
 		$data = collect();

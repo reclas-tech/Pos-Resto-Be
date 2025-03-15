@@ -10,8 +10,8 @@ class OrderHistoryListController extends BaseController
 {
     public function action(Request $request): JsonResponse
     {
-        $search = $request->query('search');
         $invoice = $request->query('invoice');
+        $search = $request->query('search');
         $price = $request->query('price');
         $time = $request->query('time');
 

@@ -11,12 +11,10 @@ class OrderHistoryDetailController extends BaseController
     {
         $order = $this->orderService->historyDetail($invoiceId);
 
-        $response = new Response(message: 'Berhasil mendapatkan rincian riwayat pesanan', data: $order);
-
         if ($order === null) {
-            $response->set(Response::NOT_FOUND, 'Riwayat pesanan tidak dapat ditemukan');
+            return Response::SetAndGet(Response::NOT_FOUND, 'Riwayat pesanan tidak dapat ditemukan');
         }
 
-        return $response->get();
+        return Response::SetAndGet(message: 'Berhasil mendapatkan rincian riwayat pesanan', data: $order);
     }
 }

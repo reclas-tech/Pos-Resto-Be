@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Table;
 
-use App\Http\Controllers\Controller;
 use App\Http\Services\Table\TableService;
+use App\Http\Controllers\Controller;
 
 class BaseController extends Controller
 {

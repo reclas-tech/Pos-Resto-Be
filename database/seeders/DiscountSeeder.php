@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\Discount;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Discount;
 
 class DiscountSeeder extends Seeder
 {
@@ -15,22 +15,16 @@ class DiscountSeeder extends Seeder
     {
         $data = [
             [
-                'percent' => 5,
+                'value' => 2.5,
             ],
             [
-                'percent' => 10,
+                'value' => 5,
             ],
             [
-                'percent' => 20,
+                'value' => 10,
             ],
             [
-                'percent' => 30,
-            ],
-            [
-                'percent' => 40,
-            ],
-            [
-                'percent' => 50,
+                'value' => 20,
             ],
         ];
 

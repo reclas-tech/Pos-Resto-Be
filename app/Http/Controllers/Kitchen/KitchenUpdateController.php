@@ -10,27 +10,24 @@ class KitchenUpdateController extends BaseController
 {
     public function action(UpdateRequest $request, string $id): JsonResponse
     {
-        $response = new Response(message: 'Edit Dapur Berhasil');
-
         $kitchen = $this->kitchenService->getById($id);
 
-        if ($kitchen !== null) {
-            
-            [
-                'name' => $name,
-                'ip' => $ip,
-            ] = $request;
-
-            $this->kitchenService->update(
-                kitchen : $kitchen,
-                name: $name,
-                ip: $ip,
-            );
-
-        } else {
-            $response->set(Response::NOT_FOUND, 'Data dapur tidak dapat ditemukan');
+        if ($kitchen === null) {
+            return Response::SetAndGet(Response::NOT_FOUND, 'Data dapur tidak dapat ditemukan');
         }
 
-        return $response->get();
+        [
+            'name' => $name,
+            'ip' => $ip,
+        ] = $request;
+
+        $this->kitchenService->update(
+            kitchen: $kitchen,
+
+            name: $name,
+            ip: $ip,
+        );
+
+        return Response::SetAndGet(message: 'Edit Dapur Berhasil');
     }
 }

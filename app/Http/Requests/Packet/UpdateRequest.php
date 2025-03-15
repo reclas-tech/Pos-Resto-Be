@@ -55,20 +55,4 @@ class UpdateRequest extends FormRequest
             'products.*.quantity' => 'Jumlah Produk',
         ];
     }
-
-    public function messages(): array
-    {
-        return [
-            'unique' => ':attribute sudah digunakan.',
-            'exists' => ':attribute tidak ditemukan.',
-            'integer' => ':attribute harus berupa integer.',
-            'image' => ':attribute harus berupa gambar.',
-            'mimes' => ':attribute harus berupa file jpeg, png, jpg, svg.',
-            'image.max' => ':attribute tidak boleh lebih dari :max kilobytes.',
-            'required' => ':attribute wajib diisi.',
-            'numeric' => ':attribute harus berupa angka.',
-            'string' => ':attribute harus berupa teks.',
-            'array' => ':attribute harus berupa array.',
-        ];
-    }
 }

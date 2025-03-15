@@ -41,14 +41,4 @@ class CreateRequest extends FormRequest
             'name' => 'Nama',
         ];
     }
-
-    public function messages(): array
-    {
-        return [
-            'unique' => ':attribute sudah digunakan.',
-            'required' => ':attribute wajib diisi.',
-            'string' => ':attribute harus berupa teks.',
-            'max' => ':attribute tidak boleh lebih dari :max karakter.',
-        ];
-    }
 }

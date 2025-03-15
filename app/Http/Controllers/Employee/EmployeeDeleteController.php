@@ -11,14 +11,12 @@ class EmployeeDeleteController extends BaseController
     {
         $employee = $this->employeeService->getById($id);
 
-        $response = new Response(message: 'Berhasil menghapus data karyawan');
-
-        if ($employee !== null) {
-            $this->employeeService->delete($employee);
-        } else {
-            $response->set(Response::NOT_FOUND, 'Data karyawan tidak dapat ditemukan');
+        if ($employee === null) {
+            return Response::SetAndGet(Response::NOT_FOUND, 'Data karyawan tidak dapat ditemukan');
         }
 
-        return $response->get();
+        $this->employeeService->delete($employee);
+
+        return Response::SetAndGet(message: 'Berhasil menghapus data karyawan');
     }
 }

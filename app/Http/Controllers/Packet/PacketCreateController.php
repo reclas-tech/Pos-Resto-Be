@@ -3,21 +3,21 @@
 namespace App\Http\Controllers\Packet;
 
 use App\Http\Requests\Packet\CreateRequest;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
 use App\Helpers\Response;
-use Illuminate\Support\Facades\Storage;
 
 class PacketCreateController extends BaseController
 {
     public function action(CreateRequest $request): JsonResponse
     {
         [
-            'name' => $name,
+            'products' => $products,
+            'image' => $image,
             'price' => $price,
             'stock' => $stock,
             'cogp' => $cogp,
-            'image' => $image,
-            'products' => $products
+            'name' => $name,
         ] = $request;
 
         $store = $image->store('public/packets');
@@ -25,12 +25,12 @@ class PacketCreateController extends BaseController
         $url = Storage::url($store);
 
         $packet = $this->packetService->create(
-            name: $name,
+            products: $products,
             price: $price,
             stock: $stock,
             cogp: $cogp,
+            name: $name,
             image: $url,
-            products: $products
         );
 
         $response = new Response(Response::CREATED, 'Buat Paket Berhasil');

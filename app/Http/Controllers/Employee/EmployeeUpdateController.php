@@ -28,6 +28,7 @@ class EmployeeUpdateController extends BaseController
             if ($pinExists === null || $pinExists?->id === $employee->id) {
                 $this->employeeService->update(
                     employee: $employee,
+
                     address: $address,
                     phone: $phone,
                     name: $name,
