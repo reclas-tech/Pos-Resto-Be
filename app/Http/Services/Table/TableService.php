@@ -59,7 +59,7 @@ class TableService extends Service
 		$query->when(
 			$search !== null,
 			function (Builder $query) use ($search): Builder {
-				return $query->whereLike('name', $search);
+				return $query->whereLike('name', "%$search%");
 			}
 		);
 

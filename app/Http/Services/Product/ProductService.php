@@ -66,7 +66,7 @@ class ProductService extends Service
 		$product->when(
 			$search !== null,
 			function (Builder $query) use ($search): Builder {
-				return $query->whereLike('name', $search);
+				return $query->whereLike('name', "%$search%");
 			}
 		);
 
