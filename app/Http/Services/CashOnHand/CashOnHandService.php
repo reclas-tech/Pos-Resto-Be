@@ -167,10 +167,17 @@ class CashOnHandService extends Service
 		$data = $category->latest()->paginate($limit ?? $this->limit);
 
 		$data->getCollection()->transform(function ($item) {
-			$date = Carbon::parse($item->started_at)->format('Y-m-d');
-			$transaction = Invoice::whereDate('created_at', $date)->get();
-			$income = $transaction->where('status', Invoice::SUCCESS)->sum('price_sum');
-			$item->income = $income;
+			$transaction = Invoice::query()->where('cashier_id', $item->cashier_id);
+			$transaction->when(
+				$item->ended_at,
+				function (Builder $query) use ($item): Builder {
+					return $query->whereBetween('updated_at', [$item->started_at, $item->ended_at]);
+				},
+				function (Builder $query) use ($item): Builder {
+					return $query->where('updated_at', '>=', $item->started_at);
+				},
+			);
+			$item->income = $transaction->where('status', Invoice::SUCCESS)->sum('price_sum');
 			return $item;
 		});
 
