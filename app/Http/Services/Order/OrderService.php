@@ -263,7 +263,7 @@ class OrderService extends Service
 				$tempDatas = [];
 				foreach ($tables ?? [] as $item) {
 					if ($table = Table::find($item)) {
-						if ($invoice->tables()->whereKey($item)->doesntExist()) {
+						if ($invoice->tables()->where('table_id', $table->id)->doesntExist()) {
 							$tempDatas[] = [
 								'id' => uuid_create(),
 
